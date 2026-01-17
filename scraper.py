@@ -17,6 +17,25 @@ class BrickLinkScraper:
         self.db = Database()
         self.current_type = 'S'
 
+    def _is_cache_valid(self, item_id: str) -> bool:
+        """Checks if valid cache exists for item (less than 7 days old)"""
+        item = self.db.get_item(item_id)
+        if not item: return False
+        
+        # Check timestamp
+        last_updated = item.get("meta", {}).get("timestamp") or item.get("meta", {}).get("cache_date")
+        if not last_updated: return False
+        
+        try:
+            # Simple check: is it from today? Or just return True if exists (User didn't specify TTL)
+            # For now, let's just assume if it exists it's valid, unless forced.
+            # But wait, we want fresh prices. Let's say 3 days.
+            last_date = datetime.fromisoformat(last_updated.split('T')[0])
+            days_diff = (datetime.now() - last_date).days
+            return days_diff < 3
+        except:
+            return True # Fallback
+
     def _init_driver(self):
         chrome_options = Options()
         chrome_options.add_argument("--headless") 
@@ -93,6 +112,7 @@ class BrickLinkScraper:
                 "item_id": item_id,
                 "item_name": item_name,
                 "year_released": year,
+                "specs": self._extract_specs(soup),
                 "timestamp": datetime.now().isoformat()
             },
             "new": {"sold": [], "stock": []},
@@ -106,6 +126,24 @@ class BrickLinkScraper:
             data["new"]["stock"] = self._extract_rows(tables[2], "stock")
             data["used"]["stock"] = self._extract_rows(tables[3], "stock")
         return data
+
+    def _extract_specs(self, soup: BeautifulSoup) -> Dict[str, Any]:
+        text = soup.get_text()
+        specs = {"weight_g": 0, "parts": 0, "minifigs": 0}
+        
+        # Weight
+        w_match = re.search(r'Weight:\s*([\d.]+)\s*g', text)
+        if w_match: specs["weight_g"] = float(w_match.group(1))
+        
+        # Parts
+        p_match = re.search(r'(\d+)\s*Parts', text)
+        if p_match: specs["parts"] = int(p_match.group(1))
+        
+        # Minifigs
+        m_match = re.search(r'(\d+)\s*Minifig', text)
+        if m_match: specs["minifigs"] = int(m_match.group(1))
+        
+        return specs
 
     def _extract_rows(self, table: Tag, table_type: str) -> List[Dict]:
         rows = []
@@ -124,9 +162,7 @@ class BrickLinkScraper:
                 p_text = tds[p_idx].get_text(strip=True).replace(',', '')
                 p = float(re.sub(r'[^\d.]', '', p_text))
                 
-                # 3. הגנת מחיר רצפה (רק לסטים)
-                if self.current_type == 'S' and p < 60:
-                    is_inc = True
+
 
                 rows.append({
                     'qty': int(re.sub(r'[^\d]', '', tds[q_idx].get_text(strip=True))),

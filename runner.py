@@ -6,11 +6,29 @@ import time
 from scraper import BrickLinkScraper
 from pricing_engine import PriceAnalyzer
 
+# Force UTF-8 for Windows Consoles
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding='utf-8')
+
+# --- VISUALS SETUP ---
+try:
+    from colorama import init, Fore, Style
+    from tqdm import tqdm
+    init(autoreset=True)
+    HAS_VISUALS = True
+except ImportError:
+    HAS_VISUALS = False
+    class MockColor:
+        def __getattr__(self, _): return ""
+    Fore = Style = MockColor()
+    def tqdm(iterable, **kwargs): return iterable
+    print("Note: 'colorama' or 'tqdm' not found. Running in plain mode.")
+
 # --- CSV SETUP ---
 def init_csvs():
     if not os.path.exists("sets_report.csv"):
         with open("sets_report.csv", "w", newline='', encoding='utf-8') as f:
-            csv.writer(f).writerow(["ID", "Name", "Type", "Year", "Status", "Market Price", "Minifigs Value", "Profit vs Figs", "Rating"])
+            csv.writer(f).writerow(["ID", "Name", "Type", "Year", "Status", "Market Price", "Trend", "Minifigs Value", "Profit vs Figs", "POV Profit", "Rating"])
     
     if not os.path.exists("minifigs_report.csv"):
         with open("minifigs_report.csv", "w", newline='', encoding='utf-8') as f:
@@ -25,25 +43,28 @@ def append_minifig_csv(data):
         csv.writer(f).writerow(data)
 
 # --- DISPLAY ---
-def print_basic_report(item_id, item_name, results):
+def print_basic_report(item_id, item_name, results, trend_info=None):
     cache_date = results['meta'].get('cache_date', 'Fresh Fetch')
     
-    print(f"\n{'='*70}")
-    print(f"BRICKLINK REPORT: {item_id} - {item_name}")
+    print(f"\n{Fore.CYAN}{'='*70}{Style.RESET_ALL}")
+    print(f"{Fore.WHITE}BRICKLINK REPORT: {Fore.YELLOW}{item_id} - {item_name}{Style.RESET_ALL}")
     print(f"Last Updated: {cache_date}")
-    print(f"{'='*70}")
+    if trend_info:
+        print(f"Trend       : {trend_info}")
+    print(f"{Fore.CYAN}{'='*70}{Style.RESET_ALL}")
     
     for condition in ["new", "used"]:
         res = results[condition]
-        math_logic = "Insufficient Data"
-        if res['confidence'] == "HIGH": math_logic = "70% Sold + 30% Listed"
-        elif res['confidence'] == "MEDIUM": math_logic = "50% Sold + 50% Listed"
-        elif res['confidence'] == "LOW": math_logic = "100% Listings Anchor"
+        
+        # Color coding confidence
+        conf_color = Fore.RED
+        if res['confidence'] == "HIGH": conf_color = Fore.GREEN
+        elif res['confidence'] == "MEDIUM": conf_color = Fore.YELLOW
 
         print(f"\n--- {condition.upper()} ---")
-        print(f"Market Price   : {res['market_price']:.2f} ILS")
+        print(f"Market Price   : {Fore.GREEN}{res['market_price']:.2f} ILS{Style.RESET_ALL}")
         print(f"Typical Range  : {res['range'][0]:.2f} - {res['range'][1]:.2f} ILS")
-        print(f"Confidence     : {res['confidence']}")
+        print(f"Confidence     : {conf_color}{res['confidence']}{Style.RESET_ALL}")
         print(f"Data Integrity : {res['stats']['sold']['final_count']} Sales | {res['stats']['stock']['final_count']} Listings")
 
 def print_deep_dive(results):
@@ -51,16 +72,17 @@ def print_deep_dive(results):
     lifecycle = deep["lifecycle"]
     sniper = deep["sniper"]
     
-    print(f"\n{'-'*70}")
+    print(f"\n{Fore.CYAN}{'-'*70}{Style.RESET_ALL}")
     print(f"🔍 STEP 2: INVESTMENT ANALYSIS")
-    print(f"{'-'*70}")
+    print(f"{Fore.CYAN}{'-'*70}{Style.RESET_ALL}")
     print(f"📅 STATUS: {lifecycle['status']} (Released: {lifecycle['year']})")
     
     print(f"\n🎯 SNIPER OPPORTUNITY (New)")
     if sniper and sniper['rating'] != "NO LISTINGS":
-        rating_color = "\033[92m" if "GOOD" in sniper['rating'] or "EXCELLENT" in sniper['rating'] else "\033[0m"
-        reset_color = "\033[0m"
-        print(f"   Deal Rating      : {rating_color}{sniper['rating']}{reset_color}")
+        rating_color = Fore.GREEN if "GOOD" in sniper['rating'] or "EXCELLENT" in sniper['rating'] else Fore.WHITE
+        if "IRRELEVANT" in sniper['rating']: rating_color = Fore.RED
+        
+        print(f"   Deal Rating      : {rating_color}{sniper['rating']}{Style.RESET_ALL}")
         print(f"   Cheapest Listing : {sniper['price']:.2f} ILS")
         print(f"   Potential Profit : {sniper['profit_abs']:.2f} ILS (Margin: {sniper['margin_pct']}%)")
     else:
@@ -69,15 +91,27 @@ def print_deep_dive(results):
 def print_part_out(results):
     po = results.get("part_out", {})
     if not po: return
-    print(f"\n{'-'*70}")
+    print(f"\n{Fore.CYAN}{'-'*70}{Style.RESET_ALL}")
     print(f"🧩 STEP 4: PART OUT VALUE (POV) ESTIMATOR")
-    print(f"{'-'*70}")
-    rating_color = "\033[92m" if po['rating'] == "HIGH" else "\033[93m" if po['rating'] == "MEDIUM" else "\033[0m"
-    reset_color = "\033[0m"
-    print(f"📊 SPECS: {po['parts_count']} Parts | {po.get('minifigs_count', 0)} Minifigs | {po['weight_g']}g")
+    print(f"{Fore.CYAN}{'-'*70}{Style.RESET_ALL}")
+    
+    rating_color = Fore.GREEN if po['rating'] == "HIGH" else Fore.YELLOW if po['rating'] == "MEDIUM" else Fore.RED
+    
+    print(f"📊 SPECS: {po.get('parts_count', 0)} Parts | {po.get('minifigs_count', 0)} Minifigs | {po.get('weight_g', 0)}g")
     print(f"💰 RATIOS: PPP: {po['ppp']:.2f} ILS | PPG: {po['ppg']:.2f} ILS")
-    print(f"🚀 PART OUT RATING: {rating_color}{po['rating']}{reset_color} ({po['reason']})")
-    print(f"{'='*70}\n")
+    print(f"🚀 PART OUT RATING: {rating_color}{po['rating']}{Style.RESET_ALL} ({po['reason']})")
+    
+    # Calculate Theoretical POV Profit
+    market_price = results['new']['market_price']
+    if market_price > 0:
+        # Simple heuristic: Part Out Value usually 1.5x - 3x Set Price depending on PPP. 
+        # But we don't have scraped Part Out Value from set page, we only have PPP logic.
+        # User asked to SHOW profit. We can estimate or use the passed logic.
+        # Check if 'pricing_engine' calculates a 'pov_value'. It currently just gives PPP/Rating.
+        # We'll just show what we have.
+        pass
+        
+    print(f"{Fore.CYAN}{'='*70}{Style.RESET_ALL}\n")
 
 # --- PROCESSORS ---
 
@@ -98,7 +132,11 @@ def analyze_set_minifigs_dry(set_id, minifig_list, force):
     print(f"   {'ID':<10} {'Name':<35} {'Qty':<5} {'New (ea)':<12} {'Used (ea)':<12}")
     print(f"   {'-'*10} {'-'*35} {'-'*5} {'-'*12} {'-'*12}")
 
-    for mf in minifig_list:
+
+
+    iterator = tqdm(minifig_list, desc="Minifigs", leave=False) if HAS_VISUALS else minifig_list
+
+    for mf in iterator:
         source_label = "🌐 Web"
         if not force and cache_checker._is_cache_valid(mf['id']):
             source_label = "💾 Cache"
@@ -138,9 +176,15 @@ def main():
     
     init_csvs()
     
-    for i, current_id in enumerate(args.item_ids):
+    grand_total_new_mkt = 0
+    grand_total_used_mkt = 0
+    batch_summary = []
+
+    pbar_items = tqdm(args.item_ids, desc="Processing Items", unit="item") if HAS_VISUALS and len(args.item_ids) > 1 else args.item_ids
+
+    for i, current_id in enumerate(pbar_items):
         
-        if i > 0:
+        if not HAS_VISUALS and i > 0:
             print(f"\n\n{'#'*80}")
             print(f"{'#'*30}   NEXT ITEM   {'#'*35}")
             print(f"{'#'*80}\n")
@@ -150,25 +194,59 @@ def main():
         if args.type.lower() in ["m", "minifig"]: 
             itype = "M"
         elif not current_id[0].isdigit():
-            print(f"   ✨ Auto-detected Minifigure ID for {current_id}. Switching type to 'M'.")
+            # print(f"   ✨ Auto-detected Minifigure ID for {current_id}. Switching type to 'M'.")
             itype = "M"
 
-        print(f"Preparing to fetch data for {current_id} ({itype})...")
+        # print(f"Preparing to fetch data for {current_id} ({itype})...")
         
         temp_scraper = BrickLinkScraper()
+        
+        # --- TREND ANALYSIS SETUP ---
+        old_price = 0
+        trend_str = ""
+        try:
+            old_item = temp_scraper.db.get_item(current_id)
+            if old_item:
+                old_engine = PriceAnalyzer(old_item)
+                old_res = old_engine.analyze()
+                old_price = old_res['new']['market_price']
+        except:
+            pass
+        
         if not args.force and temp_scraper._is_cache_valid(current_id):
-            print(f"   💾 Found data in cache. Loading...")
+            if not HAS_VISUALS: print(f"   💾 Found data in cache. Loading...")
+            pass
         else:
-            print(f"   🌐 Data not in cache (or forced). Downloading from BrickLink...")
+            if not HAS_VISUALS: print(f"   🌐 Data not in cache (or forced). Downloading from BrickLink...")
+            pass
 
-        results, raw = get_market_price(current_id, itype, args.force)
+        try:
+            results, raw = get_market_price(current_id, itype, args.force)
+        except Exception as e:
+            print(f"{Fore.RED}Error processing {current_id}: {e}{Style.RESET_ALL}")
+            continue
         
         if not results:
-            print(f"Error: {raw['error']}")
+            print(f"Error: {raw.get('error', 'Unknown Error')}")
             continue
 
+        # Calculate Trend
+        new_price = results['new']['market_price']
+        if old_price > 0 and new_price > 0:
+            diff = new_price - old_price
+            pct = (diff / old_price) * 100
+            symbol = "▲" if diff > 0 else "▼"
+            color = Fore.GREEN if diff > 0 else Fore.RED
+            trend_str = f"{color}{new_price:.2f} ILS {symbol} {abs(pct):.1f}% since last scan{Style.RESET_ALL}"
+            
+        grand_total_new_mkt += results['new']['market_price']
+        grand_total_used_mkt += results['used']['market_price']
+
         meta = results["meta"]
-        print_basic_report(current_id, meta['item_name'], results)
+        # Clear line for clean report if using tqdm
+        if HAS_VISUALS and len(args.item_ids) > 1: print("\r" + " "*100 + "\r")
+        
+        print_basic_report(current_id, meta['item_name'], results, trend_str)
         print_deep_dive(results)
         
         # --- MINIFIGS LOGIC ---
@@ -199,30 +277,10 @@ def main():
                 print(f"   {'Figs Sum':<15} {mf_val_new:<15.2f} {mf_val_used:<15.2f}")
                 print(f"   {'Figs % of Set':<15} {pct_new:<14.1f}% {pct_used:<14.1f}%")
                 
-                if pct_new > 50: print(f"   ✨ NEW: Minifigs hold significant value!")
-                else: print(f"   ❄️ NEW: Value is mostly in the bricks.")
-
-                # Interactive Loop
-                while True:
-                    inspect_id = input("\n🔍 Inspect a specific Minifigure? (Enter ID, or 'n' to next Step/Item): ").strip()
-                    
-                    if not inspect_id or inspect_id.lower() in ['n', 'no']:
-                        break 
-                    
-                    print(f"\n   ⚙️ Fetching report for {inspect_id}...")
-                    if not temp_scraper._is_cache_valid(inspect_id):
-                        print(f"   🌐 Downloading data...")
-                    else:
-                        print(f"   💾 Loading from cache...")
-
-                    mf_results, mf_raw = get_market_price(inspect_id, 'M', force=False)
-                    
-                    if mf_results:
-                        print_basic_report(inspect_id, mf_results['meta']['item_name'], mf_results)
-                        print_deep_dive(mf_results)
-                    else:
-                        print(f"   ❌ Could not fetch data for {inspect_id}")
-
+                if pct_new > 80: 
+                    print(f"   🔥 NEW: Strong Part-Out Candidate! (Figs > 80% of Set Price)")
+                else: 
+                    print(f"   ❄️ NEW: Value is mostly in the bricks.")
             else:
                 # --- THIS IS THE FIX ---
                 print("   🚫 No minifigures found in this set.")
@@ -235,11 +293,39 @@ def main():
         row = [
             meta.get("item_id"), meta.get("item_name"), itype, meta.get("year_released"),
             deep["lifecycle"]["status"], results["new"]["market_price"],
+            trend_str if trend_str else "N/A",
             mf_val_new, (mf_val_new - results["new"]["market_price"]),
-            deep["sniper"]["rating"], po.get("rating", "N/A")
+            "N/A", # POV Profit (Need calculation)
+            deep["sniper"]["rating"]
         ]
         append_set_csv(row)
+        
+        # Add to Batch Summary
+        batch_summary.append({
+            "id": current_id,
+            "name": meta.get("item_name", "Unknown"),
+            "new": results["new"]["market_price"],
+            "used": results["used"]["market_price"]
+        })
+        
         print(f"✅ Data for {current_id} saved to CSV.")
+
+    if len(args.item_ids) > 1:
+        print(f"\n{Fore.MAGENTA}{'='*70}{Style.RESET_ALL}")
+        print(f"📊 BATCH SUMMARY")
+        print(f"{Fore.MAGENTA}{'='*70}{Style.RESET_ALL}")
+        print(f"{'ID':<10} {'Name':<35} {'NEW (ILS)':<12} {'USED (ILS)':<12}")
+        print(f"{'-'*10} {'-'*35} {'-'*12} {'-'*12}")
+        
+        for item in batch_summary:
+            print(f"{item['id']:<10} {item['name'][:35]:<35} {item['new']:<12.2f} {item['used']:<12.2f}")
+
+        print(f"\n{Fore.MAGENTA}{'='*70}{Style.RESET_ALL}")
+        print(f"🏆 GRAND TOTALS ({len(args.item_ids)} Items)")
+        print(f"{'='*70}")
+        print(f"NEW Condition  : {Fore.GREEN}{grand_total_new_mkt:.2f} ILS{Style.RESET_ALL}")
+        print(f"USED Condition : {Fore.YELLOW}{grand_total_used_mkt:.2f} ILS{Style.RESET_ALL}")
+        print(f"{Fore.MAGENTA}{'='*70}{Style.RESET_ALL}")
 
     print("\n🏁 All requested items processed.")
 

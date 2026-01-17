@@ -6,13 +6,14 @@ from typing import Dict, List, Any
 class PriceAnalyzer:
     BULK_THRESHOLD = 3
     
-    # רשימה מורחבת הכוללת צירופים נפוצים וביטויים של מוכרים "בעייתיים"
+    # Updated Blacklist with more variations and case-insensitive terms
     BLACKLIST = [
         'incomplete', 'missing', 'no minifig', 'no minifigs', 'no figure', 
         'no figs', 'no box', 'no instructions', 'no manual', 'only build', 
         'build only', 'just build', 'instruction only', 'without minifig',
         'without minifigures', 'figures removed', 'minifigures removed',
-        'no figures', 'no mf', 'no character', 'no-minifig', 'no-minifigures'
+        'no figures', 'no mf', 'no character', 'no-minifig', 'no-minifigures',
+        '(i)', 'missing parts', 'partially complete'
     ]
 
     def __init__(self, data: Dict[str, Any]):
@@ -25,7 +26,7 @@ class PriceAnalyzer:
         
         # 1. בדיקה ראשונה: האם הסקרייפר כבר תייג כ-Incomplete
         if item.get('status') == 'incomplete':
-            if is_target: print(f"[DEBUG] ❌ REJECTED {price}: Marked by scraper")
+            # if is_target: print(f"[DEBUG] ❌ REJECTED {price}: Marked by scraper")
             return False
             
         # 2. בדיקה שנייה: חיפוש מילים בתוך התיאור המלא (ה-description)
@@ -34,13 +35,13 @@ class PriceAnalyzer:
         
         for word in self.BLACKLIST:
             if word in text_to_scan:
-                if is_target: print(f"[DEBUG] ❌ REJECTED {price}: Found word '{word}'")
+                # if is_target: print(f"[DEBUG] ❌ REJECTED {price}: Found word '{word}'")
                 return False
         
         # 3. בדיקת "Only"
         if 'only' in text_to_scan:
             if any(x in text_to_scan for x in ['build', 'instruction', 'parts']):
-                if is_target: print(f"[DEBUG] ❌ REJECTED {price}: Found 'only' pattern")
+                # if is_target: print(f"[DEBUG] ❌ REJECTED {price}: Found 'only' pattern")
                 return False
 
         return True
@@ -63,6 +64,22 @@ class PriceAnalyzer:
         sold_data = [x for x in sold_raw if self._is_strictly_complete(x)]
         stock_data = [x for x in stock_raw if self._is_strictly_complete(x)]
 
+        # 1. Combine valid datasets to find a global median for this condition
+        all_prices = [x['price'] for x in sold_data] + [x['price'] for x in stock_data]
+        price_floor = 0
+        if all_prices:
+            global_median = statistics.median(all_prices)
+            # Special Rule: For 2025 sets (very new), avoid strict floor to allow early market data
+            released_year = self.meta.get("year_released")
+            if released_year == 2025:
+                price_floor = 1
+            else:
+                price_floor = global_median * 0.60  # 40% lower than median
+        
+        # 2. Apply Dynamic Floor Filter
+        sold_data = [x for x in sold_data if x['price'] >= price_floor]
+        stock_data = [x for x in stock_data if x['price'] >= price_floor]
+
         sold_res = self._process_dataset(sold_data)
         stock_res = self._process_dataset(stock_data)
 
@@ -73,8 +90,8 @@ class PriceAnalyzer:
         if sold_count >= 10:
             market_price = (sold_avg * 0.70) + (stock_anchor * 0.30)
             confidence = "HIGH"
-        elif sold_count >= 3:
-            market_price = (sold_avg * 0.50) + (stock_anchor * 0.50)
+        elif sold_count >= 1:
+            market_price = sold_avg
             confidence = "MEDIUM"
         else:
             market_price = stock_anchor
