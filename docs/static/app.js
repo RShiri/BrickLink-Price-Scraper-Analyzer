@@ -72,6 +72,19 @@
             tension: 0.25, spanGaps: true,
           });
         }
+
+        // Used-condition blended value, so both conditions read on one axis.
+        const usedPts = ((data.series_used || {}).blended || [])
+          .map((p) => ({ x: p.t, y: p.v }));
+        if (usedPts.length) {
+          datasets.push({
+            label: "Used", data: usedPts,
+            borderColor: css("--s5") || "#9085e9",
+            backgroundColor: css("--s5") || "#9085e9",
+            borderWidth: 2, pointRadius: usedPts.length < 15 ? 3 : 0,
+            tension: 0.25, spanGaps: true,
+          });
+        }
         if (data.forecast && data.forecast.length > 1) {
           const f = data.forecast;
           datasets.push({
@@ -175,22 +188,14 @@
   const searchInput = document.getElementById("siteSearch");
   const searchResults = document.getElementById("siteSearchResults");
   if (searchInput && searchResults) {
-    const pageURL = (id) => (IS_STATIC ? `${BASE}sets/${id}.html` : `/sets/${id}`);
     let index = null, active = -1;
-
-    const loadIndex = () => {
-      if (index) return Promise.resolve(index);
-      return fetch(apiURL("/api/index"))
-        .then((r) => r.json())
-        .then((d) => { index = d.items || []; return index; })
-        .catch(() => (index = []));
-    };
+    const loadIndex = () => loadCatalog().then((items) => (index = items));
 
     const render = (matches) => {
       active = -1;
       if (!matches.length) { searchResults.hidden = true; return; }
       searchResults.innerHTML = matches
-        .map((i) => `<a href="${pageURL(i.id)}"><b>${i.id}</b> ${i.name}
+        .map((i) => `<a href="${itemURL(i)}"><b>${i.id}</b> ${i.name}
           <span>${i.type === "M" ? "minifig" : [i.theme, i.year].filter(Boolean).join(" · ")}</span></a>`)
         .join("");
       searchResults.hidden = false;
@@ -230,6 +235,152 @@
       if (!searchResults.contains(e.target) && e.target !== searchInput) {
         searchResults.hidden = true;
       }
+    });
+  }
+
+  // ── catalog helpers shared by the browser and the lite set page ───────
+  let catalogPromise = null;
+  const loadCatalog = () => {
+    if (!catalogPromise) {
+      catalogPromise = fetch(apiURL("/api/index"))
+        .then((r) => r.json())
+        .then((d) => {
+          // Compact wire format: rows of [id, name, themeIndex, year, parts, type, priced]
+          const themes = d.themes || [];
+          return (d.rows || []).map((r) => ({
+            id: r[0], name: r[1], theme: r[2] >= 0 ? themes[r[2]] : "",
+            year: r[3] || null, parts: r[4] || null, type: r[5], p: r[6],
+          }));
+        })
+        .catch(() => []);
+    }
+    return catalogPromise;
+  };
+  const itemURL = (i) =>
+    i.p
+      ? (IS_STATIC ? `${BASE}sets/${i.id}.html` : `/sets/${i.id}`)
+      : (IS_STATIC ? `${BASE}set.html?id=${encodeURIComponent(i.id)}`
+                   : `/sets/${i.id}`);
+  const setImg = (id, type) =>
+    type === "M" || /^[a-z]/i.test(id)
+      ? `https://img.bricklink.com/ItemImage/MN/0/${id}.png`
+      : `https://img.bricklink.com/ItemImage/SN/0/${id.includes("-") ? id : id + "-1"}.png`;
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // ── full-catalog browser (static Sets page over ~23k rows) ────────────
+  const catalogTable = document.getElementById("catalogTable");
+  if (catalogTable) {
+    const qEl = document.getElementById("catalogSearch");
+    const themeEl = document.getElementById("catalogTheme");
+    const sortEl = document.getElementById("catalogSort");
+    const pricedEl = document.getElementById("catalogPriced");
+    const countEl = document.getElementById("catalogCount");
+    const moreBtn = document.getElementById("catalogMore");
+    const body = catalogTable.querySelector("tbody");
+    const PAGE = 100;
+    let all = [], shown = 0, matches = [];
+
+    const sorters = {
+      year: (a, b) => (b.year || 0) - (a.year || 0) || a.id.localeCompare(b.id),
+      "year-asc": (a, b) => (a.year || 9999) - (b.year || 9999) || a.id.localeCompare(b.id),
+      id: (a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }),
+      parts: (a, b) => (b.parts || 0) - (a.parts || 0),
+    };
+
+    const rowHTML = (i) => `<tr>
+      <td><img class="thumb" src="${setImg(i.id, i.type)}" alt="" loading="lazy"
+               onerror="this.style.visibility='hidden'"><a href="${itemURL(i)}"><b>${esc(i.id)}</b> ${esc(i.name)}</a>
+          ${i.type === "M" ? '<span style="color:var(--muted)"> (minifig)</span>' : ""}</td>
+      <td>${esc(i.theme) || "—"}</td>
+      <td class="num">${i.year || "—"}</td>
+      <td class="num">${i.parts ? i.parts.toLocaleString() : "—"}</td>
+      <td>${i.p ? '<span class="chip on">priced</span>'
+                : '<span class="chip" style="color:var(--muted)">not scanned</span>'}</td>
+    </tr>`;
+
+    const draw = (append) => {
+      const slice = matches.slice(append ? shown : 0, (append ? shown : 0) + PAGE);
+      if (!append) { body.innerHTML = ""; shown = 0; }
+      body.insertAdjacentHTML("beforeend", slice.map(rowHTML).join(""));
+      shown += slice.length;
+      countEl.textContent = `${matches.length.toLocaleString()} matching item${
+        matches.length === 1 ? "" : "s"} — showing ${shown.toLocaleString()}`;
+      moreBtn.hidden = shown >= matches.length;
+    };
+
+    const apply = () => {
+      const q = qEl.value.trim().toLowerCase();
+      const theme = themeEl.value;
+      const pricedOnly = pricedEl.checked;
+      matches = all.filter((i) => {
+        if (pricedOnly && !i.p) return false;
+        if (theme && i.theme !== theme) return false;
+        if (!q) return true;
+        return i.id.toLowerCase().includes(q) || (i.name || "").toLowerCase().includes(q);
+      });
+      matches.sort(sorters[sortEl.value] || sorters.year);
+      draw(false);
+    };
+
+    loadCatalog().then((items) => {
+      all = items;
+      const themes = [...new Set(items.map((i) => i.theme).filter(Boolean))].sort();
+      themeEl.insertAdjacentHTML("beforeend",
+        themes.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join(""));
+      // Deep-link support: /sets?q=falcon keeps working in the static build.
+      const params = new URLSearchParams(location.search);
+      if (params.get("q")) qEl.value = params.get("q");
+      if (params.get("theme")) themeEl.value = params.get("theme");
+      apply();
+    });
+
+    [qEl, themeEl, sortEl, pricedEl].forEach((el) =>
+      el.addEventListener("input", apply));
+    moreBtn.addEventListener("click", () => draw(true));
+  }
+
+  // ── lite set page for catalog items without scraped prices ────────────
+  const lite = document.getElementById("liteSet");
+  if (lite) {
+    const id = new URLSearchParams(location.search).get("id") || "";
+    document.getElementById("liteId").textContent = id || "<set>";
+    const blNum = id.includes("-") ? id : `${id}-1`;
+    document.getElementById("liteBL").href =
+      `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${encodeURIComponent(blNum)}`;
+    document.getElementById("liteBE").href =
+      `https://www.brickeconomy.com/set/${encodeURIComponent(blNum)}`;
+    document.getElementById("liteEbay").href =
+      `https://www.ebay.com/sch/i.html?_nkw=lego+${encodeURIComponent(id)}`;
+
+    loadCatalog().then((items) => {
+      const item = items.find((i) => i.id === id);
+      if (!item) {
+        document.getElementById("liteName").textContent = id || "Unknown set";
+        document.getElementById("liteMeta").textContent =
+          "Not in the catalog index. Import it with python -m brickonomy.rebrickable.";
+        return;
+      }
+      document.title = `${item.id} ${item.name} · Brickonomy`;
+      document.getElementById("liteTheme").textContent = item.theme || "Catalog";
+      document.getElementById("liteName").innerHTML =
+        `${esc(item.name)} <span style="color:var(--muted);font-weight:400">· ${esc(item.id)}</span>`;
+      document.getElementById("liteMeta").textContent = [
+        item.year ? `Released ${item.year}` : null,
+        item.parts ? `${item.parts.toLocaleString()} parts` : null,
+      ].filter(Boolean).join(" · ");
+
+      const related = items
+        .filter((i) => i.theme && i.theme === item.theme && i.id !== item.id)
+        .sort((a, b) => Math.abs((a.year || 0) - (item.year || 0)) -
+                        Math.abs((b.year || 0) - (item.year || 0)))
+        .slice(0, 12);
+      document.getElementById("liteRelated").innerHTML = related.map((i) => `
+        <a class="relcard" href="${itemURL(i)}">
+          <img src="${setImg(i.id, i.type)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+          <div class="relname"><b>${esc(i.id)}</b> ${esc((i.name || "").slice(0, 34))}</div>
+          <div class="relmeta">${i.year || ""}${i.p ? " · priced" : ""}</div>
+        </a>`).join("");
     });
   }
 
