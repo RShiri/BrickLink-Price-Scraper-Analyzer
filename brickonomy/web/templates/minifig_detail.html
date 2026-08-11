@@ -85,7 +85,7 @@
       <tr><th>Set</th><th>Theme</th><th class="num">Year</th><th class="num">Qty in set</th><th class="num">Set value</th></tr>
       {% for s in appears_in %}
       <tr>
-        <td>{{ m.thumb(s.set_id, 'S', img_url) }}<a href="/sets/{{ s.set_id }}"><b>{{ s.set_id }}</b> {{ s.name }}</a></td>
+        <td>{{ m.thumb(s.set_id, 'S', img_url) }}<a href="{{ u('/sets/' ~ s.set_id) }}"><b>{{ s.set_id }}</b> {{ s.name }}</a></td>
         <td>{{ s.theme or '—' }}</td>
         <td class="num">{{ s.year or '—' }}</td>
         <td class="num">{{ s.qty }}</td>
@@ -119,4 +119,4 @@
 </div>
 
 {% endblock %}
-{% block scripts %}<script src="/static/app.js"></script>{% endblock %}
+{% block scripts %}<script src="{{ u('/static/app.js') }}"></script>{% endblock %}

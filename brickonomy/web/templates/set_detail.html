@@ -131,7 +131,7 @@
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
       {% for f in figs %}
       <tr>
-        <td>{{ m.thumb(f.id, 'M', img_url) }}<a href="/sets/{{ f.id }}"><b>{{ f.id }}</b> {{ f.name[:38] }}</a></td>
+        <td>{{ m.thumb(f.id, 'M', img_url) }}<a href="{{ u('/sets/' ~ f.id) }}"><b>{{ f.id }}</b> {{ f.name[:38] }}</a></td>
         <td class="num">{{ f.qty or 1 }}</td>
         <td class="num">{{ f.value|money(ccy) if f.value else '—' }}</td>
         <td class="num">{% if f.total and values.new.value %}{{ "%.1f"|format(f.total / values.new.value * 100) }}%{% else %}—{% endif %}</td>
@@ -158,6 +158,17 @@
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   {% if parts_summary.lots > 0 %}
+  {% if static_mode %}
+  <div class="searchrow" style="margin-bottom:8px">
+    <span class="chip on">{{ "{:,}".format(parts_summary.lots) }} lots · {{ "{:,}".format(parts_summary.pieces) }} parts</span>
+    {% if pov %}
+    <span class="chip">Part-out value: <b style="color:var(--ink)">&nbsp;{{ pov|money(ccy) }}</b>
+      {% if pov_premium is not none %}&nbsp;· premium {{ m.delta(pov_premium, 0) }} vs set{% endif %}</span>
+    {% endif %}
+    <span class="spacer"></span>
+    <input class="inp" type="search" data-filter-table="partsTable" placeholder="Filter parts…" aria-label="Filter parts">
+  </div>
+  {% else %}
   <form class="searchrow" method="get" action="/sets/{{ item.item_id }}" style="margin-bottom:8px">
     <span class="chip on">{{ "{:,}".format(parts_summary.lots) }} lots · {{ "{:,}".format(parts_summary.pieces) }} parts</span>
     {% if pov %}
@@ -167,8 +178,9 @@
     <span class="spacer"></span>
     <input class="inp" type="search" name="parts_q" value="{{ parts_q }}" placeholder="Filter parts…" aria-label="Filter parts">
   </form>
+  {% endif %}
   <div class="table-scroll">
-  <table>
+  <table id="partsTable">
     <tr><th>Part</th><th>Name</th><th>Color</th><th class="num">Qty</th><th class="num">Avg each</th><th class="num">Lot value</th></tr>
     {% for p in parts %}
     <tr>
@@ -191,4 +203,4 @@
 </div>
 
 {% endblock %}
-{% block scripts %}<script src="/static/app.js"></script>{% endblock %}
+{% block scripts %}<script src="{{ u('/static/app.js') }}"></script>{% endblock %}

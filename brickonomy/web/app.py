@@ -5,6 +5,7 @@ Run:  uvicorn brickonomy.web.app:app --reload
 import csv
 import io
 import json
+import os
 import re
 import sqlite3
 import xml.etree.ElementTree as ET
@@ -28,6 +29,40 @@ from ..importer import item_type_for, normalize_item_id, parse_money
 from . import jobs
 
 BASE_DIR = Path(__file__).resolve().parent
+
+# Static-export mode: brickonomy.export sets these before importing the app,
+# then crawls it with a TestClient. Links become .html paths under BASE_PATH
+# and server-only UI (refresh/import/edit/currency) is hidden.
+STATIC_MODE = bool(os.environ.get("BRICKONOMY_STATIC_EXPORT"))
+BASE_PATH = os.environ.get("BRICKONOMY_BASE_PATH", "").rstrip("/")
+
+
+def slugify(text: str) -> str:
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]", "-", (text or "").lower())).strip("-")
+
+
+def static_url(path: str) -> str:
+    """Rewrite an app route to its exported static file path."""
+    if not STATIC_MODE:
+        return path
+    base = BASE_PATH
+    path, _, query = path.partition("?")
+    if path == "/":
+        return f"{base}/index.html"
+    if path == "/sets":
+        m = re.search(r"theme=([^&]+)", query)
+        if m:
+            from urllib.parse import unquote_plus
+            return f"{base}/sets/theme-{slugify(unquote_plus(m.group(1)))}.html"
+        return f"{base}/sets/index.html"
+    if path == "/portfolio":
+        return f"{base}/portfolio.html"
+    if path.startswith("/api/"):
+        return f"{base}{path}.json"
+    if path.startswith("/static/"):
+        return f"{base}{path}"
+    return f"{base}{path}.html"
+
 
 app = FastAPI(title="Brickonomy")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
@@ -63,6 +98,9 @@ def ctx(request: Request, conn, **extra):
         "rates": rates_status(),
         "job": jobs.status(),
         "img_url": img_url,
+        "static_mode": STATIC_MODE,
+        "base_path": BASE_PATH,
+        "u": static_url,
         **extra,
     }
 

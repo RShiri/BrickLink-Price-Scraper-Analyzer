@@ -5,17 +5,18 @@
 
 <div class="eyebrow">My collection</div>
 <h1>Portfolio</h1>
-<p class="sub">{{ entries|length }} sets, valued live from three marketplaces. Import from BrickEconomy or BrickLink, edit inline.</p>
+<p class="sub">{{ entries|length }} sets, valued from three marketplaces{% if not static_mode %}. Import from BrickEconomy or BrickLink, edit inline{% endif %}.</p>
 
 {% if imported is not none %}
 <div class="notice">Imported {{ imported }} row(s){% if skipped %}, skipped {{ skipped }}{% endif %}.</div>
 {% endif %}
 
-<div class="two-col wide-left">
+<div class="{{ '' if static_mode else 'two-col wide-left' }}">
   <div class="card">
     <h3>Portfolio value over time <span class="soft">({{ ccy }})</span></h3>
     <div class="chart-wrap"><canvas id="portfolioChart"></canvas></div>
   </div>
+  {% if not static_mode %}
   <div class="card">
     <h3>Import portfolio</h3>
     <form method="post" action="/portfolio/import" enctype="multipart/form-data">
@@ -41,15 +42,16 @@
       <button class="btn-primary" type="submit">+ Add</button>
     </form>
   </div>
+  {% endif %}
 </div>
 
 <div class="card">
-  <h3>Owned sets <span class="soft">— click ✎ to edit a row inline</span></h3>
+  <h3>Owned sets{% if not static_mode %} <span class="soft">— click ✎ to edit a row inline</span>{% endif %}</h3>
   <div class="table-scroll">
   <table>
     <tr>
       <th>Set</th><th>Theme</th><th class="num">Qty</th><th class="num">Paid</th>
-      <th class="num">Value (new)</th><th class="num">Gain</th><th class="num">Δ 30d</th><th></th>
+      <th class="num">Value (new)</th><th class="num">Gain</th><th class="num">Δ 30d</th>{% if not static_mode %}<th></th>{% endif %}
     </tr>
     {% for e in entries %}
     {% if edit == e.item_id %}
@@ -83,14 +85,14 @@
     </tr>
     {% else %}
     <tr>
-      <td>{{ m.thumb(e.item_id, e.item_type, img_url) }}<a href="/sets/{{ e.item_id }}">{{ e.item_id }} {{ e.name }}</a></td>
+      <td>{{ m.thumb(e.item_id, e.item_type, img_url) }}<a href="{{ u('/sets/' ~ e.item_id) }}">{{ e.item_id }} {{ e.name }}</a></td>
       <td>{{ e.theme or '—' }}</td>
       <td class="num">{{ e.qty }}</td>
       <td class="num">{{ e.paid|money(ccy) if e.paid else '—' }}</td>
       <td class="num"><b>{{ e.value|money(ccy) if e.value else '—' }}</b></td>
       <td class="num">{{ m.delta(e.gain, 0) }}</td>
       <td class="num">{{ m.delta(e.delta30) }}</td>
-      <td><a class="btn-ghost" style="padding:2px 9px" href="/portfolio?edit={{ e.item_id }}" title="Edit">✎</a></td>
+      {% if not static_mode %}<td><a class="btn-ghost" style="padding:2px 9px" href="/portfolio?edit={{ e.item_id }}" title="Edit">✎</a></td>{% endif %}
     </tr>
     {% endif %}
     {% else %}
@@ -103,7 +105,7 @@
       <td class="num">{{ total_paid|money(ccy) }}</td>
       <td class="num">{{ total_value|money(ccy) }}</td>
       <td class="num">{{ m.delta(total_gain, 1) }}</td>
-      <td></td><td></td>
+      <td></td>{% if not static_mode %}<td></td>{% endif %}
     </tr>
     {% endif %}
   </table>
@@ -111,4 +113,4 @@
 </div>
 
 {% endblock %}
-{% block scripts %}<script src="/static/app.js"></script>{% endblock %}
+{% block scripts %}<script src="{{ u('/static/app.js') }}"></script>{% endblock %}

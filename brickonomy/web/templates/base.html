@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Brickonomy{% endblock %}</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="{{ u('/static/style.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
-<body>
+<body data-static="{{ 1 if static_mode else 0 }}" data-base="{{ base_path }}">
 <header class="app">
-  <a class="logo" href="/">
+  <a class="logo" href="{{ u('/') }}">
     <svg width="28" height="22" viewBox="0 0 26 20" aria-hidden="true">
       <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#38d4e0"/>
@@ -23,12 +23,17 @@
   </a>
   <nav class="tabs">
     {% set path = request.url.path %}
-    <a href="/" class="{{ 'active' if path == '/' }}">Dashboard</a>
-    <a href="/sets" class="{{ 'active' if path.startswith('/sets') }}">Sets</a>
-    <a href="/portfolio" class="{{ 'active' if path.startswith('/portfolio') }}">Portfolio</a>
+    <a href="{{ u('/') }}" class="{{ 'active' if path == '/' }}">Dashboard</a>
+    <a href="{{ u('/sets') }}" class="{{ 'active' if path.startswith('/sets') }}">Sets</a>
+    <a href="{{ u('/portfolio') }}" class="{{ 'active' if path.startswith('/portfolio') }}">Portfolio</a>
+    {% if not static_mode %}
     <a href="/refresh" class="{{ 'active' if path.startswith('/refresh') }}">Refresh &amp; Sources</a>
+    {% endif %}
   </nav>
   <div class="spacer"></div>
+  {% if static_mode %}
+  <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · {{ ccy }}</span>
+  {% else %}
   <form method="post" action="/settings/currency">
     <select class="ccy" name="ccy" onchange="this.form.submit()" title="Display currency" aria-label="Display currency">
       {% for c in currencies %}
@@ -44,6 +49,7 @@
     <button class="btn-ghost" type="submit" title="Refresh portfolio prices">⟳ Refresh prices</button>
   </form>
   {% endif %}
+  {% endif %}
 </header>
 
 <main>
@@ -52,7 +58,8 @@
 
 <footer class="note">
   Brickonomy · self-hosted, no API keys · sources: BrickLink, eBay, BrickOwl
-  {% if rates.stale %}· <span title="Exchange-rate fetch failed; using {{ rates.source }}">⚠ exchange rates stale ({{ rates.source }})</span>{% endif %}
+  {% if static_mode %}· static snapshot — run <code>python -m brickonomy.export</code> to update{% endif %}
+  {% if rates.stale and not static_mode %}· <span title="Exchange-rate fetch failed; using {{ rates.source }}">⚠ exchange rates stale ({{ rates.source }})</span>{% endif %}
 </footer>
 {% block scripts %}{% endblock %}
 </body>

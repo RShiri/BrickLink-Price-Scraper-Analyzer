@@ -6,3 +6,4 @@ requests
 selenium
 beautifulsoup4
 pytest
+httpx              # starlette TestClient (static export)

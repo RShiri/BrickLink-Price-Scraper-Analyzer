@@ -1,0 +1,113 @@
+"""Static site export for GitHub Pages.
+
+  python -m brickonomy.export                       # writes ./docs for
+                                                    #   rshiri.github.io/<repo>/
+  python -m brickonomy.export --out site --base-url ""   # for a root domain
+  python -m brickonomy.export --ccy USD
+
+Drives the regular FastAPI app with a test client (so the static site is
+pixel-identical to the live one) and saves every page/API response:
+
+  /                     -> index.html
+  /sets                 -> sets/index.html
+  /sets?theme=T         -> sets/theme-<slug>.html
+  /sets/<id>            -> sets/<id>.html        (sets AND minifig pages)
+  /portfolio            -> portfolio.html
+  /api/...              -> api/....json          (chart data)
+
+Server-only UI (refresh, import, editing, currency switch) is hidden by the
+templates when BRICKONOMY_STATIC_EXPORT is set.
+"""
+import argparse
+import shutil
+from pathlib import Path
+
+DEFAULT_BASE = "/BrickLink-Price-Scraper-Analyzer"
+
+
+def export(out_dir: str, base_url: str, ccy: str, quiet: bool = False):
+    from starlette.testclient import TestClient
+
+    from . import db as dbq
+    from .config import get_config
+    from .web import app as webapp
+
+    # static_url() and ctx() read these module globals at call time, so
+    # flipping them here switches the whole app into static-export mode.
+    prev = (webapp.STATIC_MODE, webapp.BASE_PATH, get_config().display_currency)
+    webapp.STATIC_MODE = True
+    webapp.BASE_PATH = base_url.rstrip("/")
+    get_config().display_currency = ccy
+    try:
+        return _crawl(webapp, out_dir, base_url, quiet)
+    finally:
+        webapp.STATIC_MODE, webapp.BASE_PATH = prev[0], prev[1]
+        get_config().display_currency = prev[2]
+
+
+def _crawl(webapp, out_dir: str, base_url: str, quiet: bool):
+    from starlette.testclient import TestClient
+
+    from . import db as dbq
+
+    client = TestClient(webapp.app)
+    out = Path(out_dir)
+    log = (lambda *a: None) if quiet else print
+
+    conn = dbq.connect()
+    try:
+        item_ids = [r["item_id"] for r in conn.execute("SELECT item_id FROM items")]
+        snap_ids = [r["item_id"] for r in conn.execute(
+            "SELECT DISTINCT item_id FROM price_snapshots")]
+        themes = [r["theme"] for r in conn.execute(
+            """SELECT theme, COUNT(*) n FROM items
+               WHERE theme IS NOT NULL AND theme != ''
+               GROUP BY theme ORDER BY n DESC LIMIT 30""")]
+    finally:
+        conn.close()
+
+    def save(route: str, path: str):
+        resp = client.get(route)
+        if resp.status_code != 200:
+            log(f"  ! skip {route} ({resp.status_code})")
+            return False
+        target = out / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(resp.content)
+        return True
+
+    n_pages = n_json = 0
+    n_pages += save("/", "index.html")
+    n_pages += save("/sets", "sets/index.html")
+    n_pages += save("/portfolio", "portfolio.html")
+    for theme in themes:
+        n_pages += save(f"/sets?theme={theme}", f"sets/theme-{webapp.slugify(theme)}.html")
+    for iid in item_ids:
+        n_pages += save(f"/sets/{iid}", f"sets/{iid}.html")
+    for iid in snap_ids:
+        n_json += save(f"/api/sets/{iid}/history", f"api/sets/{iid}/history.json")
+    n_json += save("/api/portfolio/history", "api/portfolio/history.json")
+
+    static_src = Path(webapp.BASE_DIR) / "static"
+    shutil.copytree(static_src, out / "static", dirs_exist_ok=True)
+    (out / ".nojekyll").write_text("")
+
+    log(f"Exported {n_pages} pages + {n_json} JSON files to {out}/")
+    if base_url:
+        log(f"After enabling GitHub Pages: https://rshiri.github.io{base_url}/")
+    return n_pages, n_json
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Export the site as static HTML for GitHub Pages")
+    ap.add_argument("--out", default="docs", help="output directory (default: docs)")
+    ap.add_argument("--base-url", default=DEFAULT_BASE,
+                    help=f'site base path (default: "{DEFAULT_BASE}"; use "" for a root domain)')
+    ap.add_argument("--ccy", default="ILS", choices=["ILS", "USD", "EUR", "GBP"],
+                    help="display currency baked into the export")
+    args = ap.parse_args()
+    export(args.out, args.base_url.rstrip("/"), args.ccy)
+
+
+if __name__ == "__main__":
+    main()

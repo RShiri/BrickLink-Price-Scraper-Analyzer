@@ -74,6 +74,27 @@ its share of the set's value. Each minifig has its own page — like BrickLink �
 at `/sets/<fig id>` (e.g. `/sets/sw0879`): image, new/used value, price
 history chart, best live prices, and an "appears in sets" cross-reference.
 
+## Publish to GitHub Pages (the website link)
+
+GitHub can't run the server, but it can host a **static snapshot** of the
+whole site — every set page, minifig page, chart and the portfolio:
+
+```bash
+python -m brickonomy.export        # renders the site into docs/
+git add docs && git commit -m "Update site" && git push
+```
+
+Then enable Pages once: repo **Settings → Pages → Deploy from a branch** →
+pick the branch and the **`/docs`** folder. The site appears at
+
+> **https://rshiri.github.io/BrickLink-Price-Scraper-Analyzer/**
+
+Update loop: `python -m brickonomy.refresh` → `python -m brickonomy.export` →
+commit + push. The published site is read-only (no refresh/import buttons);
+prices are as of the last scan. Options: `--ccy USD` bakes a different display
+currency, `--base-url ""` for a custom root domain, `--out <dir>` for a
+different output folder.
+
 ## Configuration
 
 Copy `brickonomy/config.example.json` to `brickonomy/config.json` and edit, or
