@@ -83,6 +83,30 @@ def convert(conn, amount: float, from_ccy: str, to_ccy: str) -> float:
 CURRENCY_SYMBOLS = {"ILS": "₪", "USD": "$", "EUR": "€", "GBP": "£"}
 
 
+def detect_currency(price_text: str, default: str = "ILS") -> str:
+    """Map a marketplace price cell (e.g. 'US $12.34', '~ILS 45.00') to a code.
+
+    Order matters: country prefixes are checked before the bare '$', since
+    BrickLink renders Canadian and Australian dollars as 'CA $' / 'AU $'.
+    """
+    p = (price_text or "").upper()
+    if "ILS" in p or "₪" in p:
+        return "ILS"
+    if "US" in p:
+        return "USD"
+    if "CA" in p:
+        return "CAD"
+    if "AU" in p:
+        return "AUD"
+    if "EU" in p or "€" in p:
+        return "EUR"
+    if "GB" in p or "£" in p:
+        return "GBP"
+    if "$" in p:
+        return "USD"
+    return default
+
+
 def money(value, ccy: str) -> str:
     """Jinja filter: format an amount with its currency symbol."""
     if value is None:

@@ -161,12 +161,18 @@ class BrickLinkScraper:
                 q_idx, p_idx = (-2, -1) if table_type == "sold" else (1, 2)
                 p_text = tds[p_idx].get_text(strip=True).replace(',', '')
                 p = float(re.sub(r'[^\d.]', '', p_text))
-                
 
+                # 3. זיהוי מטבע מתוך תא המחיר (BrickLink מציג לפי הסשן)
+                try:
+                    from brickonomy.currency import detect_currency
+                    ccy = detect_currency(p_text)
+                except ImportError:
+                    ccy = "ILS"
 
                 rows.append({
                     'qty': int(re.sub(r'[^\d]', '', tds[q_idx].get_text(strip=True))),
                     'price': p,
+                    'currency': ccy,
                     'status': "incomplete" if is_inc else "complete"
                 })
             except: continue
