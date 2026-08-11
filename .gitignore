@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 brickonomy.db
 .pytest_cache/
+.venv/
+venv/

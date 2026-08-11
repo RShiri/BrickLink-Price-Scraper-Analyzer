@@ -28,6 +28,14 @@ repo and builds on its existing BrickLink scraper and `PriceAnalyzer`.
 
 ## Quick start
 
+**Not a developer?** Double-click **`run.bat`** in the repo root (Windows) or
+run `./run.sh` (macOS/Linux) — it creates the environment, installs
+everything, seeds the database, imports the full catalog and opens the
+browser. Prices are collected with `scan.bat` / `./scan.sh`. The step-by-step
+guide is [`QUICKSTART.md`](../QUICKSTART.md).
+
+By hand:
+
 ```bash
 pip install -r brickonomy/requirements.txt
 
@@ -186,7 +194,7 @@ the refresh records it, and the UI keeps serving the last snapshots.
 ## Tests
 
 ```bash
-python -m pytest brickonomy/tests   # 38 tests, fully offline
+python -m pytest brickonomy/tests   # 60 tests, fully offline
 ```
 
 ## Layout
