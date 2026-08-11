@@ -7,8 +7,10 @@
   // Static-export mode: pages are served from GitHub Pages (or any file host);
   // API endpoints become pre-rendered .json files under the site base path.
   const IS_STATIC = document.body.dataset.static === "1";
+  // Relative prefix for the current page ('' at the site root, '../' one level
+  // down), so the export works at any mount point.
   const BASE = document.body.dataset.base || "";
-  const apiURL = (path) => (IS_STATIC ? `${BASE}${path}.json` : path);
+  const apiURL = (path) => (IS_STATIC ? `${BASE}${path.replace(/^\//, "")}.json` : path);
 
   const CHART_DEFAULTS = {
     color: css("--muted") || "#66718f",

@@ -30,38 +30,49 @@ from . import jobs
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Static-export mode: brickonomy.export sets these before importing the app,
-# then crawls it with a TestClient. Links become .html paths under BASE_PATH
-# and server-only UI (refresh/import/edit/currency) is hidden.
+# Static-export mode: brickonomy.export flips these, then crawls the app with
+# a TestClient. Links become RELATIVE .html paths (so the exported site works
+# at any mount point — repo root, /docs, a custom domain) and server-only UI
+# (refresh/import/edit/currency) is hidden.
 STATIC_MODE = bool(os.environ.get("BRICKONOMY_STATIC_EXPORT"))
-BASE_PATH = os.environ.get("BRICKONOMY_BASE_PATH", "").rstrip("/")
+# Directory depth of the page currently being rendered, e.g. sets/75192.html
+# has depth 1. The exporter sets this before each request.
+STATIC_DEPTH = 0
 
 
 def slugify(text: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]", "-", (text or "").lower())).strip("-")
 
 
+def static_prefix() -> str:
+    """'' at the site root, '../' one level down, and so on."""
+    return "../" * STATIC_DEPTH
+
+
 def static_url(path: str) -> str:
-    """Rewrite an app route to its exported static file path."""
+    """Rewrite an app route to its exported static file, relative to the page
+    being rendered."""
     if not STATIC_MODE:
         return path
-    base = BASE_PATH
     path, _, query = path.partition("?")
     if path == "/":
-        return f"{base}/index.html"
-    if path == "/sets":
+        rel = "index.html"
+    elif path == "/sets":
         m = re.search(r"theme=([^&]+)", query)
         if m:
             from urllib.parse import unquote_plus
-            return f"{base}/sets/theme-{slugify(unquote_plus(m.group(1)))}.html"
-        return f"{base}/sets/index.html"
-    if path == "/portfolio":
-        return f"{base}/portfolio.html"
-    if path.startswith("/api/"):
-        return f"{base}{path}.json"
-    if path.startswith("/static/"):
-        return f"{base}{path}"
-    return f"{base}{path}.html"
+            rel = f"sets/theme-{slugify(unquote_plus(m.group(1)))}.html"
+        else:
+            rel = "sets/index.html"
+    elif path == "/portfolio":
+        rel = "portfolio.html"
+    elif path.startswith("/api/"):
+        rel = f"{path.lstrip('/')}.json"
+    elif path.startswith("/static/"):
+        rel = path.lstrip("/")
+    else:
+        rel = f"{path.lstrip('/')}.html"
+    return static_prefix() + rel
 
 
 app = FastAPI(title="Brickonomy")
@@ -99,7 +110,7 @@ def ctx(request: Request, conn, **extra):
         "job": jobs.status(),
         "img_url": img_url,
         "static_mode": STATIC_MODE,
-        "base_path": BASE_PATH,
+        "base_path": static_prefix(),
         "u": static_url,
         **extra,
     }

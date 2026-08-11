@@ -85,15 +85,18 @@ git add docs && git commit -m "Update site" && git push
 ```
 
 Then enable Pages once: repo **Settings → Pages → Deploy from a branch** →
-pick the branch and the **`/docs`** folder. The site appears at
+branch **`main`**, folder **`/docs`**. The site appears at
 
 > **https://rshiri.github.io/BrickLink-Price-Scraper-Analyzer/**
+
+All links in the export are *relative*, so it also works if Pages is set to
+the repo root (the root `index.html` redirects into `docs/`) or served from a
+custom domain — no rebuild needed when the mount point changes.
 
 Update loop: `python -m brickonomy.refresh` → `python -m brickonomy.export` →
 commit + push. The published site is read-only (no refresh/import buttons);
 prices are as of the last scan. Options: `--ccy USD` bakes a different display
-currency, `--base-url ""` for a custom root domain, `--out <dir>` for a
-different output folder.
+currency, `--out <dir>` a different output folder.
 
 ## Configuration
 
