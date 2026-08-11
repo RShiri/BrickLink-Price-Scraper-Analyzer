@@ -1,0 +1,80 @@
+"""Static export tests — seeded tmp DB, offline."""
+import json
+from datetime import datetime, timedelta
+
+import pytest
+
+from brickonomy import db as dbq
+from brickonomy.config import get_config
+from brickonomy.export import export
+
+
+@pytest.fixture()
+def seeded_db(tmp_path, monkeypatch):
+    db_path = tmp_path / "exp.db"
+    monkeypatch.setattr(get_config(), "db_path", str(db_path))
+    conn = dbq.connect(db_path=str(db_path))
+    dbq.upsert_rate(conn, "USD", "ILS", 3.5)
+    dbq.upsert_rate(conn, "USD", "EUR", 0.9)
+    dbq.upsert_rate(conn, "USD", "GBP", 0.8)
+
+    dbq.upsert_item(conn, "75192", name="Millennium Falcon", theme="Star Wars",
+                    year=2017, retail_price=849.99, retail_currency="USD")
+    dbq.upsert_item(conn, "sw0879", name="Han Solo", item_type="M", theme="Star Wars")
+    dbq.upsert_set_minifigs(conn, "75192", [{"id": "sw0879", "name": "Han Solo", "qty": 1}])
+    dbq.upsert_portfolio(conn, "75192", owned=1, purchase_price=849.99)
+
+    for days_ago, price in ((30, 3000.0), (0, 3200.0)):
+        ts = (datetime.now() - timedelta(days=days_ago)).isoformat(timespec="seconds")
+        dbq.insert_snapshot(conn, "75192", "blended", "new", "market", "ILS",
+                            market_price=price, confidence="HIGH", scraped_at=ts)
+    conn.commit()
+    conn.close()
+    yield db_path
+
+
+class TestExport:
+    def test_export_writes_expected_files(self, seeded_db, tmp_path):
+        out = tmp_path / "site"
+        n_pages, n_json = export(str(out), "/repo", "ILS", quiet=True)
+        assert (out / "index.html").exists()
+        assert (out / "sets" / "index.html").exists()
+        assert (out / "sets" / "75192.html").exists()
+        assert (out / "sets" / "sw0879.html").exists()       # minifig page too
+        assert (out / "sets" / "theme-star-wars.html").exists()
+        assert (out / "portfolio.html").exists()
+        assert (out / "api" / "sets" / "75192" / "history.json").exists()
+        assert (out / "static" / "style.css").exists()
+        assert (out / ".nojekyll").exists()
+        assert n_pages >= 5 and n_json >= 1
+
+    def test_links_rewritten_with_base(self, seeded_db, tmp_path):
+        out = tmp_path / "site"
+        export(str(out), "/repo", "ILS", quiet=True)
+        html = (out / "index.html").read_text()
+        assert 'href="/repo/sets/index.html"' in html
+        assert 'href="/repo/static/style.css"' in html
+        assert 'href="/sets"' not in html
+        assert 'data-base="/repo"' in html and 'data-static="1"' in html
+
+    def test_server_only_ui_hidden(self, seeded_db, tmp_path):
+        out = tmp_path / "site"
+        export(str(out), "/repo", "ILS", quiet=True)
+        for page in ("index.html", "portfolio.html", "sets/index.html"):
+            html = (out / page).read_text()
+            assert 'method="post"' not in html, page
+            assert "Refresh &amp; Sources" not in html, page
+        assert "Preview import" not in (out / "portfolio.html").read_text()
+
+    def test_history_json_parses(self, seeded_db, tmp_path):
+        out = tmp_path / "site"
+        export(str(out), "/repo", "ILS", quiet=True)
+        data = json.loads((out / "api" / "sets" / "75192" / "history.json").read_text())
+        assert data["currency"] == "ILS"
+        assert len(data["series"]["blended"]) == 2
+
+    def test_dynamic_mode_restored_after_export(self, seeded_db, tmp_path):
+        from brickonomy.web import app as webapp
+        export(str(tmp_path / "site"), "/repo", "ILS", quiet=True)
+        assert webapp.STATIC_MODE is False
+        assert webapp.static_url("/sets/75192") == "/sets/75192"

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · Brickonomy</title>
+<link rel="stylesheet" href="/BrickLink-Price-Scraper-Analyzer/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body data-static="1" data-base="/BrickLink-Price-Scraper-Analyzer">
+<header class="app">
+  <a class="logo" href="/BrickLink-Price-Scraper-Analyzer/index.html">
+    <svg width="28" height="22" viewBox="0 0 26 20" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#38d4e0"/>
+      </linearGradient></defs>
+      <rect x="4"  y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="15" y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="0" y="4" width="26" height="16" rx="2.5" fill="url(#lg)"/>
+    </svg>
+    Brick<b>onomy</b>
+  </a>
+  <nav class="tabs">
+    
+    <a href="/BrickLink-Price-Scraper-Analyzer/index.html" class="active">Dashboard</a>
+    <a href="/BrickLink-Price-Scraper-Analyzer/sets/index.html" class="">Sets</a>
+    <a href="/BrickLink-Price-Scraper-Analyzer/portfolio.html" class="">Portfolio</a>
+    
+  </nav>
+  <div class="spacer"></div>
+  
+  <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
+  
+</header>
+
+<main>
+
+
+<div class="eyebrow">Overview</div>
+<h1>Dashboard</h1>
+<p class="sub">Your LEGO market at a glance — prices aggregated from BrickLink, eBay and BrickOwl.</p>
+
+<div class="tiles">
+  <div class="tile">
+    <div class="label">Portfolio value</div>
+    <div class="value">₪16,763</div>
+    <div class="delta">69 sets owned</div>
+  </div>
+  <div class="tile">
+    <div class="label">Gain vs paid/retail</div>
+    <div class="value">-4.6%</div>
+    <div class="delta down">
+      ₪-813 unrealized
+    </div>
+  </div>
+  <div class="tile">
+    <div class="label">Items tracked</div>
+    <div class="value">272</div>
+    <div class="delta">182 retired</div>
+  </div>
+  <div class="tile">
+    <div class="label">Last scan</div>
+    <div class="value" style="font-size:18px">2026-08-11 02:06</div>
+    <div class="delta">
+      <span class="dot" style="background:var(--good)"></span> idle
+    </div>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h3>Top gainers <span class="soft">— 30 days, blended value</span></h3>
+    <table>
+      <tr><th>Set</th><th class="num">Value</th><th class="num">Δ 30d</th></tr>
+      
+      <tr><td colspan="3" style="color:var(--muted)">Run at least two scans a week apart to see movers.</td></tr>
+      
+    </table>
+  </div>
+  <div class="card">
+    <h3>Top decliners <span class="soft">— 30 days</span></h3>
+    <table>
+      <tr><th>Set</th><th class="num">Value</th><th class="num">Δ 30d</th></tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/SN/0/76031-1.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="/BrickLink-Price-Scraper-Analyzer/sets/76031.html">76031 The Hulk Buster Smash</a></td>
+        <td class="num">₪245</td>
+        <td class="num"><span class="delta down">▼ 0.1%</span></td>
+      </tr>
+      
+    </table>
+  </div>
+</div>
+
+<div class="two-col">
+  <div class="card">
+    <h3>Portfolio value by theme</h3>
+    <div class="bars">
+      
+      <div class="row">
+        <span>Marvel Super Heroes</span>
+        <div class="track"><div class="fill" style="width:100.0%"></div></div>
+        <span class="num">₪12,553</span>
+      </div>
+      
+      <div class="row">
+        <span>Technic</span>
+        <div class="track"><div class="fill" style="width:8.9%"></div></div>
+        <span class="num">₪1,116</span>
+      </div>
+      
+      <div class="row">
+        <span>Icons</span>
+        <div class="track"><div class="fill" style="width:6.8%"></div></div>
+        <span class="num">₪859</span>
+      </div>
+      
+      <div class="row">
+        <span>BrickHeadz</span>
+        <div class="track"><div class="fill" style="width:3.9%"></div></div>
+        <span class="num">₪485</span>
+      </div>
+      
+      <div class="row">
+        <span>LEGO Art</span>
+        <div class="track"><div class="fill" style="width:3.8%"></div></div>
+        <span class="num">₪472</span>
+      </div>
+      
+      <div class="row">
+        <span>Other (5 themes)</span>
+        <div class="track"><div class="fill" style="width:10.2%"></div></div>
+        <span class="num">₪1,278</span>
+      </div>
+      
+    </div>
+  </div>
+  <div class="card">
+    
+    <h3>About this snapshot</h3>
+    <div style="color:var(--ink-2)">
+      Static export of the Brickonomy database, published to GitHub Pages.
+      Prices were aggregated from BrickLink, eBay and BrickOwl at scan time
+      (last scan 2026-08-11 02:06).
+      To update: <code>python -m brickonomy.refresh</code> →
+      <code>python -m brickonomy.export</code> → push.
+    </div>
+    
+  </div>
+</div>
+
+
+</main>
+
+<footer class="note">
+  Brickonomy · self-hosted, no API keys · sources: BrickLink, eBay, BrickOwl
+  · static snapshot — run <code>python -m brickonomy.export</code> to update
+  
+</footer>
+
+</body>
+</html>
