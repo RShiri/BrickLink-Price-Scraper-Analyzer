@@ -54,6 +54,27 @@ Cron example (daily 06:00):
 0 6 * * * cd /path/to/repo && python -m brickonomy.refresh --scope stale
 ```
 
+## The full LEGO catalog (every set ever released)
+
+```bash
+python -m brickonomy.rebrickable            # ~23,000 sets
+python -m brickonomy.rebrickable --minifigs # + ~15,000 minifigs
+```
+
+Rebrickable publishes the whole catalog as daily CSV dumps — free, no key.
+After importing, the Sets page and the header search cover every set that
+exists, like BrickLink or BrickEconomy. Catalog rows carry number, name,
+theme, year and part count; **prices still come from `brickonomy.refresh`**,
+so a set nobody has scanned shows "not scanned" and opens a lightweight page
+with links out to BrickLink / BrickEconomy / eBay.
+
+In the static build only priced items get their own page (23k pages would be
+gigabytes); everything else is searchable through `api/index.json` and opens
+`set.html?id=…`, which renders client-side. The **catalog-refresh** workflow
+(`.github/workflows/catalog-refresh.yml`, weekly or on demand) runs the import
+and rebuilds `docs/` on GitHub's runners, so the published site keeps the full
+catalog without you doing anything.
+
 ## Importing the BrickLink catalog (themes & all sets)
 
 The full BrickLink set taxonomy — themes, subthemes and every set in them —

@@ -9,6 +9,7 @@ import os
 import re
 import sqlite3
 import xml.etree.ElementTree as ET
+from urllib.parse import quote
 from datetime import datetime
 from pathlib import Path
 
@@ -38,6 +39,9 @@ STATIC_MODE = bool(os.environ.get("BRICKONOMY_STATIC_EXPORT"))
 # Directory depth of the page currently being rendered, e.g. sets/75192.html
 # has depth 1. The exporter sets this before each request.
 STATIC_DEPTH = 0
+# Item ids that get their own exported page. Everything else in the catalog
+# links to the client-rendered set.html instead, so no link ever dangles.
+STATIC_PAGED_IDS = None
 
 
 def slugify(text: str) -> str:
@@ -66,10 +70,18 @@ def static_url(path: str) -> str:
             rel = "sets/index.html"
     elif path == "/portfolio":
         rel = "portfolio.html"
+    elif path == "/set":
+        rel = "set.html"
     elif path.startswith("/api/"):
         rel = f"{path.lstrip('/')}.json"
     elif path.startswith("/static/"):
         rel = path.lstrip("/")
+    elif path.startswith("/sets/"):
+        item_id = path[len("/sets/"):]
+        if STATIC_PAGED_IDS is not None and item_id not in STATIC_PAGED_IDS:
+            rel = f"set.html?id={quote(item_id)}"
+        else:
+            rel = f"sets/{item_id}.html"
     else:
         rel = f"{path.lstrip('/')}.html"
     return static_prefix() + rel
@@ -445,10 +457,14 @@ def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "grow
                GROUP BY theme ORDER BY n DESC LIMIT 30"""
         ).fetchall()
         n_categories = conn.execute("SELECT COUNT(*) c FROM categories").fetchone()["c"]
-        return templates.TemplateResponse(request, "sets.html", ctx(
+        catalog_total = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
+        # The static build browses the whole catalog client-side from
+        # api/index.json — 23k rows can't be pre-rendered as pages.
+        template = "sets_static.html" if STATIC_MODE else "sets.html"
+        return templates.TemplateResponse(request, template, ctx(
             request, conn, items=items[:200], q=q, filter=filter, sort=sort,
             theme=theme, themes=themes, n_categories=n_categories,
-            total=len(items),
+            total=len(items), catalog_total=catalog_total,
         ))
     finally:
         conn.close()
@@ -617,6 +633,17 @@ def _minifig_detail(request: Request, conn, row):
     ))
 
 
+@app.get("/set")
+def set_lite(request: Request):
+    """Client-rendered stand-in for catalog sets with no scraped prices.
+    Only meaningful in the static export (`set.html?id=…`)."""
+    conn = get_conn()
+    try:
+        return templates.TemplateResponse(request, "set_lite.html", ctx(request, conn))
+    finally:
+        conn.close()
+
+
 @app.get("/api/index")
 def search_index(request: Request):
     """Small catalog index powering the header's instant search. Exported as a
@@ -624,13 +651,27 @@ def search_index(request: Request):
     conn = get_conn()
     try:
         rows = conn.execute(
-            "SELECT item_id, name, theme, year, item_type FROM items ORDER BY item_id"
+            "SELECT item_id, name, theme, year, parts, item_type FROM items ORDER BY item_id"
         ).fetchall()
-        return JSONResponse({"items": [
-            {"id": r["item_id"], "name": r["name"] or "", "theme": r["theme"] or "",
-             "year": r["year"], "type": r["item_type"] or "S"}
-            for r in rows
-        ]})
+        # `p` marks items that have their own page in the static export (only
+        # price-scraped items get one — the catalog is far too big to render
+        # 23k pages). Everything else opens the client-rendered set page.
+        priced = {r["item_id"] for r in conn.execute(
+            "SELECT DISTINCT item_id FROM price_snapshots")}
+        # Row arrays rather than objects: with a full catalog this file is
+        # ~23k+ entries, and the compact form is roughly 40% smaller.
+        themes = sorted({r["theme"] for r in rows if r["theme"]})
+        theme_ix = {t: i for i, t in enumerate(themes)}
+        return JSONResponse({
+            "fields": ["id", "name", "theme", "year", "parts", "type", "p"],
+            "themes": themes,
+            "rows": [
+                [r["item_id"], r["name"] or "", theme_ix.get(r["theme"], -1),
+                 r["year"] or 0, r["parts"] or 0,
+                 r["item_type"] or "S", 1 if r["item_id"] in priced else 0]
+                for r in rows
+            ],
+        })
     finally:
         conn.close()
 
@@ -641,13 +682,20 @@ def history_api(request: Request, item_id: str, condition: str = "new"):
     try:
         ccy = display_ccy(request)
         item_id = normalize_item_id(item_id)
-        out = {"currency": ccy, "series": {}}
-        for source in ("blended", "bricklink", "ebay", "brickowl"):
-            pts = growth_mod.series(conn, item_id, condition=condition, source=source)
-            out["series"][source] = [
+        out = {"currency": ccy, "series": {}, "series_used": {}}
+
+        def points(source, cond):
+            return [
                 {"t": ts.strftime("%Y-%m-%d"), "v": round(disp(conn, v, c, ccy) or 0, 2)}
-                for ts, v, c in pts
+                for ts, v, c in growth_mod.series(conn, item_id, condition=cond, source=source)
             ]
+
+        for source in ("blended", "bricklink", "ebay", "brickowl"):
+            out["series"][source] = points(source, condition)
+        # Used prices ride along so the chart can show both conditions without
+        # a second request (and so the static export stays a single file).
+        out["series_used"]["blended"] = points("blended",
+                                               "used" if condition == "new" else "new")
         fc = forecast_mod.forecast(conn, item_id, condition)
         if fc and out["series"]["blended"]:
             last = out["series"]["blended"][-1]

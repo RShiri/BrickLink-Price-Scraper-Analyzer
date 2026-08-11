@@ -42,7 +42,9 @@ class TestExport:
         assert (out / "index.html").exists()
         assert (out / "sets" / "index.html").exists()
         assert (out / "sets" / "75192.html").exists()
-        assert (out / "sets" / "sw0879.html").exists()       # minifig page too
+        # Minifigs of exported sets get pages too (linked from the set page).
+        assert (out / "sets" / "sw0879.html").exists()
+        assert (out / "set.html").exists()                   # catalog fallback
         assert (out / "sets" / "theme-star-wars.html").exists()
         assert (out / "portfolio.html").exists()
         assert (out / "themes.html").exists()
@@ -85,8 +87,25 @@ class TestExport:
         assert data["currency"] == "ILS"
         assert len(data["series"]["blended"]) == 2
 
+    def test_catalog_only_items_link_to_the_fallback_page(self, seeded_db, tmp_path):
+        """A set with no prices gets no page, so links must point at set.html."""
+        conn = dbq.connect(db_path=str(seeded_db))
+        dbq.upsert_item(conn, "99999", name="Unscanned Set", theme="Star Wars",
+                        year=2024)
+        conn.close()
+
+        out = tmp_path / "site"
+        export(str(out), "ILS", quiet=True)
+        assert not (out / "sets" / "99999.html").exists()
+
+        index = json.loads((out / "api" / "index.json").read_text())
+        by_id = {r[0]: r for r in index["rows"]}
+        assert by_id["99999"][-1] == 0       # not priced -> client-rendered page
+        assert by_id["75192"][-1] == 1
+
     def test_dynamic_mode_restored_after_export(self, seeded_db, tmp_path):
         from brickonomy.web import app as webapp
         export(str(tmp_path / "site"), "ILS", quiet=True)
         assert webapp.STATIC_MODE is False
+        assert webapp.STATIC_PAGED_IDS is None
         assert webapp.static_url("/sets/75192") == "/sets/75192"

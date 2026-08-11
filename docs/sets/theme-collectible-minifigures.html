@@ -46,126 +46,35 @@
 
 <div class="eyebrow">Catalog</div>
 <h1>Sets</h1>
-<p class="sub">4 tracked sets and minifigs — search, filter, sort by value or growth.</p>
-
+<p class="sub">Every LEGO set ever released — 272 items.
+   Search by number, name or theme; sets with scanned prices open their own page.</p>
 
 <div class="searchrow">
-  <input class="inp" type="search" data-filter-table="setsTable"
-         placeholder="Filter this page… (set number, name, theme)" aria-label="Filter sets">
-</div>
-
-
-<div class="searchrow" style="margin-top:2px">
-  <span class="eyebrow" style="margin-right:4px">Themes</span>
-  <a class="chip " href="../sets/index.html">All themes</a>
-  
-  <a class="chip "
-     href="../sets/theme-marvel-super-heroes.html">Marvel Super Heroes (51)</a>
-  
-  <a class="chip "
-     href="../sets/theme-brickheadz.html">BrickHeadz (6)</a>
-  
-  <a class="chip on"
-     href="../sets/theme-collectible-minifigures.html">Collectible Minifigures (4)</a>
-  
-  <a class="chip "
-     href="../sets/theme-technic.html">Technic (3)</a>
-  
-  <a class="chip "
-     href="../sets/theme-speed-champions.html">Speed Champions (2)</a>
-  
-  <a class="chip "
-     href="../sets/theme-icons.html">Icons (2)</a>
-  
-  <a class="chip "
-     href="../sets/theme-lego-art.html">LEGO Art (1)</a>
-  
-  <a class="chip "
-     href="../sets/theme-harry-potter.html">Harry Potter (1)</a>
-  
-  <a class="chip "
-     href="../sets/theme-disney.html">Disney (1)</a>
-  
-  <a class="chip "
-     href="../sets/theme-creator.html">Creator (1)</a>
-  
-  <a class="chip "
-     href="../sets/theme-city.html">City (1)</a>
-  
-  <a class="chip "
-     href="../sets/theme-brick-sketches.html">Brick Sketches (1)</a>
-  
-  
+  <input class="inp" id="catalogSearch" type="search" autocomplete="off"
+         placeholder="Search the whole catalog… (e.g. 75192, Falcon, Technic)" aria-label="Search all sets">
+  <select class="inp" id="catalogTheme" aria-label="Filter by theme"><option value="">All themes</option></select>
+  <select class="inp" id="catalogSort" aria-label="Sort">
+    <option value="year">Newest first</option>
+    <option value="year-asc">Oldest first</option>
+    <option value="id">Set number</option>
+    <option value="parts">Most parts</option>
+  </select>
+  <label class="chip"><input type="checkbox" id="catalogPriced" style="accent-color:var(--accent)"> priced only</label>
 </div>
 
 <div class="card">
+  <div id="catalogCount" style="color:var(--muted);font-size:12.5px;margin-bottom:8px">Loading catalog…</div>
   <div class="table-scroll">
-  <table id="setsTable">
-    <tr>
-      <th>Set</th><th>Theme</th><th class="num">Year</th><th class="num">Retail</th>
-      <th class="num">Value new</th><th class="num">Value used</th><th class="num">Growth / yr</th>
-      <th>Trend</th><th>Status</th>
-    </tr>
-    
-    <tr>
-      <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/col334.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/col334.html"><b>col334</b> War Machine - Black and Silver Armor with Backpack</a>
-        <span style="color:var(--muted)"> (minifig)</span></td>
-      <td>Collectible Minifigures</td>
-      <td class="num">2018</td>
-      <td class="num">—</td>
-      <td class="num"><b>₪127</b></td>
-      <td class="num">₪128</td>
-      <td class="num"><span style="color:var(--muted)">—</span></td>
-      <td><span style="color:var(--muted)">—</span></td>
-      <td><span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span></td>
-    </tr>
-    
-    <tr>
-      <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/col335.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/col335.html"><b>col335</b> Wong</a>
-        <span style="color:var(--muted)"> (minifig)</span></td>
-      <td>Collectible Minifigures</td>
-      <td class="num">2018</td>
-      <td class="num">—</td>
-      <td class="num"><b>₪52.21</b></td>
-      <td class="num">₪37.11</td>
-      <td class="num"><span style="color:var(--muted)">—</span></td>
-      <td><span style="color:var(--muted)">—</span></td>
-      <td><span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span></td>
-    </tr>
-    
-    <tr>
-      <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/col336.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/col336.html"><b>col336</b> Tony Stark - Hoodie with Dark Silver Camouflage</a>
-        <span style="color:var(--muted)"> (minifig)</span></td>
-      <td>Collectible Minifigures</td>
-      <td class="num">2018</td>
-      <td class="num">—</td>
-      <td class="num"><b>₪81.05</b></td>
-      <td class="num">₪89.05</td>
-      <td class="num"><span style="color:var(--muted)">—</span></td>
-      <td><span style="color:var(--muted)">—</span></td>
-      <td><span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span></td>
-    </tr>
-    
-    <tr>
-      <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/col337.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/col337.html"><b>col337</b> Bucky Barnes / White Wolf</a>
-        <span style="color:var(--muted)"> (minifig)</span></td>
-      <td>Collectible Minifigures</td>
-      <td class="num">2018</td>
-      <td class="num">—</td>
-      <td class="num"><b>₪76.41</b></td>
-      <td class="num">₪71.05</td>
-      <td class="num"><span style="color:var(--muted)">—</span></td>
-      <td><span style="color:var(--muted)">—</span></td>
-      <td><span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span></td>
-    </tr>
-    
+  <table id="catalogTable">
+    <thead>
+      <tr><th>Set</th><th>Theme</th><th class="num">Year</th><th class="num">Parts</th><th>Prices</th></tr>
+    </thead>
+    <tbody></tbody>
   </table>
   </div>
-  
+  <div class="searchrow" style="justify-content:center;margin-top:12px">
+    <button class="btn-ghost" id="catalogMore" hidden>Show more</button>
+  </div>
 </div>
 
 
