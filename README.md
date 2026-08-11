@@ -2,6 +2,19 @@
 
 A powerful Python toolkit for scraping BrickLink market data, analyzing trends, identifying "Sniper" deals, and calculating Part Out Values (POV). Includes a CLI for data gathering and a Streamlit dashboard for visual analytics.
 
+## 🌐 Brickonomy — the web app
+
+`brickonomy/` is a self-hosted, BrickEconomy-style site built on top of this
+scraper: every LEGO set ever released, real price history from BrickLink +
+eBay + BrickOwl, growth & forecast charts, minifig pages, part-out values,
+deals and portfolio tracking.
+
+**Run it on your PC:** double-click **`run.bat`** (Windows) or `./run.sh`
+(macOS/Linux). It sets everything up by itself and opens the browser.
+Never used Python? → **[QUICKSTART.md](QUICKSTART.md)**.
+Prices are collected by **`scan.bat`** / `./scan.sh`.
+Technical details → [`brickonomy/README.md`](brickonomy/README.md).
+
 ## ✨ Features
 
 ### 🔍 CLI Scraper (`runner.py`)
