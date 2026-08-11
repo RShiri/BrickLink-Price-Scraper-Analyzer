@@ -1,0 +1,33 @@
+{% macro delta(pct, digits=1) -%}
+  {%- if pct is none -%}
+    <span style="color:var(--muted)">—</span>
+  {%- elif pct >= 0 -%}
+    <span class="delta up">▲ {{ "%.*f"|format(digits, pct) }}%</span>
+  {%- else -%}
+    <span class="delta down">▼ {{ "%.*f"|format(digits, -pct) }}%</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro phase_chip(ph) -%}
+  {%- if ph.phase == 'NEW' -%}
+    <span class="chip"><span class="dot" style="background:var(--s3)"></span>Available</span>
+  {%- elif ph.phase == 'EOL WATCH' -%}
+    <span class="chip"><span class="dot" style="background:var(--warn)"></span>EOL watch</span>
+  {%- elif ph.phase in ('RETIRED_ACCEL', 'RETIRED_STABLE') -%}
+    <span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span>
+  {%- else -%}
+    <span class="chip"><span class="dot" style="background:var(--muted)"></span>Unknown</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro confidence_chip(c) -%}
+  {%- if c == 'HIGH' -%}<span class="chip">● HIGH</span>
+  {%- elif c == 'MEDIUM' -%}<span class="chip">◑ MEDIUM</span>
+  {%- elif c == 'LOW' -%}<span class="chip">◐ LOW</span>
+  {%- else -%}<span class="chip" style="color:var(--muted)">—</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro thumb(item_id, item_type, img_url) -%}
+  <img class="thumb" src="{{ img_url(item_id, item_type) }}" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'">
+{%- endmacro %}

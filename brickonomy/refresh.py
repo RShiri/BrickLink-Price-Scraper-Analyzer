@@ -31,6 +31,11 @@ def _update_item_meta(conn, item_id, meta):
         return
     specs = meta.get("specs", {})
     name = meta.get("item_name")
+    # Keep an already-known name (e.g. from the BrickEconomy CSV) instead of
+    # letting each marketplace's own title churn it.
+    existing = dbq.get_item(conn, item_id)
+    if existing and existing["name"] and not existing["name"].startswith("Set "):
+        name = None
     dbq.upsert_item(
         conn, item_id,
         name=name if name and name != "Unknown" else None,

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Portfolio · Brickonomy{% endblock %}
+{% block content %}
+
+<div class="eyebrow">My collection</div>
+<h1>Portfolio</h1>
+<p class="sub">{{ entries|length }} sets, valued live from three marketplaces. Import from BrickEconomy or BrickLink, edit inline.</p>
+
+{% if imported is not none %}
+<div class="notice">Imported {{ imported }} row(s){% if skipped %}, skipped {{ skipped }}{% endif %}.</div>
+{% endif %}
+
+<div class="two-col wide-left">
+  <div class="card">
+    <h3>Portfolio value over time <span class="soft">({{ ccy }})</span></h3>
+    <div class="chart-wrap"><canvas id="portfolioChart"></canvas></div>
+  </div>
+  <div class="card">
+    <h3>Import portfolio</h3>
+    <form method="post" action="/portfolio/import" enctype="multipart/form-data">
+      <label class="dropzone" style="display:block;cursor:pointer">
+        <div style="font-size:24px">⤓</div>
+        Choose a file to import…
+        <input type="file" name="file" required style="display:block;margin:10px auto 0"
+               accept=".csv,.xml,.txt">
+        <div style="margin-top:8px;font-size:12px">
+          <span class="chip">BrickEconomy CSV export</span>
+          <span class="chip">BrickLink wanted list XML</span>
+          <span class="chip">plain set list (.txt)</span>
+        </div>
+      </label>
+      <div style="color:var(--muted);font-size:12px;margin:10px 0">
+        Rows are matched by set number; duplicates merge into quantities. You get a preview before anything is saved.
+      </div>
+      <button class="btn-primary" type="submit">Preview import</button>
+    </form>
+    <form class="searchrow" method="post" action="/portfolio/add" style="margin-top:12px">
+      <input class="inp" type="text" name="item_id" placeholder="…or add one set: number, e.g. 75313" required style="flex:1" aria-label="Add set number">
+      <input class="inp" type="number" name="qty" value="1" min="1" style="width:70px" aria-label="Quantity">
+      <button class="btn-primary" type="submit">+ Add</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Owned sets <span class="soft">— click ✎ to edit a row inline</span></h3>
+  <div class="table-scroll">
+  <table>
+    <tr>
+      <th>Set</th><th>Theme</th><th class="num">Qty</th><th class="num">Paid</th>
+      <th class="num">Value (new)</th><th class="num">Gain</th><th class="num">Δ 30d</th><th></th>
+    </tr>
+    {% for e in entries %}
+    {% if edit == e.item_id %}
+    <tr class="editrow">
+      <td>{{ m.thumb(e.item_id, e.item_type, img_url) }}<b>{{ e.item_id }} {{ e.name }}</b></td>
+      <td>{{ e.theme or '—' }}</td>
+      <td colspan="6">
+        <form class="editpanel" method="post" action="/portfolio/{{ e.item_id }}">
+          <label>Qty <input class="inp" type="number" name="qty" value="{{ e.qty }}" min="0" style="width:64px"></label>
+          <label>Condition
+            <select class="inp" name="condition">
+              <option value="new" {{ 'selected' if e.condition == 'new' }}>New / sealed</option>
+              <option value="used" {{ 'selected' if e.condition == 'used' }}>Used</option>
+            </select>
+          </label>
+          <label>Paid (each) <input class="inp" type="text" name="paid" value="{{ e.paid_raw or '' }}" style="width:90px"></label>
+          <label>
+            <select class="inp" name="paid_ccy">
+              {% for c in currencies %}<option value="{{ c }}" {{ 'selected' if c == e.paid_ccy }}>{{ c }}</option>{% endfor %}
+            </select>
+          </label>
+          <label>Bought <input class="inp" type="date" name="purchase_date" value="{{ e.purchase_date or '' }}"></label>
+          <button class="btn-primary" type="submit">Save</button>
+          <a class="btn-ghost" href="/portfolio">Cancel</a>
+        </form>
+        <form method="post" action="/portfolio/{{ e.item_id }}/delete" style="display:inline">
+          <button class="btn-ghost btn-danger" type="submit"
+                  onclick="return confirm('Remove {{ e.item_id }} from portfolio?')">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td>{{ m.thumb(e.item_id, e.item_type, img_url) }}<a href="/sets/{{ e.item_id }}">{{ e.item_id }} {{ e.name }}</a></td>
+      <td>{{ e.theme or '—' }}</td>
+      <td class="num">{{ e.qty }}</td>
+      <td class="num">{{ e.paid|money(ccy) if e.paid else '—' }}</td>
+      <td class="num"><b>{{ e.value|money(ccy) if e.value else '—' }}</b></td>
+      <td class="num">{{ m.delta(e.gain, 0) }}</td>
+      <td class="num">{{ m.delta(e.delta30) }}</td>
+      <td><a class="btn-ghost" style="padding:2px 9px" href="/portfolio?edit={{ e.item_id }}" title="Edit">✎</a></td>
+    </tr>
+    {% endif %}
+    {% else %}
+    <tr><td colspan="8" style="color:var(--muted);text-align:center">Portfolio is empty — import a file or add a set above.</td></tr>
+    {% endfor %}
+    {% if entries %}
+    <tr class="total">
+      <td>Total ({{ entries|length }} sets)</td><td></td>
+      <td class="num">{{ total_qty }}</td>
+      <td class="num">{{ total_paid|money(ccy) }}</td>
+      <td class="num">{{ total_value|money(ccy) }}</td>
+      <td class="num">{{ m.delta(total_gain, 1) }}</td>
+      <td></td><td></td>
+    </tr>
+    {% endif %}
+  </table>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}<script src="/static/app.js"></script>{% endblock %}

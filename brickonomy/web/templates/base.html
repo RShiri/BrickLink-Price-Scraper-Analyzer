@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Brickonomy{% endblock %}</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+<header class="app">
+  <a class="logo" href="/">
+    <svg width="28" height="22" viewBox="0 0 26 20" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#38d4e0"/>
+      </linearGradient></defs>
+      <rect x="4"  y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="15" y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="0" y="4" width="26" height="16" rx="2.5" fill="url(#lg)"/>
+    </svg>
+    Brick<b>onomy</b>
+  </a>
+  <nav class="tabs">
+    {% set path = request.url.path %}
+    <a href="/" class="{{ 'active' if path == '/' }}">Dashboard</a>
+    <a href="/sets" class="{{ 'active' if path.startswith('/sets') }}">Sets</a>
+    <a href="/portfolio" class="{{ 'active' if path.startswith('/portfolio') }}">Portfolio</a>
+    <a href="/refresh" class="{{ 'active' if path.startswith('/refresh') }}">Refresh &amp; Sources</a>
+  </nav>
+  <div class="spacer"></div>
+  <form method="post" action="/settings/currency">
+    <select class="ccy" name="ccy" onchange="this.form.submit()" title="Display currency" aria-label="Display currency">
+      {% for c in currencies %}
+      <option value="{{ c }}" {{ 'selected' if c == ccy }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% if job.running %}
+  <a class="btn-ghost" href="/refresh">⟳ Scanning {{ job.done }}/{{ job.total }}…</a>
+  {% else %}
+  <form method="post" action="/refresh">
+    <input type="hidden" name="scope" value="portfolio">
+    <button class="btn-ghost" type="submit" title="Refresh portfolio prices">⟳ Refresh prices</button>
+  </form>
+  {% endif %}
+</header>
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<footer class="note">
+  Brickonomy · self-hosted, no API keys · sources: BrickLink, eBay, BrickOwl
+  {% if rates.stale %}· <span title="Exchange-rate fetch failed; using {{ rates.source }}">⚠ exchange rates stale ({{ rates.source }})</span>{% endif %}
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>
