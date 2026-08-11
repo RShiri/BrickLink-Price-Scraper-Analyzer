@@ -218,11 +218,14 @@ def dashboard(request: Request):
 
 
 @app.get("/sets")
-def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "growth"):
+def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "growth",
+              theme: str = ""):
     conn = get_conn()
     try:
         ccy = display_ccy(request)
         rows = dbq.list_items(conn, search=q, limit=400)
+        if theme:
+            rows = [r for r in rows if (r["theme"] or "") == theme]
         if filter == "portfolio":
             owned = {r["item_id"] for r in dbq.get_portfolio(conn)}
             rows = [r for r in rows if r["item_id"] in owned]
@@ -239,8 +242,16 @@ def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "grow
         }
         items.sort(key=keyfns.get(sort, keyfns["growth"]),
                    reverse=sort != "id")
+
+        themes = conn.execute(
+            """SELECT theme, COUNT(*) n FROM items
+               WHERE theme IS NOT NULL AND theme != ''
+               GROUP BY theme ORDER BY n DESC LIMIT 30"""
+        ).fetchall()
+        n_categories = conn.execute("SELECT COUNT(*) c FROM categories").fetchone()["c"]
         return templates.TemplateResponse(request, "sets.html", ctx(
             request, conn, items=items[:200], q=q, filter=filter, sort=sort,
+            theme=theme, themes=themes, n_categories=n_categories,
             total=len(items),
         ))
     finally:
@@ -256,6 +267,10 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
         row = dbq.get_item(conn, item_id)
         if row is None:
             return RedirectResponse(f"/sets?q={item_id}", status_code=303)
+
+        if row["item_type"] == "M" or (any(c.isalpha() for c in item_id)
+                                       and not item_id[0].isdigit()):
+            return _minifig_detail(request, conn, row)
 
         values = {}
         per_source_all = {}
@@ -286,15 +301,19 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
             o["display"] = disp(conn, o["price"], o["currency"], ccy)
         best_source = min(offers, key=lambda s: offers[s]["display"] or 1e18) if offers else None
 
+        inv = [{"id": r["fig_id"], "name": r["fig_name"], "qty": r["qty"]}
+               for r in dbq.get_set_minifigs(conn, item_id)] or legacy_minifigs(item_id)
         figs = []
-        for f in legacy_minifigs(item_id):
+        for f in inv:
             fv, _, _ = current_value(conn, f["id"], "new")
             name = f.get("name")
             if not name:
                 known = dbq.get_item(conn, f["id"])
                 name = known["name"] if known else ""
-            figs.append({**f, "name": name or "", "value": disp(conn, fv, "ILS", ccy)})
-        figs_total = sum(f["value"] or 0 for f in figs)
+            v = disp(conn, fv, "ILS", ccy)
+            figs.append({**f, "name": name or "", "value": v,
+                         "total": (v or 0) * (f.get("qty") or 1)})
+        figs_total = sum(f["total"] or 0 for f in figs)
 
         parts = dbq.get_set_parts(conn, item_id, search=parts_q, limit=100)
         psum = dbq.parts_summary(conn, item_id)
@@ -323,6 +342,47 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
         ))
     finally:
         conn.close()
+
+
+def _minifig_detail(request: Request, conn, row):
+    """Dedicated minifig page: values, history, and which sets contain it."""
+    ccy = display_ccy(request)
+    fig_id = row["item_id"]
+
+    values = {}
+    per_source_all = {}
+    for condition in ("new", "used"):
+        val, conf, ts = current_value(conn, fig_id, condition)
+        _, _, per_source = blend(conn, fig_id, condition)
+        for s, info in per_source.items():
+            info = dict(info)
+            info["display"] = disp(conn, info["native"], info["currency"], ccy)
+            per_source_all.setdefault(s, {})[condition] = info
+        values[condition] = {"value": disp(conn, val, "ILS", ccy),
+                             "confidence": conf, "as_of": ts}
+
+    g_total, g_cagr = growth_mod.growth_vs_retail(conn, fig_id)
+    delta30 = dbq.market_delta(conn, fig_id, days=30)
+
+    appears_in = []
+    for s in dbq.sets_containing_fig(conn, fig_id):
+        sv, _, _ = current_value(conn, s["set_id"], "new")
+        appears_in.append({
+            "set_id": s["set_id"], "name": s["name"] or "", "theme": s["theme"],
+            "year": s["year"], "qty": s["qty"],
+            "value": disp(conn, sv, "ILS", ccy),
+        })
+
+    offers = cheapest_stock(conn, fig_id)
+    for s, o in offers.items():
+        o["display"] = disp(conn, o["price"], o["currency"], ccy)
+    best_source = min(offers, key=lambda s: offers[s]["display"] or 1e18) if offers else None
+
+    return templates.TemplateResponse(request, "minifig_detail.html", ctx(
+        request, conn, item=row, values=values, per_source=per_source_all,
+        growth_cagr=g_cagr, delta30=delta30, appears_in=appears_in,
+        offers=offers, best_source=best_source,
+    ))
 
 
 @app.get("/api/sets/{item_id}/history")

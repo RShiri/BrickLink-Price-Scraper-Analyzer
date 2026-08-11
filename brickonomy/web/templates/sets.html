@@ -10,13 +10,26 @@
 <form class="searchrow" method="get" action="/sets">
   <input class="inp" type="search" name="q" value="{{ q }}" placeholder="Search set number or name… (e.g. 75192, Falcon)" aria-label="Search sets">
   <input type="hidden" name="sort" value="{{ sort }}">
-  <a class="chip {{ 'on' if not filter }}" href="/sets?q={{ q }}&sort={{ sort }}">All</a>
-  <a class="chip {{ 'on' if filter == 'retired' }}" href="/sets?q={{ q }}&filter=retired&sort={{ sort }}">Retired only</a>
-  <a class="chip {{ 'on' if filter == 'portfolio' }}" href="/sets?q={{ q }}&filter=portfolio&sort={{ sort }}">In portfolio</a>
-  <a class="chip {{ 'on' if sort == 'growth' }}" href="/sets?q={{ q }}&filter={{ filter }}&sort=growth">Sort: growth/yr</a>
-  <a class="chip {{ 'on' if sort == 'value' }}" href="/sets?q={{ q }}&filter={{ filter }}&sort=value">Sort: value</a>
+  {% if theme %}<input type="hidden" name="theme" value="{{ theme }}">{% endif %}
+  <a class="chip {{ 'on' if not filter }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&sort={{ sort }}">All</a>
+  <a class="chip {{ 'on' if filter == 'retired' }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&filter=retired&sort={{ sort }}">Retired only</a>
+  <a class="chip {{ 'on' if filter == 'portfolio' }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&filter=portfolio&sort={{ sort }}">In portfolio</a>
+  <a class="chip {{ 'on' if sort == 'growth' }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&filter={{ filter }}&sort=growth">Sort: growth/yr</a>
+  <a class="chip {{ 'on' if sort == 'value' }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&filter={{ filter }}&sort=value">Sort: value</a>
   <button class="btn-primary" type="submit">Search</button>
 </form>
+
+<div class="searchrow" style="margin-top:2px">
+  <span class="eyebrow" style="margin-right:4px">Themes</span>
+  <a class="chip {{ 'on' if not theme }}" href="/sets?q={{ q }}&filter={{ filter }}&sort={{ sort }}">All themes</a>
+  {% for t in themes[:14] %}
+  <a class="chip {{ 'on' if theme == t.theme }}"
+     href="/sets?theme={{ t.theme|urlencode }}&filter={{ filter }}&sort={{ sort }}">{{ t.theme }} ({{ t.n }})</a>
+  {% endfor %}
+  {% if n_categories == 0 %}
+  <span class="chip" title="python -m brickonomy.catalog --tree imports BrickLink's full theme tree">⬇ import full BrickLink theme tree: <code>&nbsp;python -m brickonomy.catalog --tree</code></span>
+  {% endif %}
+</div>
 
 <div class="card">
   <div class="table-scroll">

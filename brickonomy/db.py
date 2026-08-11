@@ -71,7 +71,32 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
     fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (base, quote)
 );
+
+CREATE TABLE IF NOT EXISTS categories (      -- BrickLink catalog tree
+    cat_id INTEGER NOT NULL,
+    item_type TEXT NOT NULL DEFAULT 'S',
+    name TEXT NOT NULL,
+    parent_id INTEGER,                       -- NULL for top-level themes
+    depth INTEGER DEFAULT 0,
+    path TEXT,                               -- "Star Wars / Ultimate Collector Series"
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (cat_id, item_type)
+);
+
+CREATE TABLE IF NOT EXISTS set_minifigs (    -- which figs are in which set
+    set_id TEXT NOT NULL,
+    fig_id TEXT NOT NULL,
+    fig_name TEXT,
+    qty INTEGER DEFAULT 1,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (set_id, fig_id),
+    FOREIGN KEY(set_id) REFERENCES items(item_id)
+);
 """
+
+MIGRATIONS = [
+    "ALTER TABLE items ADD COLUMN category_id INTEGER",
+]
 
 
 def connect(db_path: str = None) -> sqlite3.Connection:
@@ -79,6 +104,12 @@ def connect(db_path: str = None) -> sqlite3.Connection:
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     conn.executescript(DDL)
+    for migration in MIGRATIONS:
+        try:
+            conn.execute(migration)
+        except sqlite3.OperationalError:
+            pass  # column already exists
+    conn.commit()
     return conn
 
 
@@ -90,7 +121,7 @@ def now_iso() -> str:
 
 ITEM_META_COLS = ("name", "theme", "subtheme", "year", "parts", "minifigs",
                   "weight_g", "retail_price", "retail_currency",
-                  "brickowl_boid", "ebay_query", "item_type")
+                  "brickowl_boid", "ebay_query", "item_type", "category_id")
 
 
 def upsert_item(conn, item_id: str, **cols):
@@ -322,3 +353,84 @@ def get_rates(conn, base):
         "SELECT quote, rate, fetched_at FROM exchange_rates WHERE base=?", (base,)
     ).fetchall()
     return {r["quote"]: (r["rate"], r["fetched_at"]) for r in rows}
+
+
+# ── categories (BrickLink catalog tree) ──────────────────────────────────
+
+def upsert_category(conn, cat_id, name, parent_id=None, depth=0, path=None,
+                    item_type="S"):
+    conn.execute(
+        """INSERT INTO categories (cat_id, item_type, name, parent_id, depth, path, updated_at)
+           VALUES (?,?,?,?,?,?,?)
+           ON CONFLICT(cat_id, item_type) DO UPDATE SET
+             name=excluded.name, parent_id=excluded.parent_id,
+             depth=excluded.depth, path=excluded.path, updated_at=excluded.updated_at""",
+        (cat_id, item_type, name, parent_id, depth, path or name, now_iso()),
+    )
+
+
+def get_categories(conn, item_type="S", parent_id=None, top_only=False):
+    q = "SELECT * FROM categories WHERE item_type=?"
+    args = [item_type]
+    if top_only:
+        q += " AND parent_id IS NULL"
+    elif parent_id is not None:
+        q += " AND parent_id=?"
+        args.append(parent_id)
+    q += " ORDER BY name"
+    return conn.execute(q, args).fetchall()
+
+
+def category_set_counts(conn):
+    """{cat_id: number of items} for badge counts in the theme browser."""
+    rows = conn.execute(
+        "SELECT category_id, COUNT(*) n FROM items WHERE category_id IS NOT NULL "
+        "GROUP BY category_id"
+    ).fetchall()
+    return {r["category_id"]: r["n"] for r in rows}
+
+
+def category_subtree_ids(conn, cat_id, item_type="S"):
+    """cat_id plus all descendant category ids."""
+    ids, frontier = {cat_id}, [cat_id]
+    while frontier:
+        rows = conn.execute(
+            f"SELECT cat_id FROM categories WHERE item_type=? AND parent_id IN "
+            f"({', '.join('?' * len(frontier))})",
+            [item_type] + frontier,
+        ).fetchall()
+        frontier = [r["cat_id"] for r in rows if r["cat_id"] not in ids]
+        ids.update(frontier)
+    return list(ids)
+
+
+# ── set ↔ minifig links ──────────────────────────────────────────────────
+
+def upsert_set_minifigs(conn, set_id, figs):
+    """figs: iterable of {id, name, qty}."""
+    for f in figs:
+        conn.execute(
+            """INSERT INTO set_minifigs (set_id, fig_id, fig_name, qty, updated_at)
+               VALUES (?,?,?,?,?)
+               ON CONFLICT(set_id, fig_id) DO UPDATE SET
+                 fig_name=COALESCE(NULLIF(excluded.fig_name, ''), set_minifigs.fig_name),
+                 qty=excluded.qty, updated_at=excluded.updated_at""",
+            (set_id, f["id"], f.get("name") or "", max(1, int(f.get("qty") or 1)),
+             now_iso()),
+        )
+    conn.commit()
+
+
+def get_set_minifigs(conn, set_id):
+    return conn.execute(
+        "SELECT * FROM set_minifigs WHERE set_id=? ORDER BY fig_id", (set_id,)
+    ).fetchall()
+
+
+def sets_containing_fig(conn, fig_id):
+    return conn.execute(
+        """SELECT sm.set_id, sm.qty, i.name, i.theme, i.year, i.item_type
+           FROM set_minifigs sm LEFT JOIN items i ON i.item_id = sm.set_id
+           WHERE sm.fig_id=? ORDER BY i.year DESC, sm.set_id""",
+        (fig_id,),
+    ).fetchall()

@@ -59,6 +59,33 @@ class TestBrickLinkPartsAndPOV:
         assert pov == 612.34
 
 
+class TestBrickLinkCatalog:
+    def test_category_tree_depths(self):
+        cats = BrickLinkSource().parse_category_tree(read("bricklink_tree_S.html"))
+        by_name = {c["name"]: c for c in cats}
+        assert by_name["Star Wars"]["depth"] == 0
+        assert by_name["Ultimate Collector Series"]["depth"] == 1
+        assert by_name["Death Star"]["depth"] == 2
+        assert by_name["Technic"]["depth"] == 0
+        assert by_name["Star Wars"]["cat_id"] == 65
+
+    def test_catalog_list_sets_and_pages(self):
+        sets, pages = BrickLinkSource().parse_catalog_list(read("bricklink_list_66.html"))
+        assert pages == 2
+        by_id = {s["item_id"]: s for s in sets}
+        assert by_id["75192"]["name"].startswith("Millennium Falcon")
+        assert by_id["75192"]["year"] == 2017
+        assert by_id["10188"]["year"] == 2008
+        assert len(sets) == 3  # -1 suffix stripped, no duplicates
+
+    def test_minifig_inventory_with_quantities(self):
+        figs = BrickLinkSource().parse_minifig_inventory(read("bricklink_inv_figs_76031.html"))
+        by_id = {f["id"]: f for f in figs}
+        assert by_id["sh0173"] == {"id": "sh0173", "name": "Iron Man Mark 43", "qty": 2}
+        assert by_id["sh0167"]["qty"] == 1
+        assert len(figs) == 3
+
+
 # ── eBay ─────────────────────────────────────────────────────────────────
 
 class TestEbayParser:

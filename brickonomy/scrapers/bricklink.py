@@ -21,6 +21,8 @@ from .base import USER_AGENT, BaseScraper, run_cli
 
 INV_URL = "https://www.bricklink.com/catalogItemInv.asp"
 POV_URL = "https://www.bricklink.com/catalogPOV.asp"
+TREE_URL = "https://www.bricklink.com/catalogTree.asp"
+LIST_URL = "https://www.bricklink.com/catalogList.asp"
 
 
 class BrickLinkSource(BaseScraper):
@@ -164,6 +166,145 @@ class BrickLinkSource(BaseScraper):
                 return value, None
             error = "POV total not found on page"
         return None, error
+
+    # ── catalog tree (themes / subthemes) ────────────────────────────────
+
+    def parse_category_tree(self, html: str):
+        """Parse catalogTree.asp into ordered rows
+        [{cat_id, name, depth}, ...]; depth comes from the indentation
+        BrickLink renders before each category link."""
+        soup = BeautifulSoup(html, "html.parser")
+        cats, seen = [], set()
+        for a in soup.find_all("a", href=re.compile(r"catalogList\.asp\?[^\"]*catID=\d+")):
+            m = re.search(r"catID=(\d+)", a["href"])
+            if not m:
+                continue
+            cat_id = int(m.group(1))
+            name = a.get_text(" ", strip=True)
+            if not name or cat_id in seen:
+                continue
+            seen.add(cat_id)
+
+            # Indentation: BrickLink pads nested categories with &nbsp; runs
+            # (or nested lists) before the link inside the same cell/row.
+            depth = 0
+            cell = a.find_parent(["td", "div", "li"])
+            if cell is not None:
+                if cell.name == "li":
+                    depth = max(0, len(cell.find_parents("ul")) - 1)
+                else:
+                    prefix = []
+                    for node in cell.descendants:
+                        if node is a:
+                            break
+                        if isinstance(node, str):
+                            prefix.append(node)
+                    nbsp = "".join(prefix).count("\xa0")
+                    depth = nbsp // 3
+            cats.append({"cat_id": cat_id, "name": name, "depth": max(0, depth)})
+        return cats
+
+    def fetch_category_tree(self, item_type: str = "S"):
+        html, error = self._get(f"{TREE_URL}?itemType={item_type}")
+        if html:
+            cats = self.parse_category_tree(html)
+            if cats:
+                return cats, None
+            error = "no categories parsed from tree page"
+        return [], error
+
+    # ── catalog list (all sets in a category) ────────────────────────────
+
+    def parse_catalog_list(self, html: str):
+        """Parse one catalogList.asp page.
+
+        Returns (sets, total_pages) with sets =
+        [{item_id, name, year}, ...] (item_id without the -1 suffix)."""
+        soup = BeautifulSoup(html, "html.parser")
+        sets, seen = [], set()
+        for a in soup.find_all("a", href=re.compile(r"catalogitem\.page\?S=")):
+            m = re.search(r"\?S=([\w.-]+)", a["href"])
+            if not m:
+                continue
+            raw = m.group(1)
+            item_id = raw.split("-")[0]
+            text = a.get_text(" ", strip=True)
+            if item_id in seen:
+                # second link for the same set usually carries the name
+                if text and text != raw:
+                    for s in sets:
+                        if s["item_id"] == item_id and not s["name"]:
+                            s["name"] = text
+                continue
+            seen.add(item_id)
+            entry = {"item_id": item_id, "name": text if text != raw else "", "year": None}
+
+            row = a.find_parent("tr") or a.parent
+            if row:
+                ym = re.search(r"itemYear=(\d{4})", str(row))
+                if not ym:
+                    ym = re.search(r"\b(19[5-9]\d|20[0-4]\d)\b", row.get_text(" ", strip=True))
+                if ym:
+                    entry["year"] = int(ym.group(1))
+            sets.append(entry)
+
+        total_pages = 1
+        for pg in soup.find_all("a", href=re.compile(r"pg=(\d+)")):
+            m = re.search(r"pg=(\d+)", pg["href"])
+            if m:
+                total_pages = max(total_pages, int(m.group(1)))
+        m = re.search(r"Page\s+\d+\s+of\s+(\d+)", soup.get_text(" ", strip=True))
+        if m:
+            total_pages = max(total_pages, int(m.group(1)))
+        return sets, total_pages
+
+    def fetch_catalog_page(self, cat_id: int, page: int = 1, item_type: str = "S"):
+        url = (f"{LIST_URL}?catType={item_type}&catID={cat_id}"
+               f"&v=0&pg={page}&sortBy=Y&sortAsc=D")
+        html, error = self._get(url)
+        if html:
+            return self.parse_catalog_list(html) + (None,)
+        return [], 0, error
+
+    # ── minifig inventory of a set ───────────────────────────────────────
+
+    def parse_minifig_inventory(self, html: str):
+        """[{id, name, qty}, ...] from catalogItemInv.asp?...&viewItemType=M.
+        Unlike the root scraper, real quantities are parsed."""
+        soup = BeautifulSoup(html, "html.parser")
+        figs, seen = [], set()
+        for tr in soup.find_all("tr"):
+            links = tr.find_all("a", href=re.compile(r"\?M="))
+            if not links:
+                continue
+            m = re.search(r"\?M=([\w.-]+)", links[0]["href"])
+            if not m:
+                continue
+            fig_id = m.group(1)
+            if fig_id in seen:
+                continue
+            qty = 1
+            for td in tr.find_all("td"):
+                txt = td.get_text(strip=True)
+                if txt.isdigit():
+                    qty = int(txt)
+                    break
+            name = max((l.get_text(" ", strip=True) for l in links), key=len)
+            if name == fig_id:
+                name = ""
+            seen.add(fig_id)
+            figs.append({"id": fig_id, "name": name, "qty": max(1, qty)})
+        return figs
+
+    def fetch_minifig_inventory(self, set_id: str):
+        url = f"{INV_URL}?S={set_id if '-' in set_id else set_id + '-1'}&viewItemType=M"
+        html, error = self._get(url)
+        if html:
+            figs = self.parse_minifig_inventory(html)
+            if figs:
+                return figs, None
+            error = "no minifigs parsed from inventory page"
+        return [], error
 
     # ── helpers ──────────────────────────────────────────────────────────
 

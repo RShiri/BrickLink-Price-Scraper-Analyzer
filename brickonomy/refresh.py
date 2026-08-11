@@ -92,8 +92,26 @@ def refresh_item(conn, item_id, item_type=None, force=False, log=print):
 
     if item_type == "S" and "bricklink" in cfg.sources_enabled and not cfg.fixture_mode:
         _refresh_parts(conn, item_id, force=force, log=log)
+        _refresh_minifigs(conn, item_id, force=force, log=log)
 
     return results
+
+
+def _refresh_minifigs(conn, set_id, force=False, log=print):
+    """Store the set's minifig inventory (with real quantities) once, refresh
+    only on --force; the fig list of a released set doesn't change."""
+    from .scrapers.bricklink import BrickLinkSource
+
+    if not force and dbq.get_set_minifigs(conn, set_id):
+        return
+    figs, err = BrickLinkSource().fetch_minifig_inventory(set_id)
+    if figs:
+        dbq.upsert_set_minifigs(conn, set_id, figs)
+        for f in figs:  # figs become first-class items with their own pages
+            dbq.upsert_item(conn, f["id"], item_type="M", name=f["name"] or None)
+        log(f"  ⚙ minifig inventory: {len(figs)} figs")
+    elif err:
+        log(f"  ✘ minifig inventory: {err}")
 
 
 def _refresh_parts(conn, set_id, force=False, log=print):

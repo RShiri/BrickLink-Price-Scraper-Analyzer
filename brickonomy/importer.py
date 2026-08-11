@@ -144,6 +144,33 @@ def import_legacy_blobs(conn, legacy_db_path: str) -> int:
     return seeded
 
 
+def import_legacy_inventories(conn, legacy_db_path: str) -> int:
+    """Seed set_minifigs from the root scraper's inventory_lists table."""
+    path = Path(legacy_db_path)
+    if not path.exists():
+        return 0
+    legacy = sqlite3.connect(path)
+    legacy.row_factory = sqlite3.Row
+    seeded = 0
+    try:
+        for row in legacy.execute("SELECT set_id, json_data FROM inventory_lists"):
+            set_id = normalize_item_id(row["set_id"])
+            try:
+                figs = json.loads(row["json_data"])
+            except (TypeError, json.JSONDecodeError):
+                continue
+            figs = [f for f in figs if f.get("id")]
+            if not figs:
+                continue
+            if dbq.get_set_minifigs(conn, set_id):
+                continue  # a scraped inventory (with real qty) wins over the seed
+            dbq.upsert_set_minifigs(conn, set_id, figs)
+            seeded += 1
+    finally:
+        legacy.close()
+    return seeded
+
+
 def main():
     cfg = get_config()
     conn = dbq.connect()
@@ -153,6 +180,9 @@ def main():
 
     n_blobs = import_legacy_blobs(conn, cfg.legacy_db_path)
     print(f"[importer] legacy items seeded with snapshots: {n_blobs}")
+
+    n_inv = import_legacy_inventories(conn, cfg.legacy_db_path)
+    print(f"[importer] legacy set inventories seeded: {n_inv}")
 
     items = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
     pf = conn.execute("SELECT COUNT(*) c FROM portfolio").fetchone()["c"]

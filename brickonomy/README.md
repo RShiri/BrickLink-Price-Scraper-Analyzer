@@ -49,6 +49,31 @@ Cron example (daily 06:00):
 0 6 * * * cd /path/to/repo && python -m brickonomy.refresh --scope stale
 ```
 
+## Importing the BrickLink catalog (themes & all sets)
+
+The full BrickLink set taxonomy — themes, subthemes and every set in them —
+can be imported so the Sets page browses like BrickLink's own catalog:
+
+```bash
+python -m brickonomy.catalog --tree              # category tree only (1 request)
+python -m brickonomy.catalog --category 65       # one category's sets
+python -m brickonomy.catalog --category 65 --deep  # + all its subcategories
+python -m brickonomy.catalog --all               # the ENTIRE set catalog
+```
+
+`--all` walks every category page politely rate-limited — expect it to take a
+long time; run it once and then keep it fresh with occasional `--category`
+runs. Imported sets get name / year / theme / subtheme / category; prices are
+fetched separately by `brickonomy.refresh` for the sets you care about.
+
+## Minifigures
+
+Every set page shows its exact minifig inventory (with real quantities,
+scraped from the set's BrickLink inventory on refresh), each fig's value and
+its share of the set's value. Each minifig has its own page — like BrickLink —
+at `/sets/<fig id>` (e.g. `/sets/sw0879`): image, new/used value, price
+history chart, best live prices, and an "appears in sets" cross-reference.
+
 ## Configuration
 
 Copy `brickonomy/config.example.json` to `brickonomy/config.json` and edit, or
