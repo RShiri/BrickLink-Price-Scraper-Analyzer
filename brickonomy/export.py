@@ -13,8 +13,9 @@ pixel-identical to the live one) and saves every page/API response:
   /sets                 -> sets/index.html
   /sets?theme=T         -> sets/theme-<slug>.html
   /sets/<id>            -> sets/<id>.html        (sets AND minifig pages)
+  /themes, /deals       -> themes.html, deals.html
   /portfolio            -> portfolio.html
-  /api/...              -> api/....json          (chart data)
+  /api/...              -> api/....json          (chart data + search index)
 
 Server-only UI (refresh, import, editing, currency switch) is hidden by the
 templates when BRICKONOMY_STATIC_EXPORT is set.
@@ -80,6 +81,8 @@ def _crawl(webapp, out_dir: str, quiet: bool):
     n_pages = n_json = 0
     n_pages += save("/", "index.html")
     n_pages += save("/sets", "sets/index.html")
+    n_pages += save("/themes", "themes.html")
+    n_pages += save("/deals", "deals.html")
     n_pages += save("/portfolio", "portfolio.html")
     for theme in themes:
         n_pages += save(f"/sets?theme={theme}", f"sets/theme-{webapp.slugify(theme)}.html")
@@ -88,6 +91,7 @@ def _crawl(webapp, out_dir: str, quiet: bool):
     for iid in snap_ids:
         n_json += save(f"/api/sets/{iid}/history", f"api/sets/{iid}/history.json")
     n_json += save("/api/portfolio/history", "api/portfolio/history.json")
+    n_json += save("/api/index", "api/index.json")
 
     static_src = Path(webapp.BASE_DIR) / "static"
     shutil.copytree(static_src, out / "static", dirs_exist_ok=True)

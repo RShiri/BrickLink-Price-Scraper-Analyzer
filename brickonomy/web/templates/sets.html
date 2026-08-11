@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "_macros.html" as m %}
+{% import "_macros.html" as m with context %}
 {% block title %}Sets · Brickonomy{% endblock %}
 {% block content %}
 
@@ -68,4 +68,3 @@
 </div>
 
 {% endblock %}
-{% block scripts %}<script src="{{ u('/static/app.js') }}"></script>{% endblock %}

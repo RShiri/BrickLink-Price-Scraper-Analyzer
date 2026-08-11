@@ -27,6 +27,35 @@
   {%- else -%}<span class="chip" style="color:var(--muted)">—</span>{%- endif -%}
 {%- endmacro %}
 
+{% macro rating_chip(rating) -%}
+  {%- if rating == 'EXCELLENT' -%}<span class="chip rating-excellent">★ Excellent</span>
+  {%- elif rating == 'GREAT INVEST' -%}<span class="chip rating-great">◆ Great invest</span>
+  {%- elif rating == 'GOOD' -%}<span class="chip rating-good">● Good</span>
+  {%- else -%}<span class="chip" style="color:var(--muted)">—</span>{%- endif -%}
+{%- endmacro %}
+
+{% macro toplist(title, items, ccy, img_url, img_type='S', metric='value', note='') -%}
+<div class="card">
+  <h3>{{ title }}{% if note %} <span class="soft">— {{ note }}</span>{% endif %}</h3>
+  <table>
+    {% for i in items %}
+    <tr>
+      <td>{{ thumb(i.item_id, i.item_type or img_type, img_url) }}<a href="{{ u('/sets/' ~ i.item_id) }}">{{ i.item_id }} {{ (i.name or '')[:30] }}</a></td>
+      <td class="num">{{ i.value|money(ccy) if i.value else '—' }}</td>
+      <td class="num">
+        {%- if metric == 'growth' -%}{{ delta(i.growth) }}
+        {%- elif metric == 'ppp' -%}{{ i.ppp|money(ccy) }}<span style="color:var(--muted)">/part</span>
+        {%- elif metric == 'year' -%}<span style="color:var(--muted)">{{ i.year or '—' }}</span>
+        {%- endif -%}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td style="color:var(--muted)">Not enough scanned data yet.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{%- endmacro %}
+
 {% macro thumb(item_id, item_type, img_url) -%}
   <img class="thumb" src="{{ img_url(item_id, item_type) }}" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'">

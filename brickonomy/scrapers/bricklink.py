@@ -19,6 +19,8 @@ from ..compat import get_bricklink_scraper
 from ..models import ScrapeResult
 from .base import USER_AGENT, BaseScraper, run_cli
 
+BASE_URL = "https://www.bricklink.com/v2/catalog/catalogitem.page"
+
 INV_URL = "https://www.bricklink.com/catalogItemInv.asp"
 POV_URL = "https://www.bricklink.com/catalogPOV.asp"
 TREE_URL = "https://www.bricklink.com/catalogTree.asp"
@@ -27,7 +29,8 @@ LIST_URL = "https://www.bricklink.com/catalogList.asp"
 
 class BrickLinkSource(BaseScraper):
     source = "bricklink"
-    currency = "ILS"
+    currency = "ILS"          # default; the real one is detected per scrape
+    BASE_URL = BASE_URL
 
     def parse(self, html, item_id: str) -> ScrapeResult:
         scraper_cls = get_bricklink_scraper()
@@ -36,24 +39,76 @@ class BrickLinkSource(BaseScraper):
         res.meta = data.get("meta", {})
         res.new = data.get("new", res.new)
         res.used = data.get("used", res.used)
+        res.currency = self._dominant_currency(res)
         return res
 
+    @staticmethod
+    def _dominant_currency(res: ScrapeResult) -> str:
+        """BrickLink renders prices in the session's currency, so all rows of a
+        scrape share one. Take the most common tag the parser detected."""
+        counts = {}
+        for condition in ("new", "used"):
+            for kind in ("sold", "stock"):
+                for row in res.__dict__[condition][kind]:
+                    ccy = row.get("currency")
+                    if ccy:
+                        counts[ccy] = counts.get(ccy, 0) + 1
+        return max(counts, key=counts.get) if counts else BrickLinkSource.currency
+
     def _fetch_html(self, item_id: str, item_type: str = "S"):
-        # Reuse the root scraper end-to-end (it waits for the AJAX'd price
-        # tables), then hand its page source to parse() indirectly by
-        # re-fetching from its DB-normalised output. Simpler: run its scrape()
-        # and adapt the dict — no second parse needed.
-        raise NotImplementedError  # fetch() is overridden below
+        """Playwright engine: fetch the price-guide page's HTML.
+
+        Selenium goes through the root scraper instead (see fetch()), which
+        already owns the driver lifecycle and its own caching.
+        """
+        from playwright.sync_api import sync_playwright
+
+        url = f"{self.BASE_URL}?{item_type}={item_id}#T=P"
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled"],
+            )
+            try:
+                context = browser.new_context(user_agent=USER_AGENT)
+                page = context.new_page()
+                # Warm the session first: BrickLink redirects catalog deep
+                # links when it has never seen the client before.
+                page.goto("https://www.bricklink.com", wait_until="domcontentloaded",
+                          timeout=30000)
+                page.goto(url, wait_until="networkidle", timeout=40000)
+                page.wait_for_selector(".pcipgInnerTable", timeout=20000)
+                # The tables render as placeholders first; wait for real prices.
+                page.wait_for_function(
+                    "() => /[$₪€£]|~/.test(document.body.innerText)", timeout=15000
+                )
+                return page.content()
+            finally:
+                browser.close()
 
     def fetch(self, item_id: str, item_type: str = "S",
               fixture: bool = None, save_fixture: bool = False) -> ScrapeResult:
         from ..config import get_config
-        use_fixture = get_config().fixture_mode if fixture is None else fixture
+
+        cfg = get_config()
+        use_fixture = cfg.fixture_mode if fixture is None else fixture
         if use_fixture:
             try:
                 return self.parse(self._load_fixture(item_id), item_id)
             except Exception as exc:
                 return self.empty_result(item_id, error=f"{type(exc).__name__}: {exc}")
+
+        if getattr(cfg, "scrape_engine", "selenium") == "playwright":
+            try:
+                html = self._fetch_html(item_id, item_type)
+                if save_fixture:
+                    self._save_fixture(item_id, html)
+                return self.parse(html, item_id)
+            except ImportError:
+                pass  # playwright not installed — fall back to Selenium
+            except Exception as exc:
+                return self.empty_result(item_id, error=f"{type(exc).__name__}: {exc}")
+
         try:
             scraper = get_bricklink_scraper()()
             data = scraper.scrape(item_id, item_type, force=True)
@@ -61,6 +116,7 @@ class BrickLinkSource(BaseScraper):
             res.meta = data.get("meta", {})
             res.new = data.get("new", res.new)
             res.used = data.get("used", res.used)
+            res.currency = self._dominant_currency(res)
             return res
         except Exception as exc:
             return self.empty_result(item_id, error=f"{type(exc).__name__}: {exc}")

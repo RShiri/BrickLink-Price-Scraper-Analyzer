@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Themes · Brickonomy</title>
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body data-static="1" data-base="">
+<header class="app">
+  <a class="logo" href="index.html">
+    <svg width="28" height="22" viewBox="0 0 26 20" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#38d4e0"/>
+      </linearGradient></defs>
+      <rect x="4"  y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="15" y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="0" y="4" width="26" height="16" rx="2.5" fill="url(#lg)"/>
+    </svg>
+    Brick<b>onomy</b>
+  </a>
+  <nav class="tabs">
+    
+    <a href="index.html" class="">Dashboard</a>
+    <a href="sets/index.html" class="">Sets</a>
+    <a href="themes.html" class="active">Themes</a>
+    <a href="deals.html" class="">Deals</a>
+    <a href="portfolio.html" class="">Portfolio</a>
+    
+  </nav>
+  <div class="spacer"></div>
+  <div class="sitesearch">
+    <input class="inp" id="siteSearch" type="search" autocomplete="off"
+           placeholder="Search sets &amp; minifigs…" aria-label="Search the catalog">
+    <div class="sresults" id="siteSearchResults" hidden></div>
+  </div>
+  
+  <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
+  
+</header>
+
+<main>
+
+
+<div class="eyebrow">Analysis</div>
+<h1>Themes</h1>
+<p class="sub">How each LEGO theme is performing — total tracked value, average growth per year, and the strongest set in each.</p>
+
+<div class="card">
+  <h3>Average growth per year <span class="soft">— by theme</span></h3>
+  <div class="bars">
+    
+    <div class="row">
+      <a href="sets/theme-marvel-super-heroes.html" style="color:var(--ink);text-decoration:none">Marvel Super Heroes</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:41.6%;width:8.4%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 7.0%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-technic.html" style="color:var(--ink);text-decoration:none">Technic</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:19.3%;width:30.7%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 25.7%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-icons.html" style="color:var(--ink);text-decoration:none">Icons</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:37.5%;width:12.5%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 10.4%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-brickheadz.html" style="color:var(--ink);text-decoration:none">BrickHeadz</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill up" style="left:50%;width:4.4%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta up">▲ 3.7%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-lego-art.html" style="color:var(--ink);text-decoration:none">LEGO Art</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill up" style="left:50%;width:1.5%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta up">▲ 1.2%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-disney.html" style="color:var(--ink);text-decoration:none">Disney</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:32.7%;width:17.3%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 14.5%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-city.html" style="color:var(--ink);text-decoration:none">City</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:0.0%;width:50.0%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 41.9%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-harry-potter.html" style="color:var(--ink);text-decoration:none">Harry Potter</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:29.0%;width:21.0%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 17.6%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-speed-champions.html" style="color:var(--ink);text-decoration:none">Speed Champions</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:14.100000000000001%;width:35.9%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 30.0%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-creator.html" style="color:var(--ink);text-decoration:none">Creator</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:24.1%;width:25.9%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 21.7%</span></span>
+    </div>
+    
+    <div class="row">
+      <a href="sets/theme-brick-sketches.html" style="color:var(--ink);text-decoration:none">Brick Sketches</a>
+      <div class="track diverging">
+        
+        
+        <div class="fill down" style="left:44.0%;width:6.0%"></div>
+        
+        <div class="zero"></div>
+      </div>
+      <span class="num"><span class="delta down">▼ 5.0%</span></span>
+    </div>
+    
+  </div>
+</div>
+
+<div class="card">
+  <h3>All themes</h3>
+  <div class="table-scroll">
+  <table id="themesTable">
+    <tr>
+      <th>Theme</th><th class="num">Items</th><th class="num">Years</th>
+      <th class="num">Total value</th><th class="num">Avg value</th>
+      <th class="num">Growth / yr</th><th class="num">vs retail</th><th>Best performer</th>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-marvel-super-heroes.html"><b>Marvel Super Heroes</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:100.0%"></div>
+        </div>
+      </td>
+      <td class="num">51</td>
+      <td class="num">2012–2025</td>
+      <td class="num"><b>₪12,855</b></td>
+      <td class="num">₪262</td>
+      <td class="num"><span class="delta down">▼ 7.0%</span></td>
+      <td class="num"><span class="delta up">▲ 1%</span></td>
+      <td><a href="sets/76140.html">76140 Iron Man Mech</a>
+          <span style="color:var(--muted)">(+13%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-technic.html"><b>Technic</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:8.7%"></div>
+        </div>
+      </td>
+      <td class="num">3</td>
+      <td class="num">2024–2025</td>
+      <td class="num"><b>₪1,116</b></td>
+      <td class="num">₪558</td>
+      <td class="num"><span class="delta down">▼ 25.7%</span></td>
+      <td class="num"><span class="delta down">▼ 34%</span></td>
+      <td><a href="sets/42171.html">42171 Mercedes-AMG F1 W14 E Perf</a>
+          <span style="color:var(--muted)">(-20%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-icons.html"><b>Icons</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:6.7%"></div>
+        </div>
+      </td>
+      <td class="num">2</td>
+      <td class="num">2021–2024</td>
+      <td class="num"><b>₪859</b></td>
+      <td class="num">₪430</td>
+      <td class="num"><span class="delta down">▼ 10.4%</span></td>
+      <td class="num"><span class="delta down">▼ 19%</span></td>
+      <td><a href="sets/10283.html">10283 NASA Space Shuttle Discove</a>
+          <span style="color:var(--muted)">(-3%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-brickheadz.html"><b>BrickHeadz</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:3.8%"></div>
+        </div>
+      </td>
+      <td class="num">6</td>
+      <td class="num">2017–2025</td>
+      <td class="num"><b>₪485</b></td>
+      <td class="num">₪80.78</td>
+      <td class="num"><span class="delta up">▲ 3.7%</span></td>
+      <td class="num"><span class="delta up">▲ 66%</span></td>
+      <td><a href="sets/41604.html">41604 Iron Man MK50</a>
+          <span style="color:var(--muted)">(+17%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-lego-art.html"><b>LEGO Art</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:3.7%"></div>
+        </div>
+      </td>
+      <td class="num">1</td>
+      <td class="num">2020–2020</td>
+      <td class="num"><b>₪472</b></td>
+      <td class="num">₪472</td>
+      <td class="num"><span class="delta up">▲ 1.2%</span></td>
+      <td class="num"><span class="delta up">▲ 8%</span></td>
+      <td><a href="sets/31199.html">31199 Iron Man</a>
+          <span style="color:var(--muted)">(+1%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-disney.html"><b>Disney</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:3.6%"></div>
+        </div>
+      </td>
+      <td class="num">1</td>
+      <td class="num">2025–2025</td>
+      <td class="num"><b>₪468</b></td>
+      <td class="num">₪468</td>
+      <td class="num"><span class="delta down">▼ 14.5%</span></td>
+      <td class="num"><span class="delta down">▼ 14%</span></td>
+      <td><a href="sets/43269.html">43269 101 Dalmatians Puppy</a>
+          <span style="color:var(--muted)">(-14%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-collectible-minifigures.html"><b>Collectible Minifigures</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:2.6%"></div>
+        </div>
+      </td>
+      <td class="num">4</td>
+      <td class="num">2018–2018</td>
+      <td class="num"><b>₪337</b></td>
+      <td class="num">₪84.25</td>
+      <td class="num"><span style="color:var(--muted)">—</span></td>
+      <td class="num"><span style="color:var(--muted)">—</span></td>
+      <td>—</td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-city.html"><b>City</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:1.7%"></div>
+        </div>
+      </td>
+      <td class="num">1</td>
+      <td class="num">2025–2025</td>
+      <td class="num"><b>₪212</b></td>
+      <td class="num">₪212</td>
+      <td class="num"><span class="delta down">▼ 41.9%</span></td>
+      <td class="num"><span class="delta down">▼ 42%</span></td>
+      <td><a href="sets/60445.html">60445 F1 Truck with RB20 &amp; AMR24</a>
+          <span style="color:var(--muted)">(-42%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-harry-potter.html"><b>Harry Potter</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:1.4%"></div>
+        </div>
+      </td>
+      <td class="num">1</td>
+      <td class="num">2024–2024</td>
+      <td class="num"><b>₪174</b></td>
+      <td class="num">₪174</td>
+      <td class="num"><span class="delta down">▼ 17.6%</span></td>
+      <td class="num"><span class="delta down">▼ 32%</span></td>
+      <td><a href="sets/76433.html">76433 Mandrake</a>
+          <span style="color:var(--muted)">(-18%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-speed-champions.html"><b>Speed Champions</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:1.1%"></div>
+        </div>
+      </td>
+      <td class="num">2</td>
+      <td class="num">2025–2025</td>
+      <td class="num"><b>₪138</b></td>
+      <td class="num">₪68.92</td>
+      <td class="num"><span class="delta down">▼ 30.0%</span></td>
+      <td class="num"><span class="delta down">▼ 30%</span></td>
+      <td><a href="sets/77242.html">77242 Ferrari SF-24</a>
+          <span style="color:var(--muted)">(-24%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-creator.html"><b>Creator</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:1.0%"></div>
+        </div>
+      </td>
+      <td class="num">1</td>
+      <td class="num">2024–2024</td>
+      <td class="num"><b>₪123</b></td>
+      <td class="num">₪123</td>
+      <td class="num"><span class="delta down">▼ 21.7%</span></td>
+      <td class="num"><span class="delta down">▼ 39%</span></td>
+      <td><a href="sets/31152.html">31152 Space Astronaut</a>
+          <span style="color:var(--muted)">(-22%/yr)</span></td>
+    </tr>
+    
+    <tr>
+      <td><a href="sets/theme-brick-sketches.html"><b>Brick Sketches</b></a>
+        <div class="track" style="margin-top:5px;height:5px;max-width:180px">
+          <div class="fill" style="width:0.4%"></div>
+        </div>
+      </td>
+      <td class="num">1</td>
+      <td class="num">2022–2022</td>
+      <td class="num"><b>₪50.52</b></td>
+      <td class="num">₪50.52</td>
+      <td class="num"><span class="delta down">▼ 5.0%</span></td>
+      <td class="num"><span class="delta down">▼ 19%</span></td>
+      <td><a href="sets/40535.html">40535 Iron Man</a>
+          <span style="color:var(--muted)">(-5%/yr)</span></td>
+    </tr>
+    
+  </table>
+  </div>
+</div>
+
+
+</main>
+
+<footer class="note">
+  Brickonomy · self-hosted, no API keys · sources: BrickLink, eBay, BrickOwl
+  · static snapshot — run <code>python -m brickonomy.export</code> to update
+  
+</footer>
+
+<script src="static/app.js"></script>
+</body>
+</html>

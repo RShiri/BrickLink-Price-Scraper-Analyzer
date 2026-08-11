@@ -182,6 +182,34 @@ def legacy_minifigs(set_id):
         conn.close()
 
 
+def deal_for(conn, item_id, ccy, condition="new"):
+    """BrickEconomy/sniper-style bargain check: cheapest clean listing vs the
+    blended market value, after the 13% fee/VAT allowance the analyzer uses.
+    Returns None when there is no live listing or no value to compare with."""
+    value, confidence, _ = current_value(conn, item_id, condition)
+    if not value or value <= 0:
+        return None
+    offers = cheapest_stock(conn, item_id, condition)
+    if not offers:
+        return None
+    best_source = min(offers, key=lambda s: disp(conn, offers[s]["price"],
+                                                 offers[s]["currency"], "ILS") or 1e18)
+    o = offers[best_source]
+    ask_ils = disp(conn, o["price"], o["currency"], "ILS")
+    if not ask_ils or ask_ils <= 0:
+        return None
+    profit = value - (ask_ils * 1.13)
+    margin = profit / ask_ils * 100.0
+    rating = "EXCELLENT" if margin >= 20 else "GOOD" if margin >= 10 else "IRRELEVANT"
+    return {
+        "item_id": item_id, "source": best_source,
+        "ask": disp(conn, ask_ils, "ILS", ccy),
+        "value": disp(conn, value, "ILS", ccy),
+        "profit": disp(conn, profit, "ILS", ccy),
+        "margin": margin, "rating": rating, "confidence": confidence,
+    }
+
+
 def cheapest_stock(conn, item_id, condition="new"):
     """{source: {price(display later), currency, description}} from the latest
     stock snapshot's retained raw listings."""
@@ -255,12 +283,131 @@ def dashboard(request: Request):
         ).fetchone()["ts"]
 
         gain_pct = ((total_value - total_retail) / total_retail * 100.0) if total_retail else None
+
+        # Catalog-wide top lists (BrickEconomy-style leaderboards).
+        catalog = []
+        for row in conn.execute(
+                "SELECT item_id, name, theme, year, item_type, parts, retail_price, "
+                "retail_currency FROM items"):
+            value, _, _ = current_value(conn, row["item_id"], "new")
+            v = disp(conn, value, "ILS", ccy)
+            if not v:
+                continue
+            g, _ = growth_mod.best_growth_estimate(conn, row["item_id"])
+            catalog.append({
+                "item_id": row["item_id"], "name": row["name"], "theme": row["theme"],
+                "year": row["year"], "item_type": row["item_type"],
+                "value": v, "growth": g,
+                "phase": lifecycle.phase(row["year"], row["theme"]),
+                "ppp": v / row["parts"] if row["parts"] else None,
+            })
+        most_valuable = sorted(catalog, key=lambda i: i["value"], reverse=True)[:5]
+        top_growth = sorted([i for i in catalog if i["growth"] is not None],
+                            key=lambda i: i["growth"], reverse=True)[:5]
+        retiring = sorted([i for i in catalog if i["phase"]["phase"] == "EOL WATCH"],
+                          key=lambda i: i["value"], reverse=True)[:5]
+        best_ppp = sorted([i for i in catalog if i["ppp"]], key=lambda i: i["ppp"])[:5]
+
+        top_deals = []
+        for item in sorted(catalog, key=lambda i: i["value"], reverse=True)[:60]:
+            d = deal_for(conn, item["item_id"], ccy)
+            if d and d["margin"] >= 10:
+                top_deals.append({**d, "name": item["name"]})
+        top_deals.sort(key=lambda d: d["margin"], reverse=True)
+
         return templates.TemplateResponse(request, "index.html", ctx(
             request, conn,
             total_value=total_value, total_retail=total_retail, gain_pct=gain_pct,
             gainers=gainers, decliners=decliners,
             themes=top_themes, max_theme=max_theme,
             counts=counts, last_scan=last_scan,
+            most_valuable=most_valuable, top_growth=top_growth,
+            retiring=retiring, best_ppp=best_ppp, top_deals=top_deals[:5],
+        ))
+    finally:
+        conn.close()
+
+
+@app.get("/themes")
+def themes_page(request: Request):
+    """Theme analysis: how each LEGO theme is performing."""
+    conn = get_conn()
+    try:
+        ccy = display_ccy(request)
+        rows = conn.execute(
+            "SELECT item_id, name, theme, year, retail_price, retail_currency "
+            "FROM items WHERE theme IS NOT NULL AND theme != ''"
+        ).fetchall()
+
+        themes = {}
+        for row in rows:
+            value, _, _ = current_value(conn, row["item_id"], "new")
+            v = disp(conn, value, "ILS", ccy)
+            g, _ = growth_mod.best_growth_estimate(conn, row["item_id"])
+            t = themes.setdefault(row["theme"], {
+                "theme": row["theme"], "count": 0, "valued": 0, "total": 0.0,
+                "growths": [], "retail": 0.0, "best": None, "years": [],
+            })
+            t["count"] += 1
+            if row["year"]:
+                t["years"].append(row["year"])
+            if v:
+                t["valued"] += 1
+                t["total"] += v
+                if row["retail_price"]:
+                    t["retail"] += disp(conn, row["retail_price"],
+                                        row["retail_currency"] or "USD", ccy) or 0
+                if g is not None:
+                    t["growths"].append(g)
+                    if not t["best"] or g > t["best"]["growth"]:
+                        t["best"] = {"item_id": row["item_id"], "name": row["name"],
+                                     "growth": g, "value": v}
+
+        out = []
+        for t in themes.values():
+            avg_growth = sum(t["growths"]) / len(t["growths"]) if t["growths"] else None
+            out.append({**t,
+                        "avg_growth": avg_growth,
+                        "avg_value": t["total"] / t["valued"] if t["valued"] else None,
+                        "vs_retail": ((t["total"] - t["retail"]) / t["retail"] * 100.0)
+                        if t["retail"] else None,
+                        "span": (min(t["years"]), max(t["years"])) if t["years"] else None})
+        out.sort(key=lambda t: t["total"], reverse=True)
+        max_total = max((t["total"] for t in out), default=1.0) or 1.0
+        growths = [t["avg_growth"] for t in out if t["avg_growth"] is not None]
+        growth_scale = max((abs(g) for g in growths), default=1.0) or 1.0
+
+        return templates.TemplateResponse(request, "themes.html", ctx(
+            request, conn, themes=out, max_total=max_total, growth_scale=growth_scale,
+        ))
+    finally:
+        conn.close()
+
+
+@app.get("/deals")
+def deals_page(request: Request, min_margin: float = 0.0, rating: str = ""):
+    """Bargain finder: live listings priced under their blended market value."""
+    conn = get_conn()
+    try:
+        ccy = display_ccy(request)
+        deals = []
+        for row in conn.execute("SELECT item_id, name, theme, year, item_type FROM items"):
+            d = deal_for(conn, row["item_id"], ccy)
+            if not d or d["margin"] < min_margin:
+                continue
+            ph = lifecycle.phase(row["year"], row["theme"])
+            if ph["phase"] in ("RETIRED_ACCEL", "RETIRED_STABLE") and d["rating"] == "GOOD":
+                d["rating"] = "GREAT INVEST"
+            if rating and d["rating"] != rating:
+                continue
+            deals.append({**d, "name": row["name"], "theme": row["theme"],
+                          "item_type": row["item_type"], "phase": ph})
+        deals.sort(key=lambda d: d["margin"], reverse=True)
+        counts = {r: sum(1 for d in deals if d["rating"] == r)
+                  for r in ("EXCELLENT", "GREAT INVEST", "GOOD", "IRRELEVANT")}
+        return templates.TemplateResponse(request, "deals.html", ctx(
+            request, conn, deals=deals[:120], total=len(deals), counts=counts,
+            min_margin=min_margin, rating=rating,
         ))
     finally:
         conn.close()
@@ -380,6 +527,41 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
             stats[s] = {"sold": sold["listing_count"] if sold else None,
                         "stock": stock["listing_count"] if stock else None}
 
+        # Sets from the same theme, closest by year — "collectors also track".
+        related = []
+        if row["theme"]:
+            for other in conn.execute(
+                    """SELECT item_id, name, year, item_type FROM items
+                       WHERE theme = ? AND item_id != ? AND item_type = 'S'""",
+                    (row["theme"], item_id)):
+                ov, _, _ = current_value(conn, other["item_id"], "new")
+                v = disp(conn, ov, "ILS", ccy)
+                if not v:
+                    continue
+                og, _ = growth_mod.best_growth_estimate(conn, other["item_id"])
+                related.append({"item_id": other["item_id"], "name": other["name"],
+                                "year": other["year"], "value": v, "growth": og,
+                                "gap": abs((other["year"] or 0) - (row["year"] or 0))})
+            related.sort(key=lambda r: (r["gap"], -(r["value"] or 0)))
+            related = related[:6]
+
+        # Price per piece, and how it compares with the rest of the theme.
+        ppp = ppp_theme_avg = None
+        if row["parts"] and values["new"]["value"]:
+            ppp = values["new"]["value"] / row["parts"]
+            peers = []
+            for other in conn.execute(
+                    "SELECT item_id, parts FROM items WHERE theme = ? AND parts > 0",
+                    (row["theme"],)):
+                ov, _, _ = current_value(conn, other["item_id"], "new")
+                v = disp(conn, ov, "ILS", ccy)
+                if v:
+                    peers.append(v / other["parts"])
+            if len(peers) > 1:
+                ppp_theme_avg = sum(peers) / len(peers)
+
+        deal = deal_for(conn, item_id, ccy)
+
         return templates.TemplateResponse(request, "set_detail.html", ctx(
             request, conn, item=row, values=values, retail=retail_disp,
             growth_total=g_total, growth_cagr=g_cagr, forecast=fc, phase=ph,
@@ -388,6 +570,7 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
             figs=figs, figs_total=figs_total,
             parts=parts, parts_summary=psum, parts_q=parts_q,
             pov=pov_disp, pov_premium=pov_premium,
+            related=related, ppp=ppp, ppp_theme_avg=ppp_theme_avg, deal=deal,
         ))
     finally:
         conn.close()
@@ -432,6 +615,24 @@ def _minifig_detail(request: Request, conn, row):
         growth_cagr=g_cagr, delta30=delta30, appears_in=appears_in,
         offers=offers, best_source=best_source,
     ))
+
+
+@app.get("/api/index")
+def search_index(request: Request):
+    """Small catalog index powering the header's instant search. Exported as a
+    static file too, so search keeps working on GitHub Pages."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            "SELECT item_id, name, theme, year, item_type FROM items ORDER BY item_id"
+        ).fetchall()
+        return JSONResponse({"items": [
+            {"id": r["item_id"], "name": r["name"] or "", "theme": r["theme"] or "",
+             "year": r["year"], "type": r["item_type"] or "S"}
+            for r in rows
+        ]})
+    finally:
+        conn.close()
 
 
 @app.get("/api/sets/{item_id}/history")
@@ -492,11 +693,34 @@ def portfolio_page(request: Request, edit: str = None, imported: int = None,
             total_paid += (paid or 0) * qty
             total_qty += qty
         total_gain = ((total_value - total_paid) / total_paid * 100.0) if total_paid else None
+
+        # Wishlist: items marked "wanted" (the BrickEconomy CSV carries these).
+        wishlist, wish_total = [], 0.0
+        for row in conn.execute(
+                """SELECT p.item_id, p.wanted, i.name, i.theme, i.year, i.item_type,
+                          i.retail_price, i.retail_currency
+                   FROM portfolio p JOIN items i ON i.item_id = p.item_id
+                   WHERE p.wanted > 0 ORDER BY i.item_id"""):
+            value, _, _ = current_value(conn, row["item_id"], "new")
+            v = disp(conn, value, "ILS", ccy)
+            deal = deal_for(conn, row["item_id"], ccy)
+            wishlist.append({
+                "item_id": row["item_id"], "name": row["name"], "theme": row["theme"],
+                "item_type": row["item_type"], "wanted": row["wanted"], "value": v,
+                "retail": disp(conn, row["retail_price"],
+                               row["retail_currency"] or "USD", ccy) if row["retail_price"] else None,
+                "delta30": dbq.market_delta(conn, row["item_id"], days=30),
+                "deal": deal,
+                "phase": lifecycle.phase(row["year"], row["theme"]),
+            })
+            wish_total += (v or 0) * (row["wanted"] or 1)
+
         return templates.TemplateResponse(request, "portfolio.html", ctx(
             request, conn, entries=entries, edit=edit,
             total_value=total_value, total_paid=total_paid,
             total_gain=total_gain, total_qty=total_qty,
             imported=imported, skipped=skipped,
+            wishlist=wishlist, wish_total=wish_total,
         ))
     finally:
         conn.close()

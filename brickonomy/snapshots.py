@@ -28,10 +28,37 @@ def _stats(items):
     }
 
 
-def write_snapshots(conn, item_id, source, currency, data, scraped_at=None, keep_raw=False):
+def minifig_floor_values(conn, set_id, currency):
+    """(new, used) total value of the set's minifigs, in `currency`.
+
+    Feeds PriceAnalyzer's minifig floor: a "used set" listing worth less than
+    its own figures is a parted-out listing, not a complete set.
+    """
+    from . import db as dbq
+    from .analytics.valuation import BLEND_CURRENCY, current_value
+    from .currency import convert
+
+    totals = {"new": 0.0, "used": 0.0}
+    figs = dbq.get_set_minifigs(conn, set_id)
+    if not figs:
+        return 0.0, 0.0
+    for fig in figs:
+        for condition in ("new", "used"):
+            value, _, _ = current_value(conn, fig["fig_id"], condition)
+            if value:
+                totals[condition] += value * max(1, fig["qty"] or 1)
+    try:
+        return (convert(conn, totals["new"], BLEND_CURRENCY, currency),
+                convert(conn, totals["used"], BLEND_CURRENCY, currency))
+    except ValueError:
+        return 0.0, 0.0
+
+
+def write_snapshots(conn, item_id, source, currency, data, scraped_at=None,
+                    keep_raw=False, minifig_values=(0.0, 0.0)):
     """data: the {meta, new:{sold,stock}, used:{sold,stock}} dict.
     Returns the PriceAnalyzer result. Commits."""
-    analysis = PriceAnalyzer(data).analyze()
+    analysis = PriceAnalyzer(data).analyze(*minifig_values)
 
     for condition in ("new", "used"):
         cond = analysis[condition]

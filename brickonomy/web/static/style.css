@@ -211,5 +211,77 @@ svg.spark polyline { fill: none; stroke: var(--s1); stroke-width: 2; }
 
 .notice { border: 1px solid rgba(49,201,111,0.4); background: rgba(49,201,111,0.08);
           border-radius: 10px; padding: 8px 14px; margin-bottom: 12px; color: var(--ink-2); }
+
+/* ── header search ─────────────────────────────────────────────────── */
+.sitesearch { position: relative; }
+.sitesearch .inp { width: 230px; }
+.sitesearch .inp:focus { border-color: rgba(79,140,255,.55); outline: none;
+                         box-shadow: 0 0 12px rgba(79,140,255,.2); }
+.sresults {
+  position: absolute; top: calc(100% + 6px); right: 0; width: 330px; z-index: 20;
+  background: rgba(13,19,35,0.97); backdrop-filter: blur(14px);
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,.5);
+}
+.sresults a {
+  display: block; padding: 8px 12px; text-decoration: none; color: var(--ink);
+  font-size: 13px; border-bottom: 1px solid var(--grid);
+}
+.sresults a:last-child { border-bottom: 0; }
+.sresults a:hover, .sresults a.on { background: rgba(79,140,255,0.14); }
+.sresults a span { display: block; font-size: 11.5px; color: var(--muted); }
+@media (max-width: 900px) { .sitesearch { order: 9; width: 100%; } .sitesearch .inp { width: 100%; } .sresults { width: 100%; } }
+
+/* ── deal ratings ──────────────────────────────────────────────────── */
+.chip.rating-excellent { border-color: rgba(49,201,111,.55); color: #7ff0ad;
+                         box-shadow: 0 0 10px rgba(49,201,111,.18); }
+.chip.rating-great     { border-color: rgba(79,140,255,.6); color: #bcd4ff;
+                         box-shadow: 0 0 10px rgba(79,140,255,.2); }
+.chip.rating-good      { border-color: rgba(250,178,25,.5); color: #f3cd76; }
+
+.dealbanner {
+  display: flex; gap: 14px; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; margin-top: 14px; padding: 12px 16px; border-radius: 14px;
+  border: 1px solid rgba(49,201,111,0.45);
+  background: linear-gradient(90deg, rgba(49,201,111,0.10), rgba(56,212,224,0.05));
+  color: var(--ink-2);
+}
+.dealbanner b { color: var(--ink); }
+
+/* ── chart range switch ────────────────────────────────────────────── */
+.rangebtns { float: right; display: inline-flex; gap: 2px; }
+.rangebtn {
+  border: 1px solid var(--border); background: transparent; color: var(--ink-2);
+  font: inherit; font-size: 11.5px; padding: 2px 10px; border-radius: 999px; cursor: pointer;
+}
+.rangebtn.active { border-color: rgba(79,140,255,.55); color: #bcd4ff; background: rgba(79,140,255,.12); }
+
+/* ── diverging growth bars (themes) ────────────────────────────────── */
+.bars .track.diverging { position: relative; }
+.bars .track .fill.up   { position: absolute; top: 0; background: linear-gradient(90deg, rgba(49,201,111,.65), var(--up)); border-radius: 0 4px 4px 0; height: 100%; }
+.bars .track .fill.down { position: absolute; top: 0; background: linear-gradient(90deg, var(--down), rgba(230,103,103,.65)); border-radius: 4px 0 0 4px; height: 100%; }
+.bars .track .zero { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--baseline); }
+
+/* ── value vs retail ───────────────────────────────────────────────── */
+.vsbars { display: grid; gap: 10px; }
+.vsrow { display: grid; grid-template-columns: 90px 1fr 100px; gap: 10px; align-items: center; font-size: 13px; }
+.vsrow .track { height: 14px; background: rgba(124,160,255,0.10); border-radius: 4px; overflow: hidden; }
+.vsrow .fill { height: 100%; background: var(--bar); border-radius: 4px; }
+.vsrow .fill.retail { background: linear-gradient(90deg, #66718f, #8b93ad); }
+.vsrow .fill.used { background: linear-gradient(90deg, rgba(79,140,255,.45), rgba(56,212,224,.45)); }
+.vsrow .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+/* ── related sets ──────────────────────────────────────────────────── */
+.relgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.relcard {
+  display: block; text-decoration: none; color: var(--ink);
+  border: 1px solid var(--border); border-radius: 12px; padding: 10px;
+  background: rgba(10,16,31,0.45);
+}
+.relcard:hover { border-color: rgba(79,140,255,.5); box-shadow: 0 0 14px rgba(79,140,255,.15); }
+.relcard img { width: 100%; height: 84px; object-fit: contain; border-radius: 8px;
+               background: rgba(232,237,251,0.92); margin-bottom: 8px; }
+.relname { font-size: 12.5px; line-height: 1.35; }
+.relmeta { font-size: 11.5px; color: var(--ink-2); margin-top: 3px; font-variant-numeric: tabular-nums; }
 footer.note { color: var(--muted); font-size: 12px; text-align: center; padding: 20px; }
 @media (prefers-reduced-motion: reduce) { .progress > div { transition: none; } }

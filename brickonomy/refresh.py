@@ -79,8 +79,10 @@ def refresh_item(conn, item_id, item_type=None, force=False, log=print):
             continue
 
         _update_item_meta(conn, item_id, res.meta)
+        from .snapshots import minifig_floor_values
         write_snapshots(conn, item_id, source_name, res.currency,
-                        res.analyzer_input(), keep_raw=True)
+                        res.analyzer_input(), keep_raw=True,
+                        minifig_values=minifig_floor_values(conn, item_id, res.currency))
         n = (len(res.new["sold"]) + len(res.used["sold"])
              + len(res.new["stock"]) + len(res.used["stock"]))
         results[source_name] = "ok"

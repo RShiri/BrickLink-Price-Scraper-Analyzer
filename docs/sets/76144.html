@@ -25,10 +25,17 @@
     
     <a href="../index.html" class="">Dashboard</a>
     <a href="../sets/index.html" class="active">Sets</a>
+    <a href="../themes.html" class="">Themes</a>
+    <a href="../deals.html" class="">Deals</a>
     <a href="../portfolio.html" class="">Portfolio</a>
     
   </nav>
   <div class="spacer"></div>
+  <div class="sitesearch">
+    <input class="inp" id="siteSearch" type="search" autocomplete="off"
+           placeholder="Search sets &amp; minifigs…" aria-label="Search the catalog">
+    <div class="sresults" id="siteSearchResults" hidden></div>
+  </div>
   
   <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
   
@@ -94,8 +101,16 @@
   </div>
 </div>
 
+
+
 <div class="card">
-  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span></h3>
+  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span>
+    <span class="rangebtns" role="group" aria-label="Chart range">
+      <button class="rangebtn" data-range="365">1Y</button>
+      <button class="rangebtn" data-range="1095">3Y</button>
+      <button class="rangebtn active" data-range="0">All</button>
+    </span>
+  </h3>
   <div class="legend">
     <span><span class="sw" style="background:var(--s1)"></span>Blended value</span>
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
@@ -103,11 +118,64 @@
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
     <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
   </div>
-  <div class="chart-wrap"><canvas id="historyChart" data-item="76144"></canvas></div>
+  <div class="chart-wrap"><canvas id="historyChart" data-item="76144"
+       data-retired="2022"></canvas></div>
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
     Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    The vertical marker is the estimated retirement (2022).
   </div>
 </div>
+
+
+<div class="two-col">
+  
+  <div class="card">
+    <h3>Value vs retail</h3>
+    <div class="vsbars">
+      <div class="vsrow"><span>Retail</span>
+        <div class="track"><div class="fill retail" style="width:98.4%"></div></div>
+        <span class="num">₪219</span></div>
+      <div class="vsrow"><span>Value new</span>
+        <div class="track"><div class="fill" style="width:100.0%"></div></div>
+        <span class="num">₪223</span></div>
+      <div class="vsrow"><span>Value used</span>
+        <div class="track"><div class="fill used" style="width:73.0%"></div></div>
+        <span class="num">₪163</span></div>
+    </div>
+    
+    <div style="color:var(--ink-2);font-size:12.5px;margin-top:10px">
+      A buyer at retail is <span class="delta up">▲ 2%</span> today,
+      compounding at +0.2% a year.
+    </div>
+    
+  </div>
+  
+  
+  <div class="card">
+    <h3>Price per piece</h3>
+    <div class="tiles" style="grid-template-columns:1fr 1fr">
+      <div class="tile" style="background:transparent;border:0;padding:0">
+        <div class="label">This set</div>
+        <div class="value" style="font-size:22px">₪0.49</div>
+        <div class="delta">458 parts</div>
+      </div>
+      
+      <div class="tile" style="background:transparent;border:0;padding:0">
+        <div class="label">Marvel Super Heroes average</div>
+        <div class="value" style="font-size:22px">₪4.61</div>
+        <div class="delta up">
+          −89% vs theme
+        </div>
+      </div>
+      
+    </div>
+    <div style="color:var(--muted);font-size:12px;margin-top:8px">
+      Lower is better for part-out; higher usually means minifig- or licence-driven value.
+    </div>
+  </div>
+  
+</div>
+
 
 
 
@@ -229,6 +297,57 @@
 </div>
 
 
+<div class="card">
+  <h3>More from Marvel Super Heroes <span class="soft">— closest by release year</span></h3>
+  <div class="relgrid">
+    
+    <a class="relcard" href="../sets/76131.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76131-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76131</b> Avengers Compound Battle</div>
+      <div class="relmeta">2019 · ₪333
+        · <span class="delta down">▼ 1%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76126.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76126-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76126</b> Avengers Ultimate Quinjet</div>
+      <div class="relmeta">2019 · ₪275
+        · <span class="delta down">▼ 1%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76125.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76125-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76125</b> Iron Man Hall of Armor</div>
+      <div class="relmeta">2019 · ₪202
+        · <span class="delta down">▼ 1%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76124.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76124-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76124</b> War Machine Buster</div>
+      <div class="relmeta">2019 · ₪195
+        · <span class="delta up">▲ 6%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/40334.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/40334-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>40334</b> Avengers Tower</div>
+      <div class="relmeta">2019 · ₪107
+        </div>
+    </a>
+    
+    <a class="relcard" href="../sets/30452.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/30452-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>30452</b> Iron Man and Dum-E polybag</div>
+      <div class="relmeta">2019 · ₪21.85
+        · <span class="delta up">▲ 6%</span></div>
+    </a>
+    
+  </div>
+</div>
+
+
+
 </main>
 
 <footer class="note">
@@ -236,6 +355,7 @@
   · static snapshot — run <code>python -m brickonomy.export</code> to update
   
 </footer>
+
 <script src="../static/app.js"></script>
 </body>
 </html>

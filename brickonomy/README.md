@@ -16,8 +16,13 @@ repo and builds on its existing BrickLink scraper and `PriceAnalyzer`.
   not financial advice).
 - **Parts inventory & part-out value**: the exact parts list from the
   BrickLink set page plus the part-out total from its POV page.
-- **Portfolio**: seeded from your BrickEconomy CSV export; import more via
-  CSV / BrickLink wanted-list XML / plain set lists; edit rows inline.
+- **Portfolio & wishlist**: seeded from your BrickEconomy CSV export; import
+  more via CSV / BrickLink wanted-list XML / plain set lists; edit rows inline.
+  Wanted items get their own list with live "best offer" pricing.
+- **Deals**: every live listing priced under blended market value after fees,
+  rated (good / excellent / great invest) exactly like the analyzer's sniper.
+- **Themes**: per-theme totals, average growth per year and best performer.
+- **Instant search** in the header, over the whole catalog.
 - **Configurable currency**: ILS / USD / EUR / GBP, ECB rates via
   frankfurter.app (no key), with cached and hardcoded fallbacks.
 
@@ -97,6 +102,19 @@ Update loop: `python -m brickonomy.refresh` → `python -m brickonomy.export` �
 commit + push. The published site is read-only (no refresh/import buttons);
 prices are as of the last scan. Options: `--ccy USD` bakes a different display
 currency, `--out <dir>` a different output folder.
+
+## Pages
+
+| Route | What it shows |
+|---|---|
+| `/` | Portfolio KPIs, top movers, best deals, most valuable / fastest growing / retiring soon, value by theme |
+| `/sets` | Catalog with search, theme chips, sparklines, lifecycle status |
+| `/sets/{id}` | Set page: values, buy signal, history + forecast chart (1Y/3Y/All, retirement marker), value vs retail, price per piece vs theme, best live prices, minifigs, parts inventory, related sets |
+| `/sets/{fig}` | Minifig page: values, history, best prices, appears-in-sets |
+| `/themes` | Theme analysis — totals, average growth, best performer |
+| `/deals` | Bargain finder ranked by margin, filterable by rating |
+| `/portfolio` | Owned sets with gain/loss, value-over-time chart, import/edit, wishlist |
+| `/refresh` | Source health, scan trigger with live progress, configuration |
 
 ## Configuration
 

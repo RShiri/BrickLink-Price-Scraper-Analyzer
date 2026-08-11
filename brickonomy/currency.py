@@ -22,6 +22,10 @@ FRANKFURTER_URL = "https://api.frankfurter.app/latest"
 FALLBACK_RATES = {"ILS": 3.65, "EUR": 0.92, "GBP": 0.78}
 
 _state = {"stale": False, "source": None}
+# Rates are needed for every displayed price, so hold them in-process too:
+# without this a failing (or blocked) rates API is retried on every call.
+_memo = {"rates": None, "at": 0.0}
+_MEMO_TTL_SECONDS = 600
 
 
 def rates_status():
@@ -29,9 +33,15 @@ def rates_status():
     return dict(_state)
 
 
+def reset_rate_cache():
+    """Drop the in-process memo. The memo is global (one DB per process in
+    normal use), so tests that swap databases must call this."""
+    _memo.update(rates=None, at=0.0)
+
+
 def _fetch_remote():
     resp = requests.get(
-        FRANKFURTER_URL, params={"from": BASE, "to": ",".join(QUOTES)}, timeout=15
+        FRANKFURTER_URL, params={"from": BASE, "to": ",".join(QUOTES)}, timeout=5
     )
     resp.raise_for_status()
     return resp.json()["rates"]
@@ -39,6 +49,17 @@ def _fetch_remote():
 
 def get_usd_rates(conn) -> dict:
     """Return {quote: rate} with USD base, refreshing per the TTL."""
+    import time
+
+    if _memo["rates"] and time.monotonic() - _memo["at"] < _MEMO_TTL_SECONDS:
+        return _memo["rates"]
+
+    rates = _load_usd_rates(conn)
+    _memo.update(rates=rates, at=time.monotonic())
+    return rates
+
+
+def _load_usd_rates(conn) -> dict:
     cfg = get_config()
     cached = dbq.get_rates(conn, BASE)
     fresh_cutoff = datetime.now() - timedelta(hours=cfg.rates_ttl_hours)
@@ -62,6 +83,8 @@ def get_usd_rates(conn) -> dict:
         if all(q in cached for q in QUOTES):
             _state.update(stale=True, source="stale-cache")
             return {q: cached[q][0] for q in QUOTES}
+        # Not persisted: the DB cache is for real rates only, so the UI can
+        # keep telling the truth about where today's numbers came from.
         _state.update(stale=True, source="hardcoded-fallback")
         return dict(FALLBACK_RATES)
 
@@ -81,6 +104,30 @@ def convert(conn, amount: float, from_ccy: str, to_ccy: str) -> float:
 
 
 CURRENCY_SYMBOLS = {"ILS": "₪", "USD": "$", "EUR": "€", "GBP": "£"}
+
+
+def detect_currency(price_text: str, default: str = "ILS") -> str:
+    """Map a marketplace price cell (e.g. 'US $12.34', '~ILS 45.00') to a code.
+
+    Order matters: country prefixes are checked before the bare '$', since
+    BrickLink renders Canadian and Australian dollars as 'CA $' / 'AU $'.
+    """
+    p = (price_text or "").upper()
+    if "ILS" in p or "₪" in p:
+        return "ILS"
+    if "US" in p:
+        return "USD"
+    if "CA" in p:
+        return "CAD"
+    if "AU" in p:
+        return "AUD"
+    if "EU" in p or "€" in p:
+        return "EUR"
+    if "GB" in p or "£" in p:
+        return "GBP"
+    if "$" in p:
+        return "USD"
+    return default
 
 
 def money(value, ccy: str) -> str:

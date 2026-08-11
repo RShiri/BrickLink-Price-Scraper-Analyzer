@@ -26,6 +26,7 @@ class Config:
     scrape_ttl_days: float = 3.0
     request_delay_range: list = field(default_factory=lambda: [2.0, 5.0])
     sources_enabled: list = field(default_factory=lambda: ["bricklink", "ebay", "brickowl"])
+    scrape_engine: str = "selenium"   # or "playwright" (pip install playwright)
     rates_ttl_hours: float = 24.0
     fixture_mode: bool = False
     fixtures_dir: str = str(Path(__file__).resolve().parent / "tests" / "fixtures")

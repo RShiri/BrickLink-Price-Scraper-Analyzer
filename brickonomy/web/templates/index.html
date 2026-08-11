@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "_macros.html" as m %}
+{% import "_macros.html" as m with context %}
 {% block title %}Dashboard · Brickonomy{% endblock %}
 {% block content %}
 
@@ -68,6 +68,33 @@
   </div>
 </div>
 
+<div class="card">
+  <h3>Best deals right now <span class="soft">— cheapest live listing vs market value</span></h3>
+  <table>
+    <tr><th>Item</th><th>Where</th><th class="num">Ask</th><th class="num">Market</th><th class="num">Margin</th><th>Rating</th></tr>
+    {% for d in top_deals %}
+    <tr>
+      <td>{{ m.thumb(d.item_id, 'S', img_url) }}<a href="{{ u('/sets/' ~ d.item_id) }}">{{ d.item_id }} {{ d.name }}</a></td>
+      <td><span class="dot" style="background:var(--s{{ {'bricklink': 2, 'ebay': 3, 'brickowl': 4}[d.source] }})"></span>
+          {{ {'bricklink': 'BrickLink', 'ebay': 'eBay', 'brickowl': 'BrickOwl'}[d.source] }}</td>
+      <td class="num">{{ d.ask|money(ccy) }}</td>
+      <td class="num">{{ d.value|money(ccy) }}</td>
+      <td class="num">{{ m.delta(d.margin, 0) }}</td>
+      <td>{{ m.rating_chip(d.rating) }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="color:var(--muted)">No listing is currently below market value. <a href="{{ u('/deals') }}">See all deals →</a></td></tr>
+    {% endfor %}
+  </table>
+  {% if top_deals %}<div style="margin-top:8px"><a class="btn-ghost" href="{{ u('/deals') }}">All deals →</a></div>{% endif %}
+</div>
+
+<div class="three-col">
+  {{ m.toplist('Most valuable', most_valuable, ccy, img_url, metric='year', note='catalog-wide') }}
+  {{ m.toplist('Fastest growing', top_growth, ccy, img_url, metric='growth', note='per year') }}
+  {{ m.toplist('Retiring soon', retiring, ccy, img_url, metric='year', note='EOL watch') }}
+</div>
+
 <div class="two-col">
   <div class="card">
     <h3>Portfolio value by theme</h3>
@@ -82,6 +109,7 @@
       <div style="color:var(--muted)">Import your portfolio to see the theme breakdown.</div>
       {% endfor %}
     </div>
+    <div style="margin-top:10px"><a class="btn-ghost" href="{{ u('/themes') }}">Theme analysis →</a></div>
   </div>
   <div class="card">
     {% if static_mode %}

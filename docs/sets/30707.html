@@ -25,10 +25,17 @@
     
     <a href="../index.html" class="">Dashboard</a>
     <a href="../sets/index.html" class="active">Sets</a>
+    <a href="../themes.html" class="">Themes</a>
+    <a href="../deals.html" class="">Deals</a>
     <a href="../portfolio.html" class="">Portfolio</a>
     
   </nav>
   <div class="spacer"></div>
+  <div class="sitesearch">
+    <input class="inp" id="siteSearch" type="search" autocomplete="off"
+           placeholder="Search sets &amp; minifigs…" aria-label="Search the catalog">
+    <div class="sresults" id="siteSearchResults" hidden></div>
+  </div>
   
   <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
   
@@ -94,8 +101,16 @@
   </div>
 </div>
 
+
+
 <div class="card">
-  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span></h3>
+  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span>
+    <span class="rangebtns" role="group" aria-label="Chart range">
+      <button class="rangebtn" data-range="365">1Y</button>
+      <button class="rangebtn" data-range="1095">3Y</button>
+      <button class="rangebtn active" data-range="0">All</button>
+    </span>
+  </h3>
   <div class="legend">
     <span><span class="sw" style="background:var(--s1)"></span>Blended value</span>
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
@@ -103,11 +118,36 @@
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
     <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
   </div>
-  <div class="chart-wrap"><canvas id="historyChart" data-item="30707"></canvas></div>
+  <div class="chart-wrap"><canvas id="historyChart" data-item="30707"
+       data-retired="2028"></canvas></div>
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
     Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    The vertical marker is the estimated retirement (2028).
   </div>
 </div>
+
+
+<div class="two-col">
+  
+  <div class="card">
+    <h3>Value vs retail</h3>
+    <div class="vsbars">
+      <div class="vsrow"><span>Retail</span>
+        <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
+        <span class="num">₪18.21</span></div>
+      <div class="vsrow"><span>Value new</span>
+        <div class="track"><div class="fill" style="width:0.0%"></div></div>
+        <span class="num">—</span></div>
+      <div class="vsrow"><span>Value used</span>
+        <div class="track"><div class="fill used" style="width:0.0%"></div></div>
+        <span class="num">—</span></div>
+    </div>
+    
+  </div>
+  
+  
+</div>
+
 
 
 
@@ -205,6 +245,57 @@
 </div>
 
 
+<div class="card">
+  <h3>More from Marvel Super Heroes <span class="soft">— closest by release year</span></h3>
+  <div class="relgrid">
+    
+    <a class="relcard" href="../sets/76313.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76313-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76313</b> MARVEL Logo</div>
+      <div class="relmeta">2025 · ₪206
+        · <span class="delta down">▼ 44%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76316.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76316-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76316</b> Fantastic Four vs. Galactus Constr</div>
+      <div class="relmeta">2025 · ₪138
+        · <span class="delta down">▼ 37%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76327.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76327-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76327</b> Iron Man MK4 Bust</div>
+      <div class="relmeta">2025 · ₪131
+        · <span class="delta down">▼ 40%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76315.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76315-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76315</b> Iron Man&#39;s Laboratory</div>
+      <div class="relmeta">2025 · ₪66.77
+        · <span class="delta down">▼ 67%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76320.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76320-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76320</b> Iron Man &amp; War Machine vs. Hammer </div>
+      <div class="relmeta">2025 · ₪48.11
+        · <span class="delta down">▼ 43%</span></div>
+    </a>
+    
+    <a class="relcard" href="../sets/76307.html">
+      <img src="https://img.bricklink.com/ItemImage/SN/0/76307-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>76307</b> Iron Man Mech vs. Ultron</div>
+      <div class="relmeta">2025 · ₪46.71
+        · <span class="delta down">▼ 15%</span></div>
+    </a>
+    
+  </div>
+</div>
+
+
+
 </main>
 
 <footer class="note">
@@ -212,6 +303,7 @@
   · static snapshot — run <code>python -m brickonomy.export</code> to update
   
 </footer>
+
 <script src="../static/app.js"></script>
 </body>
 </html>

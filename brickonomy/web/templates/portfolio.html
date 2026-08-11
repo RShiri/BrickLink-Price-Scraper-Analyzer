@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "_macros.html" as m %}
+{% import "_macros.html" as m with context %}
 {% block title %}Portfolio · Brickonomy{% endblock %}
 {% block content %}
 
@@ -112,5 +112,37 @@
   </div>
 </div>
 
+{% if wishlist %}
+<div class="card">
+  <h3>Wishlist <span class="soft">— {{ wishlist|length }} wanted, {{ wish_total|money(ccy) }} to buy at today's prices</span></h3>
+  <div class="table-scroll">
+  <table>
+    <tr>
+      <th>Set</th><th>Theme</th><th class="num">Wanted</th><th class="num">Retail</th>
+      <th class="num">Value now</th><th class="num">Δ 30d</th><th>Best offer</th><th>Status</th>
+    </tr>
+    {% for w in wishlist %}
+    <tr>
+      <td>{{ m.thumb(w.item_id, w.item_type, img_url) }}<a href="{{ u('/sets/' ~ w.item_id) }}">{{ w.item_id }} {{ w.name }}</a></td>
+      <td>{{ w.theme or '—' }}</td>
+      <td class="num">{{ w.wanted }}</td>
+      <td class="num">{{ w.retail|money(ccy) if w.retail else '—' }}</td>
+      <td class="num"><b>{{ w.value|money(ccy) if w.value else '—' }}</b></td>
+      <td class="num">{{ m.delta(w.delta30) }}</td>
+      <td>{% if w.deal and w.deal.rating != 'IRRELEVANT' %}
+            {{ w.deal.ask|money(ccy) }} on {{ {'bricklink': 'BrickLink', 'ebay': 'eBay', 'brickowl': 'BrickOwl'}[w.deal.source] }}
+            {{ m.rating_chip(w.deal.rating) }}
+          {% else %}<span style="color:var(--muted)">no bargain right now</span>{% endif %}</td>
+      <td>{{ m.phase_chip(w.phase) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  <div style="color:var(--muted);font-size:12px;margin-top:8px">
+    Wanted quantities come from your BrickEconomy CSV import. Retiring sets are the ones to buy first —
+    prices climb fastest in the two years after retirement.
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}
-{% block scripts %}<script src="{{ u('/static/app.js') }}"></script>{% endblock %}
