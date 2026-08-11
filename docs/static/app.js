@@ -33,6 +33,31 @@
   const historyCanvas = document.getElementById("historyChart");
   if (historyCanvas && window.Chart) {
     const itemId = historyCanvas.dataset.item;
+    const retiredYear = historyCanvas.dataset.retired;
+
+    // Vertical marker at the estimated retirement date.
+    const retirementMarker = {
+      id: "retirementMarker",
+      afterDatasetsDraw(chart) {
+        if (!retiredYear) return;
+        const x = chart.scales.x.getPixelForValue(new Date(`${retiredYear}-06-30`));
+        const { top, bottom } = chart.chartArea;
+        if (x < chart.chartArea.left || x > chart.chartArea.right) return;
+        const c = chart.ctx;
+        c.save();
+        c.setLineDash([4, 4]);
+        c.strokeStyle = css("--s2") || "#d95926";
+        c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = css("--s2") || "#d95926";
+        c.font = "11px system-ui, sans-serif";
+        c.textAlign = "center";
+        c.fillText("retired", x, top + 11);
+        c.restore();
+      },
+    };
+
     fetch(apiURL(`/api/sets/${itemId}/history`))
       .then((r) => r.json())
       .then((data) => {
@@ -64,9 +89,10 @@
             borderColor: "transparent", pointRadius: 0, fill: false, tension: 0,
           });
         }
-        new Chart(historyCanvas, {
+        const chart = new Chart(historyCanvas, {
           type: "line",
           data: { datasets },
+          plugins: [retirementMarker],
           options: {
             responsive: true, maintainAspectRatio: false,
             interaction: { mode: "nearest", axis: "x", intersect: false },
@@ -85,6 +111,23 @@
               y: { ticks: { callback: (v) => v.toLocaleString() } },
             },
           },
+        });
+
+        // Range buttons (1Y / 3Y / All) clamp the x axis.
+        document.querySelectorAll(".rangebtn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".rangebtn").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            const days = Number(btn.dataset.range);
+            if (!days) {
+              delete chart.options.scales.x.min;
+            } else {
+              const from = new Date();
+              from.setDate(from.getDate() - days);
+              chart.options.scales.x.min = from.toISOString().slice(0, 10);
+            }
+            chart.update();
+          });
         });
       })
       .catch(() => { historyCanvas.parentElement.textContent = "Could not load price history."; });
@@ -126,6 +169,68 @@
         });
       })
       .catch(() => { pfCanvas.parentElement.textContent = "Could not load portfolio history."; });
+  }
+
+  // ── header search: instant catalog lookup, works statically too ───────
+  const searchInput = document.getElementById("siteSearch");
+  const searchResults = document.getElementById("siteSearchResults");
+  if (searchInput && searchResults) {
+    const pageURL = (id) => (IS_STATIC ? `${BASE}sets/${id}.html` : `/sets/${id}`);
+    let index = null, active = -1;
+
+    const loadIndex = () => {
+      if (index) return Promise.resolve(index);
+      return fetch(apiURL("/api/index"))
+        .then((r) => r.json())
+        .then((d) => { index = d.items || []; return index; })
+        .catch(() => (index = []));
+    };
+
+    const render = (matches) => {
+      active = -1;
+      if (!matches.length) { searchResults.hidden = true; return; }
+      searchResults.innerHTML = matches
+        .map((i) => `<a href="${pageURL(i.id)}"><b>${i.id}</b> ${i.name}
+          <span>${i.type === "M" ? "minifig" : [i.theme, i.year].filter(Boolean).join(" · ")}</span></a>`)
+        .join("");
+      searchResults.hidden = false;
+    };
+
+    const search = () => {
+      const q = searchInput.value.trim().toLowerCase();
+      if (q.length < 2) { searchResults.hidden = true; return; }
+      loadIndex().then((items) => {
+        const starts = [], contains = [];
+        for (const i of items) {
+          const id = i.id.toLowerCase(), name = (i.name || "").toLowerCase();
+          if (id.startsWith(q)) starts.push(i);
+          else if (id.includes(q) || name.includes(q)) contains.push(i);
+          if (starts.length >= 8) break;
+        }
+        render(starts.concat(contains).slice(0, 8));
+      });
+    };
+
+    searchInput.addEventListener("input", search);
+    searchInput.addEventListener("focus", () => { loadIndex(); search(); });
+    searchInput.addEventListener("keydown", (e) => {
+      const links = [...searchResults.querySelectorAll("a")];
+      if (e.key === "Escape") { searchResults.hidden = true; searchInput.blur(); }
+      if (!links.length) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        active = (active + (e.key === "ArrowDown" ? 1 : -1) + links.length) % links.length;
+        links.forEach((l, i) => l.classList.toggle("on", i === active));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        (links[active] || links[0]).click();
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (!searchResults.contains(e.target) && e.target !== searchInput) {
+        searchResults.hidden = true;
+      }
+    });
   }
 
   // ── client-side table filter (static pages have no server search) ──────

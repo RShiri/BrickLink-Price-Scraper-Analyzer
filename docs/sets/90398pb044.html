@@ -25,10 +25,17 @@
     
     <a href="../index.html" class="">Dashboard</a>
     <a href="../sets/index.html" class="active">Sets</a>
+    <a href="../themes.html" class="">Themes</a>
+    <a href="../deals.html" class="">Deals</a>
     <a href="../portfolio.html" class="">Portfolio</a>
     
   </nav>
   <div class="spacer"></div>
+  <div class="sitesearch">
+    <input class="inp" id="siteSearch" type="search" autocomplete="off"
+           placeholder="Search sets &amp; minifigs…" aria-label="Search the catalog">
+    <div class="sresults" id="siteSearchResults" hidden></div>
+  </div>
   
   <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
   
@@ -86,8 +93,16 @@
   </div>
 </div>
 
+
+
 <div class="card">
-  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span></h3>
+  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span>
+    <span class="rangebtns" role="group" aria-label="Chart range">
+      <button class="rangebtn" data-range="365">1Y</button>
+      <button class="rangebtn" data-range="1095">3Y</button>
+      <button class="rangebtn active" data-range="0">All</button>
+    </span>
+  </h3>
   <div class="legend">
     <span><span class="sw" style="background:var(--s1)"></span>Blended value</span>
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
@@ -95,11 +110,15 @@
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
     <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
   </div>
-  <div class="chart-wrap"><canvas id="historyChart" data-item="90398pb044"></canvas></div>
+  <div class="chart-wrap"><canvas id="historyChart" data-item="90398pb044"
+       data-retired=""></canvas></div>
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
     Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    
   </div>
 </div>
+
+
 
 
 
@@ -174,6 +193,8 @@
 </div>
 
 
+
+
 </main>
 
 <footer class="note">
@@ -181,6 +202,7 @@
   · static snapshot — run <code>python -m brickonomy.export</code> to update
   
 </footer>
+
 <script src="../static/app.js"></script>
 </body>
 </html>

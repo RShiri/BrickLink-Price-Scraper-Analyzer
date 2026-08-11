@@ -11,6 +11,8 @@ from brickonomy.export import export
 
 @pytest.fixture()
 def seeded_db(tmp_path, monkeypatch):
+    from brickonomy.currency import reset_rate_cache
+    reset_rate_cache()
     db_path = tmp_path / "exp.db"
     monkeypatch.setattr(get_config(), "db_path", str(db_path))
     conn = dbq.connect(db_path=str(db_path))
@@ -43,6 +45,9 @@ class TestExport:
         assert (out / "sets" / "sw0879.html").exists()       # minifig page too
         assert (out / "sets" / "theme-star-wars.html").exists()
         assert (out / "portfolio.html").exists()
+        assert (out / "themes.html").exists()
+        assert (out / "deals.html").exists()
+        assert (out / "api" / "index.json").exists()   # header search
         assert (out / "api" / "sets" / "75192" / "history.json").exists()
         assert (out / "static" / "style.css").exists()
         assert (out / ".nojekyll").exists()

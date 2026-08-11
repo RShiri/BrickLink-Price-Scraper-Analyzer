@@ -2,14 +2,17 @@
 import pytest
 
 from brickonomy import db as dbq
-from brickonomy.currency import FALLBACK_RATES, convert, money, rates_status
+from brickonomy.currency import (FALLBACK_RATES, convert, money, rates_status,
+                                 reset_rate_cache)
 
 
 @pytest.fixture()
 def conn(tmp_path):
+    reset_rate_cache()
     c = dbq.connect(db_path=str(tmp_path / "ccy.db"))
     yield c
     c.close()
+    reset_rate_cache()
 
 
 @pytest.fixture()

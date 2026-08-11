@@ -25,10 +25,17 @@
     
     <a href="../index.html" class="">Dashboard</a>
     <a href="../sets/index.html" class="active">Sets</a>
+    <a href="../themes.html" class="">Themes</a>
+    <a href="../deals.html" class="">Deals</a>
     <a href="../portfolio.html" class="">Portfolio</a>
     
   </nav>
   <div class="spacer"></div>
+  <div class="sitesearch">
+    <input class="inp" id="siteSearch" type="search" autocomplete="off"
+           placeholder="Search sets &amp; minifigs…" aria-label="Search the catalog">
+    <div class="sresults" id="siteSearchResults" hidden></div>
+  </div>
   
   <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
   
@@ -94,8 +101,16 @@
   </div>
 </div>
 
+
+
 <div class="card">
-  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span></h3>
+  <h3>Price history &amp; forecast <span class="soft">(ILS, blended market price · new/sealed)</span>
+    <span class="rangebtns" role="group" aria-label="Chart range">
+      <button class="rangebtn" data-range="365">1Y</button>
+      <button class="rangebtn" data-range="1095">3Y</button>
+      <button class="rangebtn active" data-range="0">All</button>
+    </span>
+  </h3>
   <div class="legend">
     <span><span class="sw" style="background:var(--s1)"></span>Blended value</span>
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
@@ -103,11 +118,56 @@
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
     <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
   </div>
-  <div class="chart-wrap"><canvas id="historyChart" data-item="31152"></canvas></div>
+  <div class="chart-wrap"><canvas id="historyChart" data-item="31152"
+       data-retired="2027"></canvas></div>
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
     Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    The vertical marker is the estimated retirement (2027).
   </div>
 </div>
+
+
+<div class="two-col">
+  
+  <div class="card">
+    <h3>Value vs retail</h3>
+    <div class="vsbars">
+      <div class="vsrow"><span>Retail</span>
+        <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
+        <span class="num">₪201</span></div>
+      <div class="vsrow"><span>Value new</span>
+        <div class="track"><div class="fill" style="width:61.4%"></div></div>
+        <span class="num">₪123</span></div>
+      <div class="vsrow"><span>Value used</span>
+        <div class="track"><div class="fill used" style="width:45.2%"></div></div>
+        <span class="num">₪90.74</span></div>
+    </div>
+    
+    <div style="color:var(--ink-2);font-size:12.5px;margin-top:10px">
+      A buyer at retail is <span class="delta down">▼ 39%</span> today,
+      compounding at -21.7% a year.
+    </div>
+    
+  </div>
+  
+  
+  <div class="card">
+    <h3>Price per piece</h3>
+    <div class="tiles" style="grid-template-columns:1fr 1fr">
+      <div class="tile" style="background:transparent;border:0;padding:0">
+        <div class="label">This set</div>
+        <div class="value" style="font-size:22px">₪0.19</div>
+        <div class="delta">647 parts</div>
+      </div>
+      
+    </div>
+    <div style="color:var(--muted);font-size:12px;margin-top:8px">
+      Lower is better for part-out; higher usually means minifig- or licence-driven value.
+    </div>
+  </div>
+  
+</div>
+
 
 
 
@@ -182,6 +242,8 @@
 </div>
 
 
+
+
 </main>
 
 <footer class="note">
@@ -189,6 +251,7 @@
   · static snapshot — run <code>python -m brickonomy.export</code> to update
   
 </footer>
+
 <script src="../static/app.js"></script>
 </body>
 </html>

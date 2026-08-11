@@ -12,6 +12,8 @@ from brickonomy.analytics.valuation import blend, store_blended
 
 @pytest.fixture()
 def conn(tmp_path):
+    from brickonomy.currency import reset_rate_cache
+    reset_rate_cache()
     c = dbq.connect(db_path=str(tmp_path / "test.db"))
     # Pin exchange rates so conversions are deterministic and offline.
     dbq.upsert_rate(c, "USD", "ILS", 3.5)

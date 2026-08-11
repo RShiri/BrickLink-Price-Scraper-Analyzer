@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import "_macros.html" as m %}
+{% import "_macros.html" as m with context %}
 {% block title %}{{ item.item_id }} {{ item.name }} · Brickonomy{% endblock %}
 {% block content %}
 
@@ -60,8 +60,28 @@
   </div>
 </div>
 
+{% if deal and deal.rating != 'IRRELEVANT' %}
+<div class="dealbanner">
+  <div>
+    {{ m.rating_chip(deal.rating) }}
+    <b>Buy signal</b> — cheapest clean listing is
+    <b>{{ deal.ask|money(ccy) }}</b> on
+    {{ {'bricklink': 'BrickLink', 'ebay': 'eBay', 'brickowl': 'BrickOwl'}[deal.source] }},
+    <b>{{ "%.0f"|format(deal.margin) }}%</b> under market after fees
+    (potential {{ deal.profit|money(ccy) }}).
+  </div>
+  <a class="btn-ghost" href="{{ u('/deals') }}">All deals →</a>
+</div>
+{% endif %}
+
 <div class="card">
-  <h3>Price history &amp; forecast <span class="soft">({{ ccy }}, blended market price · new/sealed)</span></h3>
+  <h3>Price history &amp; forecast <span class="soft">({{ ccy }}, blended market price · new/sealed)</span>
+    <span class="rangebtns" role="group" aria-label="Chart range">
+      <button class="rangebtn" data-range="365">1Y</button>
+      <button class="rangebtn" data-range="1095">3Y</button>
+      <button class="rangebtn active" data-range="0">All</button>
+    </span>
+  </h3>
   <div class="legend">
     <span><span class="sw" style="background:var(--s1)"></span>Blended value</span>
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
@@ -69,11 +89,64 @@
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
     <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
   </div>
-  <div class="chart-wrap"><canvas id="historyChart" data-item="{{ item.item_id }}"></canvas></div>
+  <div class="chart-wrap"><canvas id="historyChart" data-item="{{ item.item_id }}"
+       data-retired="{{ phase.retirement_year if phase.retirement_year else '' }}"></canvas></div>
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
     Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    {% if phase.retirement_year %}The vertical marker is the estimated retirement ({{ phase.retirement_year }}).{% endif %}
   </div>
 </div>
+
+{% if retail or ppp %}
+<div class="two-col">
+  {% if retail %}
+  <div class="card">
+    <h3>Value vs retail</h3>
+    <div class="vsbars">
+      <div class="vsrow"><span>Retail</span>
+        <div class="track"><div class="fill retail" style="width:{{ (retail / [retail, values.new.value or retail]|max * 100)|round(1) }}%"></div></div>
+        <span class="num">{{ retail|money(ccy) }}</span></div>
+      <div class="vsrow"><span>Value new</span>
+        <div class="track"><div class="fill" style="width:{{ ((values.new.value or 0) / [retail, values.new.value or retail]|max * 100)|round(1) }}%"></div></div>
+        <span class="num">{{ values.new.value|money(ccy) if values.new.value else '—' }}</span></div>
+      <div class="vsrow"><span>Value used</span>
+        <div class="track"><div class="fill used" style="width:{{ ((values.used.value or 0) / [retail, values.new.value or retail]|max * 100)|round(1) }}%"></div></div>
+        <span class="num">{{ values.used.value|money(ccy) if values.used.value else '—' }}</span></div>
+    </div>
+    {% if growth_total is not none %}
+    <div style="color:var(--ink-2);font-size:12.5px;margin-top:10px">
+      A buyer at retail is {{ m.delta(growth_total, 0) }} today{% if growth_cagr is not none %},
+      compounding at {{ "%+.1f"|format(growth_cagr) }}% a year{% endif %}.
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% if ppp %}
+  <div class="card">
+    <h3>Price per piece</h3>
+    <div class="tiles" style="grid-template-columns:1fr 1fr">
+      <div class="tile" style="background:transparent;border:0;padding:0">
+        <div class="label">This set</div>
+        <div class="value" style="font-size:22px">{{ ppp|money(ccy) }}</div>
+        <div class="delta">{{ "{:,}".format(item.parts) }} parts</div>
+      </div>
+      {% if ppp_theme_avg %}
+      <div class="tile" style="background:transparent;border:0;padding:0">
+        <div class="label">{{ item.theme }} average</div>
+        <div class="value" style="font-size:22px">{{ ppp_theme_avg|money(ccy) }}</div>
+        <div class="delta {{ 'up' if ppp < ppp_theme_avg else 'down' }}">
+          {{ "%.0f"|format((ppp - ppp_theme_avg) / ppp_theme_avg * 100)|replace('-', '−') }}% vs theme
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div style="color:var(--muted);font-size:12px;margin-top:8px">
+      Lower is better for part-out; higher usually means minifig- or licence-driven value.
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
 
 {% if offers %}
 <div class="card">
@@ -202,5 +275,20 @@
   {% endif %}
 </div>
 
+{% if related %}
+<div class="card">
+  <h3>More from {{ item.theme }} <span class="soft">— closest by release year</span></h3>
+  <div class="relgrid">
+    {% for r in related %}
+    <a class="relcard" href="{{ u('/sets/' ~ r.item_id) }}">
+      <img src="{{ img_url(r.item_id, 'S') }}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="relname"><b>{{ r.item_id }}</b> {{ (r.name or '')[:34] }}</div>
+      <div class="relmeta">{{ r.year or '' }} · {{ r.value|money(ccy) }}
+        {% if r.growth is not none %}· {{ m.delta(r.growth, 0) }}{% endif %}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}
-{% block scripts %}<script src="{{ u('/static/app.js') }}"></script>{% endblock %}
