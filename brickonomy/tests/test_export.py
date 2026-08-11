@@ -36,7 +36,7 @@ def seeded_db(tmp_path, monkeypatch):
 class TestExport:
     def test_export_writes_expected_files(self, seeded_db, tmp_path):
         out = tmp_path / "site"
-        n_pages, n_json = export(str(out), "/repo", "ILS", quiet=True)
+        n_pages, n_json = export(str(out), "ILS", quiet=True)
         assert (out / "index.html").exists()
         assert (out / "sets" / "index.html").exists()
         assert (out / "sets" / "75192.html").exists()
@@ -48,18 +48,25 @@ class TestExport:
         assert (out / ".nojekyll").exists()
         assert n_pages >= 5 and n_json >= 1
 
-    def test_links_rewritten_with_base(self, seeded_db, tmp_path):
+    def test_links_are_relative_to_each_page(self, seeded_db, tmp_path):
         out = tmp_path / "site"
-        export(str(out), "/repo", "ILS", quiet=True)
+        export(str(out), "ILS", quiet=True)
+        # Root page: links are relative with no prefix.
         html = (out / "index.html").read_text()
-        assert 'href="/repo/sets/index.html"' in html
-        assert 'href="/repo/static/style.css"' in html
+        assert 'href="sets/index.html"' in html
+        assert 'href="static/style.css"' in html
         assert 'href="/sets"' not in html
-        assert 'data-base="/repo"' in html and 'data-static="1"' in html
+        assert 'data-base=""' in html and 'data-static="1"' in html
+
+        # One level down: links climb back out with ../
+        sub = (out / "sets" / "75192.html").read_text()
+        assert 'href="../index.html"' in sub
+        assert 'href="../static/style.css"' in sub
+        assert 'data-base="../"' in sub
 
     def test_server_only_ui_hidden(self, seeded_db, tmp_path):
         out = tmp_path / "site"
-        export(str(out), "/repo", "ILS", quiet=True)
+        export(str(out), "ILS", quiet=True)
         for page in ("index.html", "portfolio.html", "sets/index.html"):
             html = (out / page).read_text()
             assert 'method="post"' not in html, page
@@ -68,13 +75,13 @@ class TestExport:
 
     def test_history_json_parses(self, seeded_db, tmp_path):
         out = tmp_path / "site"
-        export(str(out), "/repo", "ILS", quiet=True)
+        export(str(out), "ILS", quiet=True)
         data = json.loads((out / "api" / "sets" / "75192" / "history.json").read_text())
         assert data["currency"] == "ILS"
         assert len(data["series"]["blended"]) == 2
 
     def test_dynamic_mode_restored_after_export(self, seeded_db, tmp_path):
         from brickonomy.web import app as webapp
-        export(str(tmp_path / "site"), "/repo", "ILS", quiet=True)
+        export(str(tmp_path / "site"), "ILS", quiet=True)
         assert webapp.STATIC_MODE is False
         assert webapp.static_url("/sets/75192") == "/sets/75192"

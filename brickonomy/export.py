@@ -1,9 +1,10 @@
 """Static site export for GitHub Pages.
 
-  python -m brickonomy.export                       # writes ./docs for
-                                                    #   rshiri.github.io/<repo>/
-  python -m brickonomy.export --out site --base-url ""   # for a root domain
-  python -m brickonomy.export --ccy USD
+  python -m brickonomy.export              # writes ./docs
+  python -m brickonomy.export --out site --ccy USD
+
+All links are relative, so the exported site works wherever it is mounted:
+GitHub Pages serving /docs, the repo root, or a custom domain.
 
 Drives the regular FastAPI app with a test client (so the static site is
 pixel-identical to the live one) and saves every page/API response:
@@ -22,10 +23,8 @@ import argparse
 import shutil
 from pathlib import Path
 
-DEFAULT_BASE = "/BrickLink-Price-Scraper-Analyzer"
 
-
-def export(out_dir: str, base_url: str, ccy: str, quiet: bool = False):
+def export(out_dir: str, ccy: str = "ILS", quiet: bool = False):
     from starlette.testclient import TestClient
 
     from . import db as dbq
@@ -34,18 +33,17 @@ def export(out_dir: str, base_url: str, ccy: str, quiet: bool = False):
 
     # static_url() and ctx() read these module globals at call time, so
     # flipping them here switches the whole app into static-export mode.
-    prev = (webapp.STATIC_MODE, webapp.BASE_PATH, get_config().display_currency)
+    prev = (webapp.STATIC_MODE, webapp.STATIC_DEPTH, get_config().display_currency)
     webapp.STATIC_MODE = True
-    webapp.BASE_PATH = base_url.rstrip("/")
     get_config().display_currency = ccy
     try:
-        return _crawl(webapp, out_dir, base_url, quiet)
+        return _crawl(webapp, out_dir, quiet)
     finally:
-        webapp.STATIC_MODE, webapp.BASE_PATH = prev[0], prev[1]
+        webapp.STATIC_MODE, webapp.STATIC_DEPTH = prev[0], prev[1]
         get_config().display_currency = prev[2]
 
 
-def _crawl(webapp, out_dir: str, base_url: str, quiet: bool):
+def _crawl(webapp, out_dir: str, quiet: bool):
     from starlette.testclient import TestClient
 
     from . import db as dbq
@@ -67,6 +65,9 @@ def _crawl(webapp, out_dir: str, base_url: str, quiet: bool):
         conn.close()
 
     def save(route: str, path: str):
+        # Links are emitted relative to the file being written, so the whole
+        # site can be mounted anywhere.
+        webapp.STATIC_DEPTH = path.count("/")
         resp = client.get(route)
         if resp.status_code != 200:
             log(f"  ! skip {route} ({resp.status_code})")
@@ -93,20 +94,18 @@ def _crawl(webapp, out_dir: str, base_url: str, quiet: bool):
     (out / ".nojekyll").write_text("")
 
     log(f"Exported {n_pages} pages + {n_json} JSON files to {out}/")
-    if base_url:
-        log(f"After enabling GitHub Pages: https://rshiri.github.io{base_url}/")
+    log("Links are relative, so the site works from /docs, the repo root, "
+        "or any custom domain.")
     return n_pages, n_json
 
 
 def main():
     ap = argparse.ArgumentParser(description="Export the site as static HTML for GitHub Pages")
     ap.add_argument("--out", default="docs", help="output directory (default: docs)")
-    ap.add_argument("--base-url", default=DEFAULT_BASE,
-                    help=f'site base path (default: "{DEFAULT_BASE}"; use "" for a root domain)')
     ap.add_argument("--ccy", default="ILS", choices=["ILS", "USD", "EUR", "GBP"],
                     help="display currency baked into the export")
     args = ap.parse_args()
-    export(args.out, args.base_url.rstrip("/"), args.ccy)
+    export(args.out, args.ccy)
 
 
 if __name__ == "__main__":
