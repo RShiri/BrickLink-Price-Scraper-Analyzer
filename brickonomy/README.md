@@ -98,6 +98,13 @@ All links in the export are *relative*, so it also works if Pages is set to
 the repo root (the root `index.html` redirects into `docs/`) or served from a
 custom domain — no rebuild needed when the mount point changes.
 
+Two files at the repo root matter for branch-source Pages and must not be
+deleted: **`.nojekyll`** (without it GitHub runs Jekyll over the whole
+repository — binaries, caches and all — and the build fails or mangles the
+site) and **`index.html`** (redirects `/` into `docs/`). `.github/workflows/
+pages-check.yml` probes the live URLs after each publish and fails loudly if
+any of them stops returning 200.
+
 Update loop: `python -m brickonomy.refresh` → `python -m brickonomy.export` →
 commit + push. The published site is read-only (no refresh/import buttons);
 prices are as of the last scan. Options: `--ccy USD` bakes a different display
