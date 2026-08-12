@@ -19,7 +19,7 @@ import re
 from bs4 import BeautifulSoup
 
 from ..models import Listing, ScrapeResult
-from .base import BaseScraper, polite_sleep, run_cli
+from .base import BaseScraper, find_prices, polite_sleep, run_cli
 
 SEARCH_URL = "https://www.ebay.com/sch/i.html"
 
@@ -37,11 +37,9 @@ NEW_RE = re.compile(r"sealed|nisb|nib\b|misb|bnib|new\s+in\s+(?:sealed\s+)?box|"
                     r"brand\s+new|factory\s+sealed|unopened", re.IGNORECASE)
 USED_RE = re.compile(r"\bused\b|pre[- ]?owned|built|complete\s+set|100%\s*complete|"
                      r"assembled|displayed|retired\s+built", re.IGNORECASE)
-# Leading symbol optional, and a currency code or trailing symbol accepted:
-# eBay formats prices for the viewer's locale, so the same listing reads
-# "$12.34" to one visitor and "ILS 45.60" or "45.60 ₪" to another. Requiring
-# a leading symbol silently parsed zero listings from pages full of them.
-PRICE_RE = re.compile(r"(?:[A-Z]{2,3}\s*)?[\$£€₪]?\s*([\d,]+\.\d{2})")
+# Prices come from base.find_prices: eBay formats them for the viewer's
+# locale, so the same listing reads "$12.34" to one visitor and "ILS 45.60"
+# or "45.60 ₪" to another.
 
 
 class EbaySource(BaseScraper):
@@ -165,12 +163,10 @@ class EbaySource(BaseScraper):
         # Skip price ranges ("$x to $y") — ambiguous.
         if re.search(r"\bto\b", price_text, re.IGNORECASE) and price_text.count("$") > 1:
             return None
-        m = PRICE_RE.search(price_text.replace(",", ""))
-        if not m:
+        prices = find_prices(price_text)
+        if not prices:
             return None
-        price = float(m.group(1))
-        if price <= 0:
-            return None
+        price = prices[0][0]
 
         condition = self._classify_condition(card, title)
         if condition is None:

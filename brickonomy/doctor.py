@@ -69,9 +69,14 @@ def _common_classes(soup, n=14):
 
 
 def _prices_seen(soup, n=6, context=False):
+    # Deliberately the scrapers' own detector. A private copy here once
+    # reported "NONE" on a page the parser read 12 offers from, which sent
+    # the investigation down three wrong paths.
+    from .scrapers.base import PRICE_RE
+
     text = soup.get_text(" ", strip=True)
-    pattern = re.compile(r"[\$£€₪]\s*[\d,]+(?:\.\d{2})?")
-    found = [m.group(0) for m in pattern.finditer(text)][:n]
+    pattern = PRICE_RE
+    found = [m.group(0).strip() for m in pattern.finditer(text)][:n]
     print(f"    price-looking strings on the page: {found or 'NONE'}")
     if context:
         # The words around a price are what a parser has to key off, so print

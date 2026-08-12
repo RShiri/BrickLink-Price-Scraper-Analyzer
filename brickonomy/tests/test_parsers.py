@@ -171,3 +171,49 @@ class TestBrickOwlParser:
         analysis = PriceAnalyzer(result.analyzer_input()).analyze()
         assert analysis["new"]["confidence"] == "LOW"
         assert analysis["new"]["market_price"] > 0
+
+
+class TestPriceParsing:
+    """Prices are formatted for the visitor's locale.
+
+    Requiring a leading currency symbol made both eBay and BrickOwl parse
+    nothing on pages full of offers, and the doctor agreed with the broken
+    parser because it kept its own copy of the same regex. This is the
+    regression that cost the most time in this project; keep it loud.
+    """
+
+    CASES = [
+        ("$1,234.56", 1234.56, "USD"),
+        ("US $12.34", 12.34, "USD"),
+        ("ILS 45.60", 45.60, None),      # code isn't a symbol map entry
+        ("45.60 ₪", 45.60, "ILS"),
+        ("612.00", 612.00, None),        # bare — currency comes from the page
+        ("€ 99.90", 99.90, "EUR"),
+        ("£8.75", 8.75, "GBP"),
+    ]
+
+    def test_formats(self):
+        from brickonomy.scrapers.base import find_prices
+        for text, amount, ccy in self.CASES:
+            found = find_prices(text)
+            assert found, f"no price parsed from {text!r}"
+            assert found[0][0] == amount, text
+            assert found[0][1] == ccy, text
+
+    def test_default_currency_fills_bare_numbers(self):
+        from brickonomy.scrapers.base import find_prices
+        assert find_prices("612.00", default_ccy="ILS") == [(612.00, "ILS")]
+
+    def test_rejects_non_prices(self):
+        from brickonomy.scrapers.base import find_prices
+        # Integers without decimals are years, set numbers and piece counts.
+        for text in ("2017", "Set 75192", "7541 pieces", "no digits here"):
+            assert find_prices(text) == [], text
+
+    def test_doctor_uses_the_same_detector(self):
+        """The diagnostic must never be able to contradict the parser."""
+        from brickonomy import doctor
+        from brickonomy.scrapers.base import PRICE_RE
+        import inspect
+        assert "PRICE_RE" in inspect.getsource(doctor._prices_seen)
+        assert PRICE_RE.search("612.00")

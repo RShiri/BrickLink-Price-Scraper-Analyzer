@@ -14,18 +14,11 @@ import requests
 from bs4 import BeautifulSoup
 
 from ..models import Listing, ScrapeResult
-from .base import USER_AGENT, BaseScraper, run_cli
+from .base import USER_AGENT, BaseScraper, find_prices, run_cli
 
 BASE_URL = "https://www.brickowl.com"
-SYMBOL_TO_CCY = {"£": "GBP", "$": "USD", "€": "EUR", "₪": "ILS"}
-CODE_TO_CCY = {"US": "USD", "CA": "CAD", "AU": "AUD", "NZ": "NZD"}
-# The symbol is optional and may trail the number: BrickOwl formats prices for
-# the visitor's locale, and for some regions renders them bare ("12.34") or
-# suffixed ("12.34 ₪"). Requiring a leading symbol found nothing at all on
-# those pages — 15 offer rows, zero parsed.
-PRICE_RE = re.compile(
-    r"(?:(?P<code>[A-Z]{2,3})\s*)?(?P<sym>[£$€₪])?\s*"
-    r"(?P<amt>\d[\d,]*(?:\.\d{1,2})?)\s*(?P<sym2>[£$€₪])?")
+# Prices come from base.find_prices: BrickOwl renders them in the visitor's
+# locale, so they may be bare ("612.00") or symbol-suffixed.
 
 
 class BrickOwlSource(BaseScraper):
@@ -129,19 +122,14 @@ class BrickOwlSource(BaseScraper):
             else:
                 if not re.search(r"\bused\b", low):
                     continue
-            m = PRICE_RE.search(text)
-            if not m:
+            prices = find_prices(text, default_ccy=page_ccy or "GBP")
+            if not prices:
                 continue
-            price = float(m.group("amt").replace(",", ""))
-            if price <= 0:
-                continue
+            price, ccy = prices[0]
             qty = 1
             qm = re.search(r"(\d+)\s+(?:available|in stock)", low)
             if qm:
                 qty = max(1, min(int(qm.group(1)), 50))
-            symbol = m.group("sym") or m.group("sym2")
-            ccy = (SYMBOL_TO_CCY.get(symbol) or CODE_TO_CCY.get(m.group("code") or "")
-                   or page_ccy or "GBP")
             yield price, qty, ccy, text[:140]
 
     @staticmethod
