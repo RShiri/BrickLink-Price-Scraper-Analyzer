@@ -470,6 +470,42 @@ def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "grow
         conn.close()
 
 
+def _maybe_auto_scan(conn, item_id):
+    """Queue a scan for an item whose page was just opened and whose prices are
+    missing or stale. Returns None, or {'state', 'position', 'age_days'} for
+    the banner.
+
+    Never runs during a static export: the exporter GETs every page through a
+    test client, which would queue a scan for the entire catalog."""
+    cfg = get_config()
+    if STATIC_MODE or not cfg.auto_scan_on_view_days:
+        return None
+
+    last = dbq.last_scrape_any(conn, item_id)
+    age_days = None
+    if last:
+        try:
+            age_days = (datetime.now() - datetime.fromisoformat(last)).days
+        except ValueError:
+            age_days = None
+        if age_days is not None and age_days < cfg.auto_scan_on_view_days:
+            return None
+
+    status = jobs.status()
+    if status.get("current_item") == item_id:
+        return {"state": "scanning", "position": 0, "age_days": age_days}
+    position = jobs.enqueue(item_id)
+    if position is None:
+        # Already queued by an earlier view, or the queue is full.
+        if item_id in status.get("queue", []):
+            return {"state": "queued",
+                    "position": status["queue"].index(item_id) + 1,
+                    "age_days": age_days}
+        return None
+    return {"state": "scanning" if position == 1 and not status["running"] else "queued",
+            "position": position, "age_days": age_days}
+
+
 @app.get("/sets/{item_id}")
 def set_detail(request: Request, item_id: str, parts_q: str = ""):
     conn = get_conn()
@@ -579,7 +615,8 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
         deal = deal_for(conn, item_id, ccy)
 
         return templates.TemplateResponse(request, "set_detail.html", ctx(
-            request, conn, item=row, values=values, retail=retail_disp,
+            request, conn, auto_scan=_maybe_auto_scan(conn, item_id),
+            item=row, values=values, retail=retail_disp,
             growth_total=g_total, growth_cagr=g_cagr, forecast=fc, phase=ph,
             buy_target=buy_target, per_source=per_source_all, source_stats=stats,
             offers=offers, best_source=best_source,
@@ -627,7 +664,8 @@ def _minifig_detail(request: Request, conn, row):
     best_source = min(offers, key=lambda s: offers[s]["display"] or 1e18) if offers else None
 
     return templates.TemplateResponse(request, "minifig_detail.html", ctx(
-        request, conn, item=row, values=values, per_source=per_source_all,
+        request, conn, auto_scan=_maybe_auto_scan(conn, fig_id),
+        item=row, values=values, per_source=per_source_all,
         growth_cagr=g_cagr, delta30=delta30, appears_in=appears_in,
         offers=offers, best_source=best_source,
     ))

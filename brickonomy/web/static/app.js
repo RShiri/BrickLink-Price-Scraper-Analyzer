@@ -461,6 +461,39 @@
     });
   });
 
+  // ── auto-scan banner: wait for this item's scan, then show the prices ──
+  const autoScan = document.getElementById("autoScan");
+  if (autoScan) {
+    const id = autoScan.dataset.item;
+    const text = document.getElementById("autoScanText");
+    let seen = false;                    // became visible in the job state
+    const poll = () => {
+      // Absolute path is safe: the banner only renders on the live server,
+      // never in the static export.
+      fetch("/api/refresh/status")
+        .then((r) => r.json())
+        .then((s) => {
+          const queued = (s.queue || []).indexOf(id);
+          const active = s.current_item === id;
+          if (active || queued >= 0) {
+            seen = true;
+            if (text) {
+              text.textContent = active
+                ? "Fetching prices from BrickLink, eBay and BrickOwl…"
+                : `Queued for a refresh, ${queued} ahead.`;
+            }
+            setTimeout(poll, 3000);
+          } else if (seen || !s.running) {
+            window.location.reload();    // our scan finished — show the result
+          } else {
+            setTimeout(poll, 3000);
+          }
+        })
+        .catch(() => setTimeout(poll, 6000));
+    };
+    setTimeout(poll, 2500);
+  }
+
   // ── refresh page: live progress polling ────────────────────────────────
   const scanStatus = document.getElementById("scanStatus");
   if (scanStatus) {

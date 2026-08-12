@@ -34,13 +34,17 @@ def _describe(html, label):
     soup = _soup(html)
     title = (soup.title.get_text(strip=True) if soup.title else "")[:80]
     print(f"  {label}: {len(html):,} bytes · title={title!r}")
+    # Only trust strong signals: "cloudflare" and "robot" appear in ordinary
+    # footers, so matching them anywhere produced false alarms.
     low = html[:6000].lower()
-    blocked = [w for w in ("captcha", "are you a human", "access denied",
-                           "unusual traffic", "cloudflare", "please verify",
-                           "pardon our interruption", "robot")
+    signals = [w for w in ("captcha", "are you a human", "access denied",
+                           "unusual traffic", "pardon our interruption",
+                           "checking your browser", "verify you are human")
                if w in low]
-    if blocked:
-        print(f"    ⚠ looks blocked — page mentions: {', '.join(blocked)}")
+    if "error page" in title.lower() or "denied" in title.lower():
+        signals.append(f"title says {title!r}")
+    if signals:
+        print(f"    ⚠ looks blocked — {', '.join(signals)}")
     return soup
 
 
@@ -64,10 +68,17 @@ def _common_classes(soup, n=14):
     print(f"    most common classes: {top}")
 
 
-def _prices_seen(soup, n=6):
+def _prices_seen(soup, n=6, context=False):
     text = soup.get_text(" ", strip=True)
-    found = re.findall(r"[\$£€₪]\s*[\d,]+(?:\.\d{2})?", text)[:n]
+    pattern = re.compile(r"[\$£€₪]\s*[\d,]+(?:\.\d{2})?")
+    found = [m.group(0) for m in pattern.finditer(text)][:n]
     print(f"    price-looking strings on the page: {found or 'NONE'}")
+    if context:
+        # The words around a price are what a parser has to key off, so print
+        # them verbatim when a regex is being rewritten.
+        for m in list(pattern.finditer(text))[:n]:
+            start, end = max(0, m.start() - 110), min(len(text), m.end() + 40)
+            print(f"      … {text[start:end]} …")
 
 
 def _dump(html, path):
@@ -175,7 +186,8 @@ def check_bricklink_pov(item_id, dump=False):
         idx = text.lower().find(label.lower())
         if idx >= 0:
             print(f"    …{text[max(0, idx - 60):idx + 90]}…")
-    _prices_seen(soup, n=8)
+    _prices_seen(soup, n=8, context=True)
+    print(f"    page text (first 900 chars):\n      {text[:900]}")
     if dump:
         _dump(html, f"doctor_bricklink_{item_id}_pov.html")
     print(f"  → parser produced: {src.parse_part_out_value(html)}")
