@@ -31,6 +31,7 @@
       {{ m.phase_chip(phase) }}
       <a class="chip" href="{{ bricklink_url(item.item_id, item.item_type) }}" target="_blank" rel="noopener">BrickLink ↗</a>
       <a class="chip" href="{{ brickeconomy_url(item.item_id, item.item_type) }}" target="_blank" rel="noopener">BrickEconomy ↗</a>
+      {{ m.scan_button(item.item_id) }}
     </div>
     {% if phase.phase and item.year %}
     <div class="phasebar" style="margin-top:16px">

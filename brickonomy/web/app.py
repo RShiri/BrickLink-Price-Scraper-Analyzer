@@ -549,7 +549,7 @@ def _maybe_auto_scan(conn, item_id):
     Never runs during a static export: the exporter GETs every page through a
     test client, which would queue a scan for the entire catalog."""
     cfg = get_config()
-    if STATIC_MODE or not cfg.auto_scan_on_view_days:
+    if STATIC_MODE:
         return None
 
     last = dbq.last_scrape_any(conn, item_id)
@@ -559,30 +559,35 @@ def _maybe_auto_scan(conn, item_id):
             age_days = (datetime.now() - datetime.fromisoformat(last)).days
         except ValueError:
             age_days = None
-        if age_days is not None and age_days < cfg.auto_scan_on_view_days:
-            # Fresh prices — but a set whose specs promise minifigs while none
-            # are stored has a failed/missing inventory scan (e.g. BrickLink
-            # served the plain client a redirect): scan it anyway, the fresh
-            # sources are skipped and only the inventory is fetched.
-            row = dbq.get_item(conn, item_id)
-            figs_missing = (row is not None
-                            and (row["item_type"] or "S") == "S"
-                            and (row["minifigs"] or 0) > 0
-                            and not dbq.get_set_minifigs(conn, item_id))
-            if not figs_missing:
-                return None
 
+    # A scan already underway — auto-queued by an earlier view, or requested
+    # via the page's Scan button — shows the banner whatever the prices' age.
     status = jobs.status()
     if status.get("current_item") == item_id:
         return {"state": "scanning", "position": 0, "age_days": age_days}
+    if item_id in status.get("queue", []):
+        return {"state": "queued",
+                "position": status["queue"].index(item_id) + 1,
+                "age_days": age_days}
+
+    if not cfg.auto_scan_on_view_days:
+        return None
+    if age_days is not None and age_days < cfg.auto_scan_on_view_days:
+        # Fresh prices — but a set whose specs promise minifigs while none
+        # are stored has a failed/missing inventory scan (e.g. BrickLink
+        # served the plain client a redirect): scan it anyway, the fresh
+        # sources are skipped and only the inventory is fetched.
+        row = dbq.get_item(conn, item_id)
+        figs_missing = (row is not None
+                        and (row["item_type"] or "S") == "S"
+                        and (row["minifigs"] or 0) > 0
+                        and not dbq.get_set_minifigs(conn, item_id))
+        if not figs_missing:
+            return None
+
     position = jobs.enqueue(item_id)
     if position is None:
-        # Already queued by an earlier view, or the queue is full.
-        if item_id in status.get("queue", []):
-            return {"state": "queued",
-                    "position": status["queue"].index(item_id) + 1,
-                    "age_days": age_days}
-        return None
+        return None                       # queue is full
     return {"state": "scanning" if position == 1 and not status["running"] else "queued",
             "position": position, "age_days": age_days}
 
@@ -762,6 +767,17 @@ def _minifig_detail(request: Request, conn, row, parts_q: str = ""):
         parts=parts, parts_summary=psum, parts_q=parts_q,
         pov=None, pov_premium=None,
     ))
+
+
+@app.post("/sets/{item_id}/scan")
+def set_scan(request: Request, item_id: str):
+    """The set/minifig page's Scan button: queue a forced scan of this one
+    item — all marketplaces, plus parts and minifig inventory — even if its
+    prices are still fresh. Lands back on the page, where the banner tracks
+    the queued scan."""
+    item_id = normalize_item_id(item_id)
+    jobs.enqueue(item_id, force=True)
+    return RedirectResponse(f"/sets/{quote(item_id)}", status_code=303)
 
 
 @app.get("/set")

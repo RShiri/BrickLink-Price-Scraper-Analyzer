@@ -62,13 +62,26 @@
   <span class="spinner"></span>
   <span id="autoScanText">
     {%- if info.age_days is none %}No prices yet — scanning this item now, about 30 seconds.
-    {%- elif info.state == 'scanning' %}Prices are {{ info.age_days }} days old — refreshing now.
-    {%- else %}Prices are {{ info.age_days }} days old — queued for a refresh
+    {%- elif info.state == 'scanning' -%}
+      {%- if info.age_days > 0 %}Prices are {{ info.age_days }} days old — refreshing now.
+      {%- else %}Rescanning this item now.{% endif %}
+    {%- else -%}
+      {%- if info.age_days > 0 %}Prices are {{ info.age_days }} days old — queued for a refresh
+      {%- else %}Queued for a rescan{% endif %}
       {%- if info.position > 1 %}, {{ info.position - 1 }} ahead{% endif %}.
     {%- endif %}
   </span>
   <span class="soft">The page updates by itself when it finishes.</span>
 </div>
+{%- endif %}
+{%- endmacro %}
+
+{% macro scan_button(item_id) -%}
+{%- if not static_mode %}
+<form method="post" action="/sets/{{ item_id }}/scan" style="display:inline;margin:0">
+  <button class="chip" type="submit" style="cursor:pointer"
+          title="Scrape BrickLink, eBay and BrickOwl now — prices, parts and minifig inventory — even if the data is fresh">⟳ Scan now</button>
+</form>
 {%- endif %}
 {%- endmacro %}
 

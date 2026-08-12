@@ -28,6 +28,7 @@
       {{ m.confidence_chip(values.new.confidence) }}
       <a class="chip" href="{{ bricklink_url(item.item_id, 'M') }}" target="_blank" rel="noopener">BrickLink ↗</a>
       <a class="chip" href="{{ brickeconomy_url(item.item_id, 'M') }}" target="_blank" rel="noopener">BrickEconomy ↗</a>
+      {{ m.scan_button(item.item_id) }}
     </div>
   </div>
 </div>

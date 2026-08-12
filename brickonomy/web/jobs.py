@@ -16,7 +16,7 @@ from collections import deque
 MAX_QUEUE = 25
 
 _lock = threading.Lock()
-_queue = deque()        # ("scope", kwargs) | ("item", item_id)
+_queue = deque()        # ("scope", kwargs) | ("item", item_id, force)
 _queued_items = set()   # item ids in _queue, for dedupe
 _state = {
     "running": False,
@@ -65,7 +65,7 @@ def start(scope="portfolio", item_id=None, force=False, theme=None):
         if _state["running"] or any(t[0] == "scope" for t in _queue):
             return False
         if item_id:
-            _queue.append(("item", item_id))
+            _queue.append(("item", item_id, force))
             _queued_items.add(item_id)
         else:
             _queue.append(("scope", {"scope": scope, "force": force,
@@ -165,16 +165,17 @@ ACTIONS = {
 }
 
 
-def enqueue(item_id):
-    """Queue one item scanned because its page was viewed. Returns the 1-based
-    queue position, or None when it was not queued (already pending, already
-    scanning, or the queue is full)."""
+def enqueue(item_id, force=False):
+    """Queue one item scanned because its page was viewed (or its Scan button
+    was clicked, with force=True). Returns the 1-based queue position, or None
+    when it was not queued (already pending, already scanning, or the queue is
+    full)."""
     with _lock:
         if item_id in _queued_items or _state["current_item"] == item_id:
             return None
         if len(_queue) >= MAX_QUEUE:
             return None
-        _queue.append(("item", item_id))
+        _queue.append(("item", item_id, force))
         _queued_items.add(item_id)
         position = len(_queue)
         if not _state["running"]:
@@ -214,7 +215,8 @@ def _drain():
             return
         try:
             if task[0] == "item":
-                run_refresh(item_id=task[1], progress=_progress, log=_log_line)
+                run_refresh(item_id=task[1], force=task[2],
+                            progress=_progress, log=_log_line)
             elif task[0] == "action":
                 _log_line(f"▶ {ACTIONS[task[1]][0]}…")
                 ACTIONS[task[1]][1](_log_line)
