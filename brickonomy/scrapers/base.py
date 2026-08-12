@@ -18,8 +18,10 @@ from pathlib import Path
 from ..config import get_config
 from ..models import ScrapeResult
 
+# Used for the plain-`requests` fetches (BrickLink POV, BrickOwl). Selenium
+# sessions keep the browser's own UA — see make_driver.
 USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
+              "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36")
 
 
 def polite_sleep():
@@ -47,12 +49,26 @@ def make_driver(profile_dir=None, headless=True):
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--log-level=3")
-    opts.add_argument(f"user-agent={USER_AGENT}")
+    # Deliberately NOT overriding the user agent. Chrome sends its real
+    # version in sec-ch-ua client hints no matter what the UA string says, so
+    # pinning a stale "Chrome/119" string only creates a mismatch that bot
+    # detection reads as automation. The browser's own UA is consistent.
     opts.add_argument("--disable-blink-features=AutomationControlled")
+    opts.add_argument("--window-size=1440,900")
     opts.add_experimental_option("excludeSwitches", ["enable-automation"])
     opts.add_experimental_option("useAutomationExtension", False)
     driver = webdriver.Chrome(options=opts)
     driver.set_page_load_timeout(40)
+
+    # navigator.webdriver is true for every Selenium session and is the first
+    # thing anti-bot scripts read. Patch it before any page script runs.
+    try:
+        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+            "source": "Object.defineProperty(navigator, 'webdriver', "
+                      "{get: () => undefined});"
+        })
+    except Exception:
+        pass          # non-Chromium driver, or CDP unavailable — not fatal
     return driver
 
 

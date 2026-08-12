@@ -15,6 +15,7 @@ app by default). Delete that folder to sign out. Set `ebay_profile_dir` to ""
 in config.json to switch the whole thing off and keep eBay asks-only.
 """
 import argparse
+import time
 from pathlib import Path
 
 from .config import get_config
@@ -40,6 +41,8 @@ def check(profile_dir=None, log=print):
 
     driver = make_driver(profile_dir=profile)
     try:
+        driver.get("https://www.ebay.com/")      # arrive with a referrer
+        time.sleep(2)
         driver.get(CHECK_URL)
         html = driver.page_source
         title = driver.title
@@ -75,19 +78,40 @@ def login(log=print):
     try:
         driver.get(SIGNIN_URL)
         input("\n  Press Enter here once you are signed in… ")
-        driver.get(CHECK_URL)
-        cards = _count_cards(driver.page_source)
+
+        # Retry rather than give up. eBay's "Pardon Our Interruption"
+        # interstitial is bot detection, not a login failure — it usually
+        # clears once you interact with the page in the visible window, and
+        # arriving from the homepage rather than cold helps.
+        for attempt in range(1, 5):
+            driver.get("https://www.ebay.com/")
+            time.sleep(2)
+            driver.get(CHECK_URL)
+            time.sleep(2)
+            cards, title = _count_cards(driver.page_source), driver.title
+            if cards:
+                log(f"\n✔ Done — the sold search returned {cards} results.")
+                log("  eBay scans will now include sold prices, which raises")
+                log("  its confidence from LOW to HIGH/MEDIUM in the blend.")
+                return True
+
+            log(f"\n  Attempt {attempt}: blocked — page title {title!r}.")
+            if "interruption" in title.lower() or "security" in title.lower():
+                log("  That is eBay's bot check, not a sign-in problem.")
+                log("  In the Chrome window: solve whatever it shows (a")
+                log("  button, a slider, sometimes just scrolling), until you")
+                log("  can see real sold listings there.")
+            else:
+                log("  Make sure you are actually signed in in that window.")
+            if input("  Press Enter to check again, or type q to stop: ").strip().lower() == "q":
+                break
         title = driver.title
     finally:
         driver.quit()
 
-    if cards:
-        log(f"\n✔ Done — the sold search returned {cards} results.")
-        log("  eBay scans will now include sold prices, which raises its")
-        log("  confidence from LOW to HIGH/MEDIUM in the blended value.")
-        return True
-    log(f"\n✘ Sold search still blocked (page title: {title!r}).")
-    log("  eBay stays asks-only. Try again, or leave it as is.")
+    log("\n✘ Sold prices are not reachable from this machine right now.")
+    log("  eBay stays asks-only; everything else keeps working. You can")
+    log("  re-run this any time.")
     return False
 
 

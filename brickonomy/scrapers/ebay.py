@@ -98,6 +98,12 @@ class EbaySource(BaseScraper):
         htmls = {"sold": "", "active": ""}
         driver = make_driver(profile_dir=profile)
         try:
+            if profile:
+                # Land on the homepage first. Jumping straight to a sold
+                # search with no referrer and no prior session activity is
+                # what trips eBay's "Pardon Our Interruption" interstitial.
+                driver.get("https://www.ebay.com/")
+                polite_sleep()
             for key, url in urls.items():
                 driver.get(url)
                 polite_sleep()
