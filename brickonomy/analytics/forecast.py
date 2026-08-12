@@ -1,10 +1,12 @@
-"""Trend-based value forecast with retirement-phase adjustment.
+"""Trend-based value forecast shaped by the retirement cycle.
 
-Projection: value * (1 + g_eff)^t where g is the best growth estimate clamped
-to sane bounds and g_eff applies a phase multiplier modeled on the well-known
-retirement cycle (bump at retirement, 6–24 month acceleration, stabilization).
-All tuning constants live in PARAMS. Outputs carry a ±band and are labeled
-"trend estimate" in the UI — this is not a statistical model.
+BrickEconomy-style curve rather than a flat compound line: each projected
+year applies the multiplier of the phase the item will be in *that* year —
+damped while the set is still in stores, a one-time step when it retires,
+accelerated growth for the first two retired years, then stabilization.
+The uncertainty band widens with the horizon. All tuning constants live in
+PARAMS. Outputs are labeled "trend estimate" in the UI — this is not a
+statistical model.
 """
 from datetime import datetime
 
@@ -23,15 +25,31 @@ PARAMS = {
         "RETIRED_STABLE": 0.7,
         None: 1.0,
     },
-    "retirement_step_pct": 10.0,  # one-time bump applied when the horizon
-                                  # crosses the estimated retirement year
-    "band_pct": 20.0,
-    "horizons_years": (2, 5),
+    "retirement_step_pct": 10.0,  # one-time bump in the retirement year
+    "band_start_pct": 12.0,       # ±band at +1y ...
+    "band_step_pct": 4.5,         # ... widening per additional year out
+    "horizon_years": 5,
 }
 
 
+def _phase_in_year(year, retirement_year, current_phase):
+    """Which lifecycle phase the item will be in during `year`."""
+    if not retirement_year:
+        return current_phase
+    if year < retirement_year - 1:
+        return "NEW"
+    if year <= retirement_year:
+        return "EOL WATCH"
+    if year <= retirement_year + 2:
+        return "RETIRED_ACCEL"
+    return "RETIRED_STABLE"
+
+
 def forecast(conn, item_id, condition="new"):
-    """Returns {'basis', 'growth_pct', 'phase', 'horizons': {years: {value, low, high}}}
+    """Returns {'basis', 'growth_pct', 'growth_effective_pct', 'phase',
+    'points': [{year, value, low, high}, ...],
+    'horizons': {1..N: {value, low, high, year, band_pct}},
+    'at_retirement': {'year', 'value'} | None}
     or None when there's no current value to project from."""
     value, _, _ = current_value(conn, item_id, condition)
     if not value or value <= 0:
@@ -45,23 +63,35 @@ def forecast(conn, item_id, condition="new"):
     item = dbq.get_item(conn, item_id)
     ph = lifecycle.phase(item["year"] if item else None,
                          item["theme"] if item else None)
-    g_eff = g * PARAMS["phase_multiplier"].get(ph["phase"], 1.0)
 
     now_year = datetime.now().year
-    horizons = {}
-    for years in PARAMS["horizons_years"]:
-        projected = value * (1 + g_eff / 100.0) ** years
-        # One-time retirement bump if the horizon crosses the estimated
-        # retirement year of a not-yet-retired set.
-        if (ph["retirement_year"] and now_year < ph["retirement_year"] <= now_year + years):
+    ret_year = ph["retirement_year"]
+    projected = value
+    points, horizons = [], {}
+    at_retirement = None
+    first_year_mult = PARAMS["phase_multiplier"].get(
+        _phase_in_year(now_year + 1, ret_year, ph["phase"]), 1.0)
+
+    for t in range(1, PARAMS["horizon_years"] + 1):
+        yr = now_year + t
+        mult = PARAMS["phase_multiplier"].get(
+            _phase_in_year(yr, ret_year, ph["phase"]), 1.0)
+        projected *= 1 + g * mult / 100.0
+        if ret_year and yr == ret_year:
             projected *= 1 + PARAMS["retirement_step_pct"] / 100.0
-        band = PARAMS["band_pct"] / 100.0
-        horizons[years] = {
+        band = (PARAMS["band_start_pct"] + PARAMS["band_step_pct"] * (t - 1)) / 100.0
+        point = {
+            "year": yr,
             "value": round(projected, 2),
             "low": round(projected * (1 - band), 2),
             "high": round(projected * (1 + band), 2),
-            "year": now_year + years,
         }
+        points.append(point)
+        horizons[t] = {**point, "band_pct": round(band * 100)}
+        if ret_year and yr == ret_year:
+            at_retirement = {"year": ret_year, "value": round(projected, 2)}
+
     return {"basis": basis, "growth_pct": round(g, 2),
-            "growth_effective_pct": round(g_eff, 2),
-            "phase": ph, "horizons": horizons}
+            "growth_effective_pct": round(g * first_year_mult, 2),
+            "phase": ph, "points": points, "horizons": horizons,
+            "at_retirement": at_retirement}

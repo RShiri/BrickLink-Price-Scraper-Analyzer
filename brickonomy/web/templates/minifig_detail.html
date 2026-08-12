@@ -5,6 +5,11 @@
 
 {{ m.autoscan_banner(auto_scan, item.item_id) }}
 
+<nav class="crumbs"><a href="{{ u('/catalog') }}">Browse</a>
+  › <a href="{{ u('/sets?type=M') }}">Minifigs</a>
+  {%- if item.theme %} › <a href="{{ u('/sets?theme=' ~ item.theme|urlencode) }}">{{ item.theme }}</a>{% endif %}
+  › <span>{{ item.item_id }}</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0;width:220px;min-height:220px">
     <img src="{{ img_url(item.item_id, 'M') }}" alt="{{ item.name }}"
@@ -21,6 +26,8 @@
       <span class="chip">🧍 minifigure</span>
       {% if appears_in %}<span class="chip">📦 {{ appears_in|length }} sets</span>{% endif %}
       {{ m.confidence_chip(values.new.confidence) }}
+      <a class="chip" href="{{ bricklink_url(item.item_id, 'M') }}" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="{{ brickeconomy_url(item.item_id, 'M') }}" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
   </div>
 </div>
@@ -120,5 +127,7 @@
     </div>
   </div>
 </div>
+
+{% include "_parts_card.html" %}
 
 {% endblock %}

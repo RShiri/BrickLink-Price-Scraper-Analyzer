@@ -26,6 +26,7 @@
   <nav class="tabs">
     {% set path = request.url.path %}
     <a href="{{ u('/') }}" class="{{ 'active' if path == '/' }}">Dashboard</a>
+    <a href="{{ u('/catalog') }}" class="{{ 'active' if path.startswith('/catalog') }}">Browse</a>
     <a href="{{ u('/sets') }}" class="{{ 'active' if path.startswith('/sets') }}">Sets</a>
     <a href="{{ u('/themes') }}" class="{{ 'active' if path.startswith('/themes') }}">Themes</a>
     <a href="{{ u('/deals') }}" class="{{ 'active' if path.startswith('/deals') }}">Deals</a>

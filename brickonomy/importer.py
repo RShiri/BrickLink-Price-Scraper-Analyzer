@@ -3,7 +3,10 @@
   python -m brickonomy.importer
 
 Idempotent:
-  1. BrickEconomy CSV export → items metadata + portfolio rows.
+  1. BrickEconomy CSV export → items metadata + portfolio rows. Exports that
+     carry BrickEconomy's own valuation columns (Value / Value New / Value
+     Used) additionally seed 'brickeconomy'-source snapshots, so an imported
+     file enriches price history without any scraping.
   2. Legacy bricklink_data.db JSON blobs → items metadata + one seed snapshot
      set per item (source='bricklink', ILS, timestamped with the blob's
      updated_at) so history charts start with a data point.
@@ -12,6 +15,7 @@ import csv
 import json
 import re
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 from . import db as dbq
@@ -19,6 +23,10 @@ from .config import get_config
 from .snapshots import write_snapshots
 
 MINIFIG_ID_RE = re.compile(r"^[a-z]{2,4}\d+", re.IGNORECASE)
+
+# Column spellings BrickEconomy has used across export flavors.
+BE_VALUE_COLS = {"new": ("Value", "Current Value", "Value New", "Value (New)"),
+                 "used": ("Value Used", "Value (Used)")}
 
 
 def normalize_item_id(raw: str) -> str:
@@ -45,12 +53,40 @@ def parse_money(raw: str):
     return float(digits), (ccy or "USD")
 
 
+def _seed_brickeconomy_values(conn, item_id, row, scraped_at) -> int:
+    """Store the export's own valuation columns (when present) as
+    'brickeconomy'-source snapshots. One per (item, condition, file date):
+    re-importing the same file is a no-op, a newer export adds a new point."""
+    added = 0
+    for condition, cols in BE_VALUE_COLS.items():
+        raw = next((row[c] for c in cols if row.get(c)), None)
+        value, ccy = parse_money(raw or "")
+        if not value or value <= 0:
+            continue
+        existing = conn.execute(
+            """SELECT 1 FROM price_snapshots
+               WHERE item_id=? AND source='brickeconomy' AND condition=?
+                 AND scraped_at=? LIMIT 1""",
+            (item_id, condition, scraped_at),
+        ).fetchone()
+        if existing:
+            continue
+        dbq.insert_snapshot(conn, item_id, "brickeconomy", condition, "market",
+                            ccy or "USD", market_price=value,
+                            confidence="MEDIUM", scraped_at=scraped_at)
+        added += 1
+    return added
+
+
 def import_csv(conn, csv_path: str) -> int:
     path = Path(csv_path)
     if not path.exists():
         print(f"[importer] CSV not found: {path} — skipping portfolio seed")
         return 0
-    count = 0
+    count = n_values = 0
+    # The file's mtime dates its valuation columns — that's when BrickEconomy
+    # computed them, not when we happen to import.
+    file_date = datetime.fromtimestamp(path.stat().st_mtime).isoformat(timespec="seconds")
     with path.open(newline="", encoding="utf-8-sig") as fh:
         for row in csv.DictReader(fh):
             number = (row.get("Number") or "").strip()
@@ -81,7 +117,11 @@ def import_csv(conn, csv_path: str) -> int:
                     owned=owned, wanted=wanted,
                     purchase_price=retail, purchase_currency=retail_ccy or "USD",
                 )
+            n_values += _seed_brickeconomy_values(conn, item_id, row, file_date)
             count += 1
+    conn.commit()
+    if n_values:
+        print(f"[importer] BrickEconomy valuation columns seeded: {n_values} snapshots")
     return count
 
 

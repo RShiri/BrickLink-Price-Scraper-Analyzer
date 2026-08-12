@@ -54,6 +54,62 @@ class TestBrickLinkPartsAndPOV:
         assert by_no["3023"]["color_name"] == "Light Bluish Gray"
         assert by_no["2412b"]["qty"] == 2
 
+    def test_parts_inventory_color_from_part_link(self):
+        """color_id must come from the part's own link, not the first
+        idColor anywhere in the row (counterpart links can differ)."""
+        html = """<table><tr>
+          <td><img></td><td>7</td>
+          <td><a href="/catalogItem.asp?P=3005&idColor=11">3005</a></td>
+          <td><a href="catalogList.asp?colorID=99">other</a>
+              <a href="/catalogItem.asp?P=3005&idColor=11">Black Brick 1 x 1</a></td>
+        </tr></table>"""
+        parts = BrickLinkSource().parse_parts_inventory(html)
+        assert parts == [{"part_no": "3005", "part_name": "Brick 1 x 1",
+                          "color_id": 11, "color_name": "Black", "qty": 7}]
+
+    def test_parts_inventory_color_map_resolves_unknown_colors(self):
+        """Colors outside the builtin list resolve through the DB-synced
+        color table, un-mangling the part name."""
+        html = """<table><tr>
+          <td><img></td><td>2</td>
+          <td><a href="/catalogItem.asp?P=98138&idColor=227">98138</a></td>
+          <td><a href="/catalogItem.asp?P=98138&idColor=227">Glitter Trans-Purple Tile, Round 1 x 1</a></td>
+        </tr></table>"""
+        src = BrickLinkSource()
+        bare = src.parse_parts_inventory(html)[0]
+        assert bare["color_name"] is None            # not in the builtin list
+        mapped = src.parse_parts_inventory(
+            html, color_map={227: "Glitter Trans-Purple"})[0]
+        assert mapped["color_name"] == "Glitter Trans-Purple"
+        assert mapped["part_name"] == "Tile, Round 1 x 1"
+
+    def test_parts_inventory_qty_from_cell_before_item_no(self):
+        """A leading numeric cell (e.g. a match-count column) must not be
+        mistaken for the quantity."""
+        html = """<table><tr>
+          <td>2016</td><td>3</td>
+          <td><a href="/catalogItem.asp?P=3001&idColor=5">3001</a></td>
+          <td><a href="/catalogItem.asp?P=3001&idColor=5">Reddish Brown Brick 2 x 4</a></td>
+        </tr></table>"""
+        parts = BrickLinkSource().parse_parts_inventory(html)
+        assert parts[0]["qty"] == 3
+
+    def test_minifig_inventory_url_shape(self):
+        """Minifig ids carry no -1 sequence suffix; set ids get one."""
+        from brickonomy.scrapers.bricklink import inv_ref
+        assert inv_ref("76031", "S") == "76031-1"
+        assert inv_ref("76031-2", "S") == "76031-2"
+        assert inv_ref("sh0167", "M") == "sh0167"
+
+    def test_color_table_parser(self):
+        html = """<table>
+          <tr><td>Name</td></tr>
+          <tr><td><img></td><td>11</td><td>Black</td><td>21,000</td><td>2,417</td><td>1949 - 2026</td></tr>
+          <tr><td><img></td><td>227</td><td>Glitter Trans-Purple</td><td>93</td><td>50</td><td>2013 - 2024</td></tr>
+        </table>"""
+        colors = BrickLinkSource().parse_color_table(html)
+        assert colors == {11: "Black", 227: "Glitter Trans-Purple"}
+
     def test_part_out_value(self):
         pov, ccy = BrickLinkSource().parse_part_out_value(read("bricklink_pov_76031.html"))
         assert pov == 612.34

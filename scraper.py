@@ -33,15 +33,25 @@ class BrickLinkScraper:
             last_date = datetime.fromisoformat(last_updated.split('T')[0])
             days_diff = (datetime.now() - last_date).days
             return days_diff < 3
-        except:
+        except (ValueError, TypeError):
             return True # Fallback
 
     def _init_driver(self):
-        chrome_options = Options()
-        chrome_options.add_argument("--headless") 
-        chrome_options.add_argument("--log-level=3")
-        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
-        driver = webdriver.Chrome(options=chrome_options)
+        # Prefer the hardened driver (stealth flags, webdriver patch, no
+        # pinned stale UA — see brickonomy/scrapers/base.py for why). Lazy
+        # import: brickonomy imports this module through compat.py, so a
+        # top-level import would be circular.
+        try:
+            from brickonomy.scrapers.base import make_driver
+            driver = make_driver(headless=True)
+        except ImportError:
+            chrome_options = Options()
+            chrome_options.add_argument("--headless=new")
+            chrome_options.add_argument("--log-level=3")
+            chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+            chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            chrome_options.add_experimental_option("useAutomationExtension", False)
+            driver = webdriver.Chrome(options=chrome_options)
         driver.set_page_load_timeout(30)
         return driver
 
@@ -120,12 +130,51 @@ class BrickLinkScraper:
         }
 
         tables = soup.find_all('table', class_='pcipgInnerTable')
-        if len(tables) >= 4:
+        classified = {}
+        for table in tables:
+            cond, kind = self._classify_table(table)
+            if cond and kind and (cond, kind) not in classified:
+                classified[(cond, kind)] = table
+
+        if len(classified) == 4:
+            for (cond, kind), table in classified.items():
+                data[cond][kind] = self._extract_rows(table, kind)
+        elif len(tables) >= 4:
+            # Heading detection failed (layout change?) — fall back to the
+            # historical fixed order, but say so instead of guessing silently.
+            print(f"[scraper] {item_id}: price tables not recognized by "
+                  f"headings ({len(classified)}/4) — using positional order")
             data["new"]["sold"] = self._extract_rows(tables[0], "sold")
             data["used"]["sold"] = self._extract_rows(tables[1], "sold")
             data["new"]["stock"] = self._extract_rows(tables[2], "stock")
             data["used"]["stock"] = self._extract_rows(tables[3], "stock")
+        elif tables:
+            print(f"[scraper] {item_id}: only {len(tables)} price tables "
+                  f"found — page layout changed or prices did not load")
         return data
+
+    @staticmethod
+    def _classify_table(table: Tag):
+        """(condition, kind) for one pcipgInnerTable, from its own markup:
+        the price guide renders New tables in td.pcipgOddColumn and Used in
+        td.pcipgEvenColumn; sold tables are headed by a month ("December
+        2025"), stock tables by "Currently Available"."""
+        cond = None
+        cell = table.find_parent('td')
+        classes = " ".join(cell.get("class") or []) if cell else ""
+        if "pcipgOddColumn" in classes:
+            cond = "new"
+        elif "pcipgEvenColumn" in classes:
+            cond = "used"
+
+        kind = None
+        head = table.find('tr')
+        head_txt = head.get_text(" ", strip=True) if head else ""
+        if "Currently Available" in head_txt:
+            kind = "stock"
+        elif re.match(r'[A-Z][a-z]+\s+\d{4}', head_txt) or "Times Sold" in head_txt:
+            kind = "sold"
+        return cond, kind
 
     def _extract_specs(self, soup: BeautifulSoup) -> Dict[str, Any]:
         text = soup.get_text()
@@ -175,5 +224,8 @@ class BrickLinkScraper:
                     'currency': ccy,
                     'status': "incomplete" if is_inc else "complete"
                 })
-            except: continue
+            except (ValueError, IndexError):
+                # Header/summary rows have no parsable qty+price — expected.
+                # Anything else (a real bug) is allowed to surface.
+                continue
         return rows

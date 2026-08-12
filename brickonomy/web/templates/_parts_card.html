@@ -1,0 +1,56 @@
+{# Parts inventory card, shared by set_detail and minifig_detail.
+   Expects in scope: item, parts, parts_summary, parts_q, pov, pov_premium. #}
+{% import "_macros.html" as m with context %}
+<div class="card">
+  <h3>Parts inventory <span class="soft">— exact list from the BrickLink {{ 'minifig' if item.item_type == 'M' else 'set' }} page</span></h3>
+  {% if parts_summary.lots > 0 %}
+  {% if static_mode %}
+  <div class="searchrow" style="margin-bottom:8px">
+    <span class="chip on">{{ "{:,}".format(parts_summary.lots) }} lots · {{ "{:,}".format(parts_summary.pieces) }} parts</span>
+    {% if pov %}
+    <span class="chip">Part-out value: <b style="color:var(--ink)">&nbsp;{{ pov|money(ccy) }}</b>
+      {% if pov_premium is not none %}&nbsp;· premium {{ m.delta(pov_premium, 0) }} vs set{% endif %}</span>
+    {% endif %}
+    <span class="spacer"></span>
+    <input class="inp" type="search" data-filter-table="partsTable" placeholder="Filter parts…" aria-label="Filter parts">
+  </div>
+  {% else %}
+  <form class="searchrow" method="get" action="/sets/{{ item.item_id }}" style="margin-bottom:8px">
+    <span class="chip on">{{ "{:,}".format(parts_summary.lots) }} lots · {{ "{:,}".format(parts_summary.pieces) }} parts</span>
+    {% if pov %}
+    <span class="chip">Part-out value: <b style="color:var(--ink)">&nbsp;{{ pov|money(ccy) }}</b>
+      {% if pov_premium is not none %}&nbsp;· premium {{ m.delta(pov_premium, 0) }} vs set{% endif %}</span>
+    {% endif %}
+    <span class="spacer"></span>
+    <input class="inp" type="search" name="parts_q" value="{{ parts_q }}" placeholder="Filter parts…" aria-label="Filter parts">
+  </form>
+  {% endif %}
+  {% set has_prices = parts|selectattr('avg_price')|list %}
+  <div class="table-scroll">
+  <table id="partsTable">
+    <tr><th>Part</th><th>Name</th><th>Color</th><th class="num">Qty</th>
+        {%- if has_prices %}<th class="num">Avg each</th><th class="num">Lot value</th>{% endif %}</tr>
+    {% for p in parts %}
+    <tr>
+      <td style="white-space:nowrap"><img class="partthumb" src="{{ part_img_url(p.part_no, p.color_id) }}"
+             alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+          <a href="{{ part_url(p.part_no, p.color_id) }}" target="_blank" rel="noopener"
+             title="Open on BrickLink">{{ p.part_no }}&nbsp;↗</a></td>
+      <td>{{ p.part_name }}</td>
+      <td>{{ p.color_name or '—' }}</td>
+      <td class="num">{{ p.qty }}</td>
+      {% if has_prices %}
+      <td class="num">{{ p.avg_price|money(p.price_currency) if p.avg_price else '—' }}</td>
+      <td class="num">{{ (p.avg_price * p.qty)|money(p.price_currency) if p.avg_price else '—' }}</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% if parts_summary.lots > parts|length %}
+  <div style="color:var(--muted);font-size:12px;margin-top:8px">Showing {{ parts|length }} of {{ "{:,}".format(parts_summary.lots) }} lots — use the filter to narrow.</div>
+  {% endif %}
+  {% else %}
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the {{ 'minifig' if item.item_type == 'M' else 'set' }}'s next refresh.</div>
+  {% endif %}
+</div>

@@ -10,8 +10,9 @@ Drives the regular FastAPI app with a test client (so the static site is
 pixel-identical to the live one) and saves every page/API response:
 
   /                     -> index.html
+  /catalog              -> catalog.html          (browse by theme/year/type)
   /sets                 -> sets/index.html
-  /sets?theme=T         -> sets/theme-<slug>.html
+  /sets?theme=T         -> sets/theme-<slug>.html (every theme)
   /sets/<id>            -> sets/<id>.html        (sets AND minifig pages)
   /themes, /deals       -> themes.html, deals.html
   /portfolio            -> portfolio.html
@@ -71,10 +72,12 @@ def _crawl(webapp, out_dir: str, quiet: bool):
         item_ids = sorted(set(snap_ids) | set(owned) | set(figs))
         webapp.STATIC_PAGED_IDS = set(item_ids)
         catalog_total = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
+        # Every theme gets a page: the Browse hub links them all, and a
+        # dangling theme card would be worse than ~150 cheap pages.
         themes = [r["theme"] for r in conn.execute(
             """SELECT theme, COUNT(*) n FROM items
                WHERE theme IS NOT NULL AND theme != ''
-               GROUP BY theme ORDER BY n DESC LIMIT 30""")]
+               GROUP BY theme ORDER BY n DESC""")]
     finally:
         conn.close()
 
@@ -93,6 +96,7 @@ def _crawl(webapp, out_dir: str, quiet: bool):
 
     n_pages = n_json = 0
     n_pages += save("/", "index.html")
+    n_pages += save("/catalog", "catalog.html")
     n_pages += save("/sets", "sets/index.html")
     n_pages += save("/themes", "themes.html")
     n_pages += save("/deals", "deals.html")

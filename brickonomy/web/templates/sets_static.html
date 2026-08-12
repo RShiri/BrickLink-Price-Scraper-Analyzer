@@ -4,6 +4,7 @@
 {% block content %}
 
 <div class="eyebrow">Catalog</div>
+<nav class="crumbs" id="catalogCrumbs" hidden><a href="{{ u('/catalog') }}">Browse</a><span id="catalogCrumbTail"></span></nav>
 <h1>Sets</h1>
 <p class="sub">Every LEGO set ever released — {{ "{:,}".format(catalog_total) }} items.
    Search by number, name or theme; sets with scanned prices open their own page.</p>
@@ -12,6 +13,13 @@
   <input class="inp" id="catalogSearch" type="search" autocomplete="off"
          placeholder="Search the whole catalog… (e.g. 75192, Falcon, Technic)" aria-label="Search all sets">
   <select class="inp" id="catalogTheme" aria-label="Filter by theme"><option value="">All themes</option></select>
+  <select class="inp" id="catalogSub" aria-label="Filter by subtheme" hidden><option value="">All subthemes</option></select>
+  <select class="inp" id="catalogYear" aria-label="Filter by year"><option value="">All years</option></select>
+  <select class="inp" id="catalogType" aria-label="Filter by type">
+    <option value="">Sets + minifigs</option>
+    <option value="S">Sets only</option>
+    <option value="M">Minifigs only</option>
+  </select>
   <select class="inp" id="catalogSort" aria-label="Sort">
     <option value="year">Newest first</option>
     <option value="year-asc">Oldest first</option>
@@ -24,7 +32,10 @@
 <div class="card">
   <div id="catalogCount" style="color:var(--muted);font-size:12.5px;margin-bottom:8px">Loading catalog…</div>
   <div class="table-scroll">
-  <table id="catalogTable">
+  {# The exporter renders per-theme pages (sets/theme-<slug>.html); the picked
+     facets ride along as data attributes so the browser starts pre-filtered. #}
+  <table id="catalogTable" data-theme="{{ theme }}" data-sub="{{ sub }}"
+         data-year="{{ year or '' }}" data-type="{{ itype }}">
     <thead>
       <tr><th>Set</th><th>Theme</th><th class="num">Year</th><th class="num">Parts</th><th>Prices</th></tr>
     </thead>

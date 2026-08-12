@@ -49,8 +49,9 @@ CREATE TABLE IF NOT EXISTS portfolio (
     FOREIGN KEY(item_id) REFERENCES items(item_id)
 );
 
-CREATE TABLE IF NOT EXISTS set_parts (
-    set_id TEXT NOT NULL, part_no TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS set_parts (       -- set_id holds any inventory
+    set_id TEXT NOT NULL, part_no TEXT NOT NULL,  -- owner: a set number or a
+                                                  -- minifig id
     part_name TEXT, color_id INTEGER, color_name TEXT,
     qty INTEGER NOT NULL,
     avg_price REAL, price_currency TEXT DEFAULT 'ILS',
@@ -91,6 +92,12 @@ CREATE TABLE IF NOT EXISTS set_minifigs (    -- which figs are in which set
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (set_id, fig_id),
     FOREIGN KEY(set_id) REFERENCES items(item_id)
+);
+
+CREATE TABLE IF NOT EXISTS colors (          -- BrickLink color id → name
+    color_id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """
 
@@ -210,16 +217,88 @@ def get_item(conn, item_id: str):
     return conn.execute("SELECT * FROM items WHERE item_id = ?", (item_id,)).fetchone()
 
 
-def list_items(conn, search: str = "", limit: int = 500):
+def list_items(conn, search: str = "", limit: int = 500, theme: str = None,
+               subtheme: str = None, year: int = None, item_type: str = None):
     q = "SELECT * FROM items"
-    args = []
+    where, args = [], []
     if search:
-        q += " WHERE item_id LIKE ? OR name LIKE ? OR theme LIKE ?"
+        where.append("(item_id LIKE ? OR name LIKE ? OR theme LIKE ?)")
         like = f"%{search}%"
-        args = [like, like, like]
+        args += [like, like, like]
+    if theme:
+        where.append("theme = ?")
+        args.append(theme)
+    if subtheme:
+        where.append("subtheme = ?")
+        args.append(subtheme)
+    if year:
+        where.append("year = ?")
+        args.append(year)
+    if item_type:
+        where.append("item_type = ?")
+        args.append(item_type)
+    if where:
+        q += " WHERE " + " AND ".join(where)
     q += " ORDER BY item_id LIMIT ?"
     args.append(limit)
     return conn.execute(q, args).fetchall()
+
+
+def catalog_tree(conn):
+    """Theme → subtheme tree for the catalog browser, from items.theme and
+    items.subtheme (the categories table only covers BrickLink-synced items).
+    [{theme, count, sets, figs, y_min, y_max, subthemes: [{name, count}]}],
+    biggest themes first."""
+    rows = conn.execute(
+        """SELECT theme, subtheme, item_type, COUNT(*) n,
+                  MIN(year) y_min, MAX(year) y_max
+           FROM items WHERE theme IS NOT NULL AND theme != ''
+           GROUP BY theme, subtheme, item_type"""
+    ).fetchall()
+    themes = {}
+    for r in rows:
+        t = themes.setdefault(r["theme"], {
+            "theme": r["theme"], "count": 0, "sets": 0, "figs": 0,
+            "y_min": None, "y_max": None, "subthemes": {},
+        })
+        t["count"] += r["n"]
+        if (r["item_type"] or "S") == "M":
+            t["figs"] += r["n"]
+        else:
+            t["sets"] += r["n"]
+        if r["y_min"]:
+            t["y_min"] = min(t["y_min"], r["y_min"]) if t["y_min"] else r["y_min"]
+        if r["y_max"]:
+            t["y_max"] = max(t["y_max"], r["y_max"]) if t["y_max"] else r["y_max"]
+        if r["subtheme"]:
+            t["subthemes"][r["subtheme"]] = t["subthemes"].get(r["subtheme"], 0) + r["n"]
+    out = []
+    for t in themes.values():
+        t["subthemes"] = [{"name": name, "count": n} for name, n in
+                          sorted(t["subthemes"].items(), key=lambda kv: -kv[1])]
+        out.append(t)
+    out.sort(key=lambda t: -t["count"])
+    return out
+
+
+def year_histogram(conn):
+    """[{year, sets, figs, total}] ascending, for the by-year browser."""
+    rows = conn.execute(
+        """SELECT year, item_type, COUNT(*) n FROM items
+           WHERE year IS NOT NULL AND year >= 1949
+           GROUP BY year, item_type"""
+    ).fetchall()
+    years = {}
+    for r in rows:
+        y = years.setdefault(r["year"], {"year": r["year"], "sets": 0, "figs": 0})
+        if (r["item_type"] or "S") == "M":
+            y["figs"] += r["n"]
+        else:
+            y["sets"] += r["n"]
+    out = sorted(years.values(), key=lambda y: y["year"])
+    for y in out:
+        y["total"] = y["sets"] + y["figs"]
+    return out
 
 
 # ── snapshots ────────────────────────────────────────────────────────────
@@ -420,6 +499,24 @@ def parts_summary(conn, set_id):
            FROM set_parts WHERE set_id=?""",
         (set_id,),
     ).fetchone()
+
+
+def upsert_colors(conn, colors):
+    """colors: {color_id: name} from the BrickLink color table."""
+    for color_id, name in colors.items():
+        conn.execute(
+            """INSERT INTO colors (color_id, name, updated_at) VALUES (?,?,?)
+               ON CONFLICT(color_id) DO UPDATE SET
+                 name=excluded.name, updated_at=excluded.updated_at""",
+            (color_id, name, now_iso()),
+        )
+    conn.commit()
+
+
+def color_map(conn):
+    """{color_id: name}; empty until the color table has been synced."""
+    return {r["color_id"]: r["name"]
+            for r in conn.execute("SELECT color_id, name FROM colors")}
 
 
 def upsert_part_out(conn, set_id, pov_total, currency="ILS"):
