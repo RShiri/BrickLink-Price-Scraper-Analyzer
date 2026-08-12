@@ -54,16 +54,56 @@ def minifig_floor_values(conn, set_id, currency):
         return 0.0, 0.0
 
 
+def _pricing_analysis(source, data, minifig_values, full):
+    """The analysis the market price is taken from.
+
+    eBay asking prices are aspirational — the same set sits listed at double
+    what it actually sells for — so once eBay sold data is available (which
+    needs a signed-in session, see brickonomy.ebay_login) its value is taken
+    from sold listings alone rather than PriceAnalyzer's usual 70/30 blend of
+    sold and asks. BrickLink keeps the blend, and BrickOwl has no sold data
+    at all, so both are untouched. Set `ebay_price_from_sold_only` to false
+    to restore the standard behaviour.
+    """
+    from copy import deepcopy
+
+    from .config import get_config
+
+    if source != "ebay" or not get_config().ebay_price_from_sold_only:
+        return full
+
+    out = deepcopy(full)
+    for condition in ("new", "used"):
+        stats = full[condition]["stats"]["sold"]
+        avg, count = stats.get("avg"), stats.get("final_count") or 0
+        if not avg or count < 2:
+            continue          # too little sold data — keep the normal blend
+        # Take the analyzer's own cleaned sold average as the market price.
+        # Emptying `stock` and re-running would not work: the formula weights
+        # a stock anchor at 30–40%, and a missing anchor counts as zero,
+        # dragging the result far below what the set actually sold for.
+        cond = out[condition]
+        cond["market_price"] = avg
+        cond["range"] = (round(avg * 0.9, 2), round(avg * 1.1, 2))
+        cond["buy_target"] = round(avg * 0.8, 2)
+        cond["confidence"] = "HIGH" if count >= 10 else "MEDIUM"
+    return out
+
+
 def write_snapshots(conn, item_id, source, currency, data, scraped_at=None,
                     keep_raw=False, minifig_values=(0.0, 0.0)):
     """data: the {meta, new:{sold,stock}, used:{sold,stock}} dict.
     Returns the PriceAnalyzer result. Commits."""
-    analysis = PriceAnalyzer(data).analyze(*minifig_values)
+    full = PriceAnalyzer(data).analyze(*minifig_values)
+    analysis = _pricing_analysis(source, data, minifig_values, full)
 
     for condition in ("new", "used"):
         cond = analysis[condition]
         sold_clean = cond["stats"]["sold"]["clean_items"]
-        stock_clean = cond["stats"]["stock"]["clean_items"]
+        # Live listings always come from the unmodified analysis: even when a
+        # source is priced off sold data alone, its current offers still feed
+        # the deals finder and the "best price right now" panel.
+        stock_clean = full[condition]["stats"]["stock"]["clean_items"]
 
         for kind, items in (("sold", sold_clean), ("stock", stock_clean)):
             st = _stats(items)

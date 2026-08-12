@@ -137,3 +137,37 @@ class TestForecast:
     def test_no_value_returns_none(self, conn):
         dbq.upsert_item(conn, "9992", name="Test", year=2020)
         assert forecast_mod.forecast(conn, "9992") is None
+
+
+class TestEbaySoldOnlyPricing:
+    """eBay asks are aspirational; once sold data exists it prices on sales."""
+
+    @staticmethod
+    def _data():
+        L = lambda p: {"qty": 1, "price": p, "status": "complete",
+                       "description": "lego set"}
+        return {"meta": {},
+                "new": {"sold": [L(100), L(110), L(105)], "stock": [L(300), L(320)]},
+                "used": {"sold": [], "stock": [L(80)]}}
+
+    def _analyse(self, source):
+        from brickonomy.compat import PriceAnalyzer
+        from brickonomy.snapshots import _pricing_analysis
+        data = self._data()
+        full = PriceAnalyzer(data).analyze(0.0, 0.0)
+        return _pricing_analysis(source, data, (0.0, 0.0), full), full
+
+    def test_ebay_prices_on_sold_not_asks(self):
+        priced, full = self._analyse("ebay")
+        assert priced["new"]["market_price"] == 105      # the sold average
+        assert full["new"]["market_price"] > 150         # asks drag it upwards
+        assert priced["new"]["confidence"] == "MEDIUM"   # 3 sales
+
+    def test_condition_without_sold_data_is_untouched(self):
+        priced, full = self._analyse("ebay")
+        assert priced["used"]["market_price"] == full["used"]["market_price"]
+
+    def test_other_sources_keep_the_standard_blend(self):
+        for source in ("bricklink", "brickowl"):
+            priced, full = self._analyse(source)
+            assert priced is full
