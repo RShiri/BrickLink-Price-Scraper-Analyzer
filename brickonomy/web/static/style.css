@@ -304,6 +304,36 @@ svg.spark polyline { fill: none; stroke: var(--s1); stroke-width: 2; }
 
 /* ── related sets ──────────────────────────────────────────────────── */
 .relgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+
+/* Minifigure breakdown — one tile per fig, big enough to recognise a face */
+.figgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
+.figtile {
+  display: block; text-decoration: none; color: var(--ink);
+  border: 1px solid var(--border); border-radius: 14px; padding: 10px;
+  background: rgba(10,16,31,0.5); transition: border-color .15s, transform .15s;
+}
+.figtile:hover { border-color: rgba(79,140,255,0.55); transform: translateY(-2px); }
+.figtile-img {
+  position: relative; aspect-ratio: 1 / 1; border-radius: 10px; margin-bottom: 8px;
+  background: radial-gradient(120px 90px at 50% 20%, rgba(79,140,255,0.14), transparent 70%),
+              rgba(232,237,251,0.92);
+  display: flex; align-items: center; justify-content: center; padding: 8px;
+}
+.figtile-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.figtile-qty {
+  position: absolute; top: 6px; right: 6px; font-size: 11px; font-weight: 700;
+  background: var(--accent); color: var(--accent-ink); border-radius: 999px; padding: 1px 7px;
+}
+.figtile-id { font-size: 11px; color: var(--accent-2); font-weight: 700; letter-spacing: 0.02em; }
+.figtile-name {
+  font-size: 12.5px; line-height: 1.35; color: var(--ink-2); margin: 2px 0 6px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: 34px;
+}
+.figtile-value { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.figtile-share { font-size: 11px; color: var(--muted); }
+.toggle { display: inline-flex; gap: 6px; }
+.toggle .chip { cursor: pointer; background: rgba(10,16,31,0.5); }
 .relcard {
   display: block; text-decoration: none; color: var(--ink);
   border: 1px solid var(--border); border-radius: 12px; padding: 10px;

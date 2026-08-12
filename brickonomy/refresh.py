@@ -141,10 +141,12 @@ def _refresh_parts(conn, set_id, force=False, log=print):
         elif err:
             log(f"  ✘ parts inventory: {err}")
     if not pov_fresh or force:
-        value, err = src.fetch_part_out_value(set_id)
+        value, pov_ccy, err = src.fetch_part_out_value(set_id)
         if value is not None:
-            dbq.upsert_part_out(conn, set_id, value, "ILS")
-            log(f"  ⚙ part-out value: {value:,.2f}")
+            # The POV page is fetched without a session, so it is in the site
+            # default currency, not the scraper's — store what it actually is.
+            dbq.upsert_part_out(conn, set_id, value, pov_ccy or "USD")
+            log(f"  ⚙ part-out value: {value:,.2f} {pov_ccy or 'USD'}")
         elif err:
             log(f"  ✘ part-out value: {err}")
 

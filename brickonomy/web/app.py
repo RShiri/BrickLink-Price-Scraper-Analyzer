@@ -561,6 +561,9 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
             v = disp(conn, fv, "ILS", ccy)
             figs.append({**f, "name": name or "", "value": v,
                          "total": (v or 0) * (f.get("qty") or 1)})
+        # Most valuable first, so the first paint is already the useful order
+        # (matters for the static export and with JS disabled).
+        figs.sort(key=lambda f: f["total"] or 0, reverse=True)
         figs_total = sum(f["total"] or 0 for f in figs)
 
         parts = dbq.get_set_parts(conn, item_id, search=parts_q, limit=100)
