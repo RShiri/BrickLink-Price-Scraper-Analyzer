@@ -31,6 +31,7 @@ echo   3  One set           - type a set or minifig number
 echo   4  Everything        - the whole catalog (very slow, hours)
 echo   5  Full LEGO catalog - re-download set/minifig names from Rebrickable
 echo   6  Rebuild the published site (docs\)
+echo   7  Sign in to eBay  - unlocks SOLD prices (one time, opens a browser)
 echo   0  Quit
 echo.
 
@@ -45,6 +46,7 @@ if "%CHOICE%"=="3" goto :one
 if "%CHOICE%"=="4" goto :all
 if "%CHOICE%"=="5" goto :catalog
 if "%CHOICE%"=="6" goto :export
+if "%CHOICE%"=="7" goto :ebaylogin
 echo  Not a valid choice.
 pause
 exit /b 1
@@ -93,6 +95,14 @@ echo  Rebuilding the static site into docs\ ...
 "%VPY%" -m brickonomy.export
 echo.
 echo  Done. To publish it:  git add docs ^&^& git commit -m "Update site" ^&^& git push
+goto :done
+
+:ebaylogin
+echo.
+echo  eBay only shows SOLD prices to a signed-in browser.
+echo  A Chrome window will open - sign in there, then come back here.
+echo  Your password goes to eBay's own page; only the browser session is kept.
+"%VPY%" -m brickonomy.ebay_login
 goto :done
 
 :done

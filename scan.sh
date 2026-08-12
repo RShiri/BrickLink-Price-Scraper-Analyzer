@@ -29,6 +29,7 @@ cat <<'EOF'
    4  Everything        - the whole catalog (very slow, hours)
    5  Full LEGO catalog - re-download set/minifig names from Rebrickable
    6  Rebuild the published site (docs/)
+   7  Sign in to eBay  - unlocks SOLD prices (one time, opens a browser)
    0  Quit
 
 EOF
@@ -58,6 +59,9 @@ case "$CHOICE" in
        "$VPY" -m brickonomy.export
        echo
        echo ' To publish it:  git add docs && git commit -m "Update site" && git push' ;;
+    7) echo; echo " eBay only shows SOLD prices to a signed-in browser."
+       echo " A Chrome window will open - sign in there, then come back here."
+       "$VPY" -m brickonomy.ebay_login ;;
     *) echo " Not a valid choice."; exit 1 ;;
 esac
 

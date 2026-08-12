@@ -27,13 +27,23 @@ def polite_sleep():
     time.sleep(random.uniform(lo, hi))
 
 
-def make_driver():
-    """Headless Chrome mirroring the root scraper's setup, plus stealth flags."""
+def make_driver(profile_dir=None, headless=True):
+    """Headless Chrome mirroring the root scraper's setup, plus stealth flags.
+
+    profile_dir: reuse a persistent Chrome profile. Signing in once inside
+    that profile (see `brickonomy.ebay_login`) makes the session's cookies
+    available to later scrapes, which is what eBay's sold/completed search
+    now requires. Nothing is stored by Brickonomy itself — the cookies live
+    in Chrome's own profile directory.
+    """
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
 
     opts = Options()
-    opts.add_argument("--headless=new")
+    if profile_dir:
+        opts.add_argument(f"--user-data-dir={profile_dir}")
+    if headless:
+        opts.add_argument("--headless=new")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--log-level=3")

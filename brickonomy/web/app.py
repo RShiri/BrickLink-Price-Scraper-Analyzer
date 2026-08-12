@@ -1020,10 +1020,13 @@ def refresh_page(request: Request):
         n_items = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
         coverage = dbq.theme_coverage(conn, ttl_days=cfg.auto_scan_on_view_days or 30)
         covered = sum(t["scanned"] for t in coverage)
+        fresh = sum(t["fresh"] for t in coverage)
+        from ..scrapers.ebay import EbaySource
         return templates.TemplateResponse(request, "refresh.html", ctx(
             request, conn, cfg=cfg, sources_health=sources_health,
             n_portfolio=n_portfolio, n_items=n_items, coverage=coverage,
-            covered=covered,
+            covered=covered, fresh=fresh,
+            ebay_signed_in=bool(EbaySource.signed_in_profile()),
         ))
     finally:
         conn.close()
@@ -1040,6 +1043,15 @@ def refresh_start(request: Request, scope: str = Form("portfolio"),
                          force=force, theme=theme or None)
     if request.headers.get("accept", "").startswith("application/json"):
         return JSONResponse(jobs.status(), status_code=200 if started else 409)
+    return RedirectResponse("/refresh", status_code=303)
+
+
+@app.post("/refresh/action")
+def refresh_action(request: Request, action: str = Form(...)):
+    """Catalog import / static export / eBay session check, so every scraping
+    job is drivable from the site and not only from the command line."""
+    if action in jobs.ACTIONS:
+        jobs.start_action(action)
     return RedirectResponse("/refresh", status_code=303)
 
 
