@@ -6,7 +6,7 @@
   --surface-2: rgba(34,44,74,0.55);
   --ink:       #e8edfb;
   --ink-2:     #9aa7c7;
-  --muted:     #66718f;
+  --muted:     #8b97b8;
   --grid:      rgba(124,160,255,0.10);
   --baseline:  rgba(124,160,255,0.28);
   --border:    rgba(124,160,255,0.16);
@@ -120,14 +120,28 @@ td a:hover { color: #7fb0ff; }
 @media (max-width: 840px) { .two-col, .two-col.wide-left, .three-col { grid-template-columns: 1fr; } }
 
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+th { text-align: left; color: var(--ink-2); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
      border-bottom: 1px solid var(--grid); padding: 6px 8px; white-space: nowrap; }
-td { padding: 8px; border-bottom: 1px solid var(--grid); }
+td { padding: 6px 8px; border-bottom: 1px solid var(--grid); }
 tr:last-child td { border-bottom: 0; }
 td.num, th.num { text-align: right; }
 tr.total td { font-weight: 700; border-top: 1px solid var(--baseline); }
 tr.hl td { background: rgba(79,140,255,0.07); }
+/* Long tables: keep the column names visible and give the eye a line to
+   follow across a wide window. */
+thead th { position: sticky; top: 0; z-index: 1; background: #101728; }
+tbody tr:nth-child(even) td { background: rgba(124,160,255,0.035); }
+tbody tr:hover td { background: rgba(79,140,255,0.10); }
+table td:first-child { width: 38%; }
+table.narrow-first td:first-child { width: auto; }
 .table-scroll { overflow-x: auto; }
+
+/* Click-to-sort headers */
+th[data-sort] { cursor: pointer; user-select: none; }
+th[data-sort]:hover { color: var(--ink); background: rgba(79,140,255,0.08); }
+th[data-sort]::after { content: "↕"; opacity: 0.25; margin-left: 6px; font-size: 10px; }
+th[data-sort="asc"]::after  { content: "↑"; opacity: 1; color: var(--accent); }
+th[data-sort="desc"]::after { content: "↓"; opacity: 1; color: var(--accent); }
 
 .chip {
   display: inline-flex; align-items: center; gap: 6px;

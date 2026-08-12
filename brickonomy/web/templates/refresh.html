@@ -50,6 +50,12 @@
         <option value="stale">Stale only (TTL &gt; {{ cfg.scrape_ttl_days|int }} days)</option>
         <option value="all">Everything ({{ n_items }} items)</option>
       </select>
+      <select class="inp" name="theme" style="max-width:230px">
+        <option value="">…or a whole theme</option>
+        {% for t in coverage %}
+        <option value="{{ t.theme }}">{{ t.theme }} — {{ t.left }} left of {{ t.total }}</option>
+        {% endfor %}
+      </select>
       <input class="inp" type="text" name="item_id" placeholder="…or a single set, e.g. 75192" style="width:190px">
       <label class="chip"><input type="checkbox" name="force" value="true" style="accent-color:var(--accent)"> force</label>
       <button class="btn-primary" type="submit" {{ 'disabled' if job.running }}>▶ Start scan</button>
@@ -78,12 +84,59 @@
       <dt>Sources enabled</dt><dd>{{ cfg.sources_enabled|join(' · ') }}</dd>
       <dt>Rates TTL</dt><dd>{{ cfg.rates_ttl_hours|int }} h, cached fallback if offline</dd>
       <dt>Databases</dt><dd>brickonomy.db (snapshots) · bricklink_data.db (legacy, read-only seed)</dd>
+      <dt>Auto-scan on view</dt><dd>{% if cfg.auto_scan_on_view_days %}opening a set older than
+        {{ cfg.auto_scan_on_view_days|int }} days queues a scan for it{% else %}off{% endif %}</dd>
       <dt>Fixture mode</dt><dd>{{ 'on — parsing saved HTML, no network' if cfg.fixture_mode else 'off' }}</dd>
     </dl>
     <div style="color:var(--muted);font-size:12px;margin-top:10px">
       First run: <code>python -m brickonomy.importer</code> seeds the catalog from your existing
       scraped items and BrickEconomy CSV, so charts start with a data point instead of empty.
     </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Scan coverage <span class="soft">— which themes are done and what is left</span></h3>
+  <div class="searchrow" style="margin-bottom:8px">
+    <span class="chip on">{{ "{:,}".format(covered) }} of {{ "{:,}".format(n_items) }} items scanned</span>
+    <span class="chip">fresh = scanned within {{ (cfg.auto_scan_on_view_days or 30)|int }} days</span>
+    <span class="spacer"></span>
+    <input class="inp" type="search" data-filter-table="coverageTable" placeholder="Filter themes…" aria-label="Filter themes">
+  </div>
+  <div class="table-scroll">
+  <table id="coverageTable" data-sortable>
+    <thead>
+      <tr><th>Theme</th><th class="num">Items</th><th class="num">Scanned</th>
+          <th class="num">Fresh</th><th class="num">Stale</th><th class="num">Left</th>
+          <th>Progress</th><th>Last scan</th>{% if not static_mode %}<th></th>{% endif %}</tr>
+    </thead>
+    <tbody>
+      {% for t in coverage %}
+      <tr>
+        <td><a href="{{ u('/sets?theme=' ~ t.theme|urlencode) }}">{{ t.theme }}</a></td>
+        <td class="num" data-v="{{ t.total }}">{{ "{:,}".format(t.total) }}</td>
+        <td class="num" data-v="{{ t.scanned }}">{{ "{:,}".format(t.scanned) }}</td>
+        <td class="num" data-v="{{ t.fresh }}">{{ "{:,}".format(t.fresh) }}</td>
+        <td class="num" data-v="{{ t.stale }}">{% if t.stale %}<span style="color:var(--warn)">{{ "{:,}".format(t.stale) }}</span>{% else %}—{% endif %}</td>
+        <td class="num" data-v="{{ t.left }}">{{ "{:,}".format(t.left) }}</td>
+        <td data-v="{{ t.pct }}" style="min-width:110px">
+          <div class="progress" style="margin:0"><div style="width:{{ t.pct }}%"></div></div>
+          <span style="color:var(--muted);font-size:11px">{{ t.pct }}%</span>
+        </td>
+        <td data-v="{{ t.last_scan or '' }}" style="color:var(--ink-2)">{{ t.last_scan[:10] if t.last_scan else '—' }}</td>
+        {% if not static_mode %}
+        <td>
+          <form method="post" action="/refresh" style="margin:0">
+            <input type="hidden" name="scope" value="theme">
+            <input type="hidden" name="theme" value="{{ t.theme }}">
+            <button class="chip" type="submit" {{ 'disabled' if job.running }}>▶ Scan</button>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
   </div>
 </div>
 

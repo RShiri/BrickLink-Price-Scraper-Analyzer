@@ -24,6 +24,9 @@ class Config:
     legacy_db_path: str = str(REPO_ROOT / "bricklink_data.db")
     portfolio_csv: str = str(REPO_ROOT / "BrickEconomy-Sets(2).csv")
     scrape_ttl_days: float = 3.0
+    # Opening a set page queues a scan when its newest snapshot is older than
+    # this (or it has none at all). 0 disables the behaviour entirely.
+    auto_scan_on_view_days: float = 30.0
     request_delay_range: list = field(default_factory=lambda: [2.0, 5.0])
     sources_enabled: list = field(default_factory=lambda: ["bricklink", "ebay", "brickowl"])
     scrape_engine: str = "selenium"   # or "playwright" (pip install playwright)

@@ -3,6 +3,7 @@
   python -m brickonomy.refresh --item 75192
   python -m brickonomy.refresh --scope portfolio
   python -m brickonomy.refresh --scope stale
+  python -m brickonomy.refresh --theme "Super Heroes Marvel"
   python -m brickonomy.refresh --scope all
 
 Per item and source: skip if a snapshot newer than scrape_ttl_days exists
@@ -160,7 +161,7 @@ def _stale_items(conn, ttl_days):
     return stale
 
 
-def run_refresh(scope="portfolio", item_id=None, force=False,
+def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
                 progress=None, log=print):
     """Entry point shared by the CLI and the web background job.
 
@@ -175,6 +176,19 @@ def run_refresh(scope="portfolio", item_id=None, force=False,
             targets = [(r["item_id"], r["item_type"]) for r in dbq.get_portfolio(conn)]
         elif scope == "stale":
             targets = _stale_items(conn, cfg.scrape_ttl_days)
+        elif scope == "theme":
+            if not theme:
+                raise ValueError("scope 'theme' needs a theme name")
+            # Sets first, then the theme's minifigs; oldest data first so an
+            # interrupted run still made progress where it mattered most.
+            targets = [(r["item_id"], r["item_type"]) for r in conn.execute(
+                """SELECT i.item_id, i.item_type FROM items i
+                   LEFT JOIN (SELECT item_id, MAX(scraped_at) ts
+                              FROM price_snapshots GROUP BY item_id) s
+                     ON s.item_id = i.item_id
+                   WHERE i.theme = ?
+                   ORDER BY i.item_type DESC, s.ts IS NOT NULL, s.ts""",
+                (theme,))]
         elif scope == "all":
             targets = [(r["item_id"], r["item_type"])
                        for r in conn.execute("SELECT item_id, item_type FROM items")]
@@ -204,12 +218,18 @@ def main():
     ap = argparse.ArgumentParser(description="Refresh prices across sources")
     ap.add_argument("--item", help="single item id, e.g. 75192 or sw0636")
     ap.add_argument("--scope", default="portfolio",
-                    choices=["portfolio", "stale", "all"])
+                    choices=["portfolio", "stale", "theme", "all"])
+    ap.add_argument("--theme", help="theme name for --scope theme, "
+                                    "e.g. \"Super Heroes Marvel\"")
     ap.add_argument("--force", action="store_true",
                     help="ignore the freshness TTL")
     args = ap.parse_args()
 
-    summary = run_refresh(scope=args.scope, item_id=args.item, force=args.force)
+    if args.theme and args.scope == "portfolio":
+        args.scope = "theme"          # --theme alone implies --scope theme
+
+    summary = run_refresh(scope=args.scope, item_id=args.item,
+                          force=args.force, theme=args.theme)
     print(f"\nRefreshed {summary['done']} item(s); {len(summary['errors'])} source error(s).")
     for iid, source, err in summary["errors"][:20]:
         print(f"  {iid} · {source}: {err}")

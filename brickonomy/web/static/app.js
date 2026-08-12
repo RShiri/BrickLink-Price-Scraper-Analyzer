@@ -397,6 +397,70 @@
     });
   });
 
+  // ── sortable tables ────────────────────────────────────────────────────
+  // Any <table data-sortable> gets click-to-sort headers. Numeric cells carry
+  // data-v="<raw number>" so sorting is never fooled by "₪3.23", "▲ 8%" or
+  // "—"; anything else compares as text. Missing values sink to the bottom in
+  // both directions, which is what you want when half a column is unscanned.
+  const cellValue = (row, idx) => {
+    const td = row.children[idx];
+    if (!td) return null;
+    if (td.hasAttribute("data-v")) {
+      const raw = td.getAttribute("data-v");
+      if (raw === "" || raw === null) return null;
+      const n = parseFloat(raw);
+      return Number.isNaN(n) ? raw.toLowerCase() : n;
+    }
+    const text = td.textContent.trim();
+    if (!text || text === "—") return null;
+    return text.toLowerCase();
+  };
+
+  const compare = (a, b) => {
+    if (a === null && b === null) return 0;
+    if (a === null) return 1;            // blanks last, always
+    if (b === null) return -1;
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    return String(a).localeCompare(String(b), undefined, { numeric: true });
+  };
+
+  window.brickonomySortRows = (rows, idx, dir) =>
+    rows.sort((r1, r2) => {
+      const c = compare(cellValue(r1, idx), cellValue(r2, idx));
+      // Blanks stay last even when the direction flips.
+      if (cellValue(r1, idx) === null || cellValue(r2, idx) === null) return c;
+      return dir === "desc" ? -c : c;
+    });
+
+  document.querySelectorAll("table[data-sortable]").forEach((table) => {
+    const head = table.tHead ? table.tHead.rows[0] : table.rows[0];
+    const body = table.tBodies[0];
+    if (!head || !body) return;
+
+    [...head.cells].forEach((th, idx) => {
+      if (th.dataset.nosort !== undefined) return;
+      th.tabIndex = 0;
+      th.dataset.sort = "";
+      const run = () => {
+        // First click on a numeric column sorts high→low; text sorts A→Z.
+        const wasNumeric = body.rows[0] &&
+          body.rows[0].children[idx] &&
+          body.rows[0].children[idx].hasAttribute("data-v");
+        const current = th.dataset.sort;
+        const dir = current === "asc" ? "desc" : current === "desc" ? "asc"
+                                                                   : (wasNumeric ? "desc" : "asc");
+        [...head.cells].forEach((o) => { o.dataset.sort = ""; });
+        th.dataset.sort = dir;
+        window.brickonomySortRows([...body.rows], idx, dir)
+          .forEach((tr) => body.appendChild(tr));
+      };
+      th.addEventListener("click", run);
+      th.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); }
+      });
+    });
+  });
+
   // ── refresh page: live progress polling ────────────────────────────────
   const scanStatus = document.getElementById("scanStatus");
   if (scanStatus) {
