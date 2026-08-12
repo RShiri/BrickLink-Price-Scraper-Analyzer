@@ -11,6 +11,7 @@ from tests/fixtures/ instead of the network, so everything runs offline.
 import argparse
 import json
 import random
+import re
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -22,6 +23,50 @@ from ..models import ScrapeResult
 # sessions keep the browser's own UA — see make_driver.
 USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36")
+
+
+# ── prices ───────────────────────────────────────────────────────────────
+#
+# One definition, shared by every scraper AND by the doctor. Keeping separate
+# copies is what hid a real bug for days: BrickOwl renders prices in the
+# visitor's locale, which for some regions means a bare "612.00", so a
+# symbol-required regex parsed nothing from a page holding 15 offers — while
+# the doctor, using its own equally strict copy, cheerfully confirmed there
+# were "no prices on the page". A diagnostic that can disagree with the
+# parser is worse than no diagnostic.
+#
+# Accepts: "$12.34", "US $12.34", "ILS 45.60", "45.60 ₪", "45.60".
+SYMBOL_TO_CCY = {"£": "GBP", "$": "USD", "€": "EUR", "₪": "ILS"}
+CODE_TO_CCY = {"US": "USD", "CA": "CAD", "AU": "AUD", "NZ": "NZD"}
+
+PRICE_RE = re.compile(
+    r"(?:(?P<code>[A-Z]{2,3})\s*)?(?P<sym>[£$€₪])?\s*"
+    r"(?P<amt>\d[\d,]*\.\d{1,2})\s*(?P<sym2>[£$€₪])?")
+
+
+def price_currency(match, default=None):
+    """Currency of one PRICE_RE match: symbol either side, then ISO code."""
+    symbol = match.group("sym") or match.group("sym2")
+    return (SYMBOL_TO_CCY.get(symbol)
+            or CODE_TO_CCY.get((match.group("code") or "").upper())
+            or default)
+
+
+def find_prices(text, default_ccy=None):
+    """[(amount, currency|default), …] for every price in `text`.
+
+    Requires decimals on purpose: bare integers in marketplace copy are years,
+    set numbers and piece counts far more often than they are prices.
+    """
+    out = []
+    for m in PRICE_RE.finditer(text or ""):
+        try:
+            amount = float(m.group("amt").replace(",", ""))
+        except ValueError:
+            continue
+        if amount > 0:
+            out.append((amount, price_currency(m, default_ccy)))
+    return out
 
 
 def polite_sleep():
