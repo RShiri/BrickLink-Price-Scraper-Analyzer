@@ -85,12 +85,20 @@
         <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>⬇ Import full LEGO catalog</button>
       </form>
       <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="bl_tree">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>🗂 BrickLink themes</button>
+      </form>
+      <form method="post" action="/refresh/action" style="margin:0">
         <input type="hidden" name="action" value="export">
         <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>⬆ Rebuild published site</button>
       </form>
       <form method="post" action="/refresh/action" style="margin:0">
         <input type="hidden" name="action" value="ebay_check">
         <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>⟳ Check eBay session</button>
+      </form>
+      <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="doctor">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>🩺 Diagnose sources</button>
       </form>
     </div>
     <div style="color:var(--muted);font-size:12px;margin-top:8px">
