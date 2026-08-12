@@ -27,6 +27,10 @@
 }
 
 * { box-sizing: border-box; }
+/* The browser hides [hidden] with `display: none`, which any class-based
+   display rule outranks — `.figgrid { display: grid }` kept the minifig grid
+   on screen while its own toggle said to hide it. */
+[hidden] { display: none !important; }
 body {
   margin: 0;
   background:
