@@ -118,8 +118,9 @@
   </div>
   {% endif %}
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate shaped by the retirement cycle
-    (damped while in stores, step + acceleration after retirement, then stabilizing), with a band that widens further out.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     {% if phase.retirement_year %}The vertical marker is the estimated retirement ({{ phase.retirement_year }}).{% endif %}
   </div>
 </div>

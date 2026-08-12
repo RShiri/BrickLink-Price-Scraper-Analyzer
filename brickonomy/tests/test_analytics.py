@@ -130,31 +130,69 @@ class TestForecast:
         p1 = p0 * (1 + growth_yearly_pct / 100.0)
         seed_series(conn, item_id, [(p0, 365), (p1, 0)])
 
-    def test_retired_accel_grows_faster_near_term(self, conn):
-        # First projected year: RETIRED_ACCEL's 1.5× multiplier must beat the
-        # in-stores 0.5× damping. (Further out the NEW set retires inside the
-        # horizon and accelerates too — that's the retirement-cycle curve.)
+    def test_retired_grows_now_available_does_not(self, conn):
+        # BrickEconomy logic: a retired set appreciates from today; a set
+        # still in stores does not — its value tracks the retirement anchor.
         year = datetime.now().year
-        self._seed(conn, "7777", year)          # NEW next year
+        self._seed(conn, "7777", year)          # in stores, no retail seeded
         self._seed(conn, "8888", year - 4)      # RETIRED_ACCEL next year
         f_new = forecast_mod.forecast(conn, "7777")
         f_ret = forecast_mod.forecast(conn, "8888")
         assert f_ret["growth_effective_pct"] > f_new["growth_effective_pct"]
         assert f_ret["horizons"][1]["value"] > f_new["horizons"][1]["value"]
+        # No retail and current value as anchor → flat until retirement.
+        ret = f_new["phase"]["retirement_year"]
+        for p in f_new["points"]:
+            if p["year"] <= ret:
+                assert p["value"] == pytest.approx(f_new["at_retirement"]["value"])
 
-    def test_new_set_accelerates_after_retirement(self, conn):
-        # For a set still in stores the year-over-year step peaks in the
-        # estimated retirement year (phase shift + one-time bump).
+    def test_available_set_appreciates_only_after_retirement(self, conn):
+        # The largest year-over-year step lands right after retirement
+        # (one-time bump + accelerated growth), never before it.
         year = datetime.now().year
         self._seed(conn, "7779", year)
         f = forecast_mod.forecast(conn, "7779")
         ret = f["phase"]["retirement_year"]
         ratios = {p2["year"]: p2["value"] / p1["value"]
                   for p1, p2 in zip(f["points"], f["points"][1:])}
-        if ret in ratios:
-            assert ratios[ret] == max(ratios.values())
+        post = {y: r for y, r in ratios.items() if y > ret}
+        pre = {y: r for y, r in ratios.items() if y <= ret}
+        if post:
+            assert max(post.values()) == max(ratios.values())
+            assert post[ret + 1] == max(post.values())   # bump year is biggest
+        for r in pre.values():
+            assert r == pytest.approx(1.0, abs=0.02)     # no pre-retirement growth
         assert f["at_retirement"] is not None
         assert f["at_retirement"]["year"] == ret
+
+    def test_available_set_anchors_to_retail(self, conn):
+        # Current value below retail → the curve drifts up to retail by the
+        # retirement year (BrickEconomy's "value at retirement").
+        year = datetime.now().year
+        dbq.upsert_item(conn, "7780", name="Test", year=year,
+                        retail_price=1000.0, retail_currency="USD")  # 3500 ILS
+        seed_series(conn, "7780", [(2000, 365), (2000, 0)])          # ILS, flat
+        f = forecast_mod.forecast(conn, "7780")
+        assert f["at_retirement"]["value"] == pytest.approx(3500.0)
+        ret = f["phase"]["retirement_year"]
+        values = {p["year"]: p["value"] for p in f["points"]}
+        if ret in values:
+            assert values[ret] == pytest.approx(3500.0)
+
+    def test_available_set_prefers_theme_comparables(self, conn):
+        # Post-retirement growth comes from the theme's median, not the set's
+        # own in-stores trend (which reflects discounting).
+        year = datetime.now().year
+        for iid, g in (("7801", 6.0), ("7802", 12.0), ("7803", 18.0)):
+            dbq.upsert_item(conn, iid, name="Peer", theme="Star Wars", year=2015)
+            seed_series(conn, iid, [(1000, 365), (1000 * (1 + g / 100), 0)])
+        dbq.upsert_item(conn, "7804", name="In stores", theme="Star Wars", year=year)
+        seed_series(conn, "7804", [(1000, 365), (900, 0)])   # discounting −10%/yr
+        f = forecast_mod.forecast(conn, "7804")
+        assert f["basis"] == "theme"
+        # Theme median over [-10, 6, 12, 18] (its own trend joins the pool)
+        # — far above the -10 %/yr its own discounting would project.
+        assert f["growth_pct"] == pytest.approx(9.0, abs=0.5)
 
     def test_growth_clamped(self, conn):
         dbq.upsert_item(conn, "9990", name="Test", year=2020)

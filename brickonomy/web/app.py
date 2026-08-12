@@ -560,7 +560,17 @@ def _maybe_auto_scan(conn, item_id):
         except ValueError:
             age_days = None
         if age_days is not None and age_days < cfg.auto_scan_on_view_days:
-            return None
+            # Fresh prices — but a set whose specs promise minifigs while none
+            # are stored has a failed/missing inventory scan (e.g. BrickLink
+            # served the plain client a redirect): scan it anyway, the fresh
+            # sources are skipped and only the inventory is fetched.
+            row = dbq.get_item(conn, item_id)
+            figs_missing = (row is not None
+                            and (row["item_type"] or "S") == "S"
+                            and (row["minifigs"] or 0) > 0
+                            and not dbq.get_set_minifigs(conn, item_id))
+            if not figs_missing:
+                return None
 
     status = jobs.status()
     if status.get("current_item") == item_id:

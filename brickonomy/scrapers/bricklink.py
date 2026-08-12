@@ -226,18 +226,55 @@ class BrickLinkSource(BaseScraper):
             })
         return parts
 
+    def _get_inventory_html(self, url, parse):
+        """Fetch an inventory page and parse it: plain HTTP first (the page
+        is server-rendered), a real browser as fallback — BrickLink sometimes
+        serves plain clients a redirect/interstitial instead of the table,
+        which parses as an empty inventory."""
+        html, error = self._get(url)
+        rows = parse(html) if html else []
+        if rows:
+            return rows, None
+        browser_html, browser_err = self._get_with_browser(url)
+        if browser_html:
+            rows = parse(browser_html)
+            if rows:
+                return rows, None
+            error = "no rows parsed from inventory page (plain and browser)"
+        return [], error or browser_err
+
+    @staticmethod
+    def _get_with_browser(url):
+        """Load a page in the stealth Selenium driver and return its HTML."""
+        try:
+            from selenium.webdriver.common.by import By
+            from selenium.webdriver.support import expected_conditions as EC
+            from selenium.webdriver.support.ui import WebDriverWait
+
+            from .base import make_driver
+        except ImportError as exc:
+            return None, f"ImportError: {exc}"
+        try:
+            driver = make_driver(headless=True)
+        except Exception as exc:
+            return None, f"{type(exc).__name__}: {exc}"
+        try:
+            driver.get(url)
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.TAG_NAME, "table")))
+            return driver.page_source, None
+        except Exception as exc:
+            return None, f"{type(exc).__name__}: {exc}"
+        finally:
+            driver.quit()
+
     def fetch_parts_inventory(self, item_id: str, item_type: str = "S",
                               color_map=None):
         """Parts inventory of a set ('S') or a minifig ('M').
-        Returns (parts, error). Plain HTTP — the page is server-rendered."""
+        Returns (parts, error)."""
         url = f"{INV_URL}?{item_type}={inv_ref(item_id, item_type)}&viewItemType=P"
-        html, error = self._get(url)
-        if html:
-            parts = self.parse_parts_inventory(html, color_map=color_map)
-            if parts:
-                return parts, None
-            error = "no parts parsed from inventory page"
-        return [], error
+        return self._get_inventory_html(
+            url, lambda html: self.parse_parts_inventory(html, color_map=color_map))
 
     # ── color table ──────────────────────────────────────────────────────
 
@@ -452,13 +489,7 @@ class BrickLinkSource(BaseScraper):
 
     def fetch_minifig_inventory(self, set_id: str):
         url = f"{INV_URL}?S={inv_ref(set_id)}&viewItemType=M"
-        html, error = self._get(url)
-        if html:
-            figs = self.parse_minifig_inventory(html)
-            if figs:
-                return figs, None
-            error = "no minifigs parsed from inventory page"
-        return [], error
+        return self._get_inventory_html(url, self.parse_minifig_inventory)
 
     # ── helpers ──────────────────────────────────────────────────────────
 
@@ -478,6 +509,14 @@ class BrickLinkSource(BaseScraper):
                 "User-Agent": USER_AGENT,
                 "Accept-Language": "en-US,en;q=0.9",
             })
+            # Warm the session first: BrickLink redirects catalog deep links
+            # away when it has never seen the client before (same reason the
+            # Playwright engine loads the homepage before the item page), and
+            # a redirected inventory page parses as "0 minifigs / 0 parts".
+            try:
+                cls._session.get("https://www.bricklink.com", timeout=25)
+            except requests.RequestException:
+                pass
         last_err = None
         for delay in cls._RETRY_DELAYS:
             if delay:
