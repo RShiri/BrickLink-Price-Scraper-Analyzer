@@ -1,10 +1,14 @@
-"""eBay source — sold/completed listings plus active Buy-It-Now asks.
+"""eBay source — active Buy-It-Now asking prices.
 
-No API key: scrapes the public search results pages
-    /sch/i.html?_nkw=lego+<set>&LH_Sold=1&LH_Complete=1   (sold, real sale prices)
+No API key: scrapes the public search results page
     /sch/i.html?_nkw=lego+<set>&LH_BIN=1                  (active asks)
 with Selenium (eBay challenges bare HTTP clients). The parser handles both the
-classic `li.s-item` markup and the newer `.s-card` variant eBay A/B tests.
+classic `li.s-item` markup and the newer `.s-card` variant eBay A/B tests, and
+still understands a sold page when one is supplied from a fixture.
+
+Sold/completed listings used to be fetched here too, but eBay now requires a
+signed-in session for them — see `_fetch_html`. eBay is therefore an
+asks-only source, and PriceAnalyzer rates it LOW confidence accordingly.
 
 Every listing's title is stored as `description`, so the root PriceAnalyzer
 blacklist ('no minifig', 'incomplete', 'box only', …) applies to eBay rows
@@ -53,22 +57,31 @@ class EbaySource(BaseScraper):
         return f"lego {item_id}"
 
     def _fetch_html(self, item_id: str, item_type: str = "S"):
+        """Active Buy-It-Now listings only.
+
+        eBay closed the sold/completed search to anonymous clients: every
+        variant of `LH_Sold=1&LH_Complete=1` now answers with "Error Page",
+        "Sign in or Register" or "Security Measure" (verified across five URL
+        shapes from a clean IP — see `python -m brickonomy.doctor <set>
+        --source ebay-sold`). Asking for it anyway cost a page load and a
+        polite delay per item and returned nothing, so the request is gone.
+
+        The consequence is honest rather than hidden: with no sold data,
+        PriceAnalyzer anchors eBay on its competitive ask and reports LOW
+        confidence, exactly as it does for BrickOwl. BrickLink remains the
+        only source with real sale history.
+        """
         from .base import make_driver
-        params_common = f"_nkw={self._build_query(item_id).replace(' ', '+')}&_ipg=120"
-        urls = {
-            "sold": f"{SEARCH_URL}?{params_common}&LH_Sold=1&LH_Complete=1",
-            "active": f"{SEARCH_URL}?{params_common}&LH_BIN=1",
-        }
-        htmls = {}
+
+        url = (f"{SEARCH_URL}?_nkw={self._build_query(item_id).replace(' ', '+')}"
+               f"&_ipg=120&LH_BIN=1")
         driver = make_driver()
         try:
-            for key, url in urls.items():
-                driver.get(url)
-                polite_sleep()
-                htmls[key] = driver.page_source
+            driver.get(url)
+            polite_sleep()
+            return {"sold": "", "active": driver.page_source}
         finally:
             driver.quit()
-        return htmls
 
     # ── parse ────────────────────────────────────────────────────────────
 
