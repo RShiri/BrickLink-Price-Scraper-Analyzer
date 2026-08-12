@@ -184,16 +184,50 @@ class PriceAnalyzer:
 
         return {"lifecycle": {"status": status, "year": year, "desc": desc}, "sniper": best}
 
+    @staticmethod
+    def reject_outliers(prices, high_k=3.5, low_k=3.5):
+        """Drop prices that are absurd relative to the rest, by MAD.
+
+        Median absolute deviation, not standard deviation: the mean and SD are
+        themselves dragged around by the very listings being hunted, so one
+        chancer asking 10x the going rate widens the band enough to keep
+        itself inside it. The MAD is unmoved by up to half the sample being
+        junk, which matches marketplace reality — optimistic asks, misfiled
+        lots, and the occasional 1-agorot listing.
+
+        Kept deliberately loose (3.5 deviations) so a genuinely rare set with
+        a wide honest spread survives; this removes the indefensible, not the
+        merely expensive.
+        """
+        values = sorted(p for p in prices if p and p > 0)
+        if len(values) < 4:
+            return values                       # too few to judge anything
+        median = statistics.median(values)
+        deviations = [abs(p - median) for p in values]
+        mad = statistics.median(deviations)
+        if mad <= 0:
+            # Prices nearly identical: fall back to a ratio band, else a
+            # single differing listing would look infinitely deviant.
+            return [p for p in values if 0.25 * median <= p <= 4 * median]
+        # 1.4826 scales MAD to a standard-deviation equivalent for normal data.
+        scale = 1.4826 * mad
+        return [p for p in values
+                if (median - low_k * scale) <= p <= (median + high_k * scale)] or values
+
     def _get_competitive_stock_price(self, items):
-        """Median of the cheapest half of live listings — what a buyer actually pays."""
+        """What a buyer realistically pays: the median of the cheapest half of
+        live listings, after absurd prices are rejected outright.
+
+        Two stages on purpose. Outlier rejection removes the indefensible at
+        both ends; taking the cheaper half of what remains then reflects that
+        buyers work up from the bottom of the list, not from its middle."""
         if not items:
             return 0.0
-        sorted_s = sorted(items, key=lambda x: x['price'])
-        cutoff = max(1, int(len(sorted_s) * 0.50))
-        subset = sorted_s[:cutoff]
-        if not subset:
+        prices = self.reject_outliers([x['price'] for x in items])
+        if not prices:
             return 0.0
-        return statistics.median([x['price'] for x in subset])
+        cutoff = max(1, int(len(prices) * 0.50))
+        return statistics.median(sorted(prices)[:cutoff])
 
     def _weighted_avg(self, items):
         """Quantity-weighted mean. Kept for callers that want it; the central
