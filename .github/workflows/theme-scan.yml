@@ -13,10 +13,15 @@ name: theme scan
 # that actually drives valuations — works fine.
 
 on:
+  # Every 6 hours, keep chewing through whatever the catalog is still
+  # missing — sets before minifigs, never-scanned before merely stale. No
+  # input needed; each run picks up where the last one stopped.
+  schedule:
+    - cron: "0 */6 * * *"
   workflow_dispatch:
     inputs:
       theme:
-        description: "Theme to scan, exactly as it appears in the catalog"
+        description: "Theme to scan; leave empty to continue the whole catalog"
         default: "Super Heroes Marvel"
       limit:
         description: "Max items this run (≈35 s each; 300 ≈ 3 h)"
@@ -57,10 +62,16 @@ jobs:
           python -m brickonomy.importer
           python -m brickonomy.rebrickable --minifigs
 
-      - name: Scan the theme
+      - name: Scan
         run: |
-          python -m brickonomy.refresh \
-            --theme "${{ inputs.theme }}" --limit "${{ inputs.limit }}"
+          LIMIT="${{ inputs.limit }}"; LIMIT="${LIMIT:-300}"
+          THEME="${{ inputs.theme }}"
+          if [ -z "$THEME" ]; then
+            echo "No theme given — continuing the whole catalog."
+            python -m brickonomy.refresh --scope gaps --limit "$LIMIT"
+          else
+            python -m brickonomy.refresh --theme "$THEME" --limit "$LIMIT"
+          fi
 
       - name: Coverage after this run
         run: |
