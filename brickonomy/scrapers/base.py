@@ -46,6 +46,11 @@ def make_driver(profile_dir=None, headless=True):
         opts.add_argument(f"--user-data-dir={profile_dir}")
     if headless:
         opts.add_argument("--headless=new")
+    else:
+        # A real window, parked off-screen. Some sites (eBay) reject headless
+        # Chrome outright even with valid cookies, so scraping them needs a
+        # genuine window — but nobody wants it popping up once per set.
+        opts.add_argument("--window-position=-2400,-2400")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-dev-shm-usage")
     opts.add_argument("--log-level=3")
