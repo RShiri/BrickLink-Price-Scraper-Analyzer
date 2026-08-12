@@ -18,7 +18,14 @@ from .base import USER_AGENT, BaseScraper, run_cli
 
 BASE_URL = "https://www.brickowl.com"
 SYMBOL_TO_CCY = {"£": "GBP", "$": "USD", "€": "EUR", "₪": "ILS"}
-PRICE_RE = re.compile(r"([£$€₪])\s*([\d,]+(?:\.\d{1,2})?)")
+CODE_TO_CCY = {"US": "USD", "CA": "CAD", "AU": "AUD", "NZ": "NZD"}
+# The symbol is optional and may trail the number: BrickOwl formats prices for
+# the visitor's locale, and for some regions renders them bare ("12.34") or
+# suffixed ("12.34 ₪"). Requiring a leading symbol found nothing at all on
+# those pages — 15 offer rows, zero parsed.
+PRICE_RE = re.compile(
+    r"(?:(?P<code>[A-Z]{2,3})\s*)?(?P<sym>[£$€₪])?\s*"
+    r"(?P<amt>\d[\d,]*(?:\.\d{1,2})?)\s*(?P<sym2>[£$€₪])?")
 
 
 class BrickOwlSource(BaseScraper):
@@ -67,9 +74,10 @@ class BrickOwlSource(BaseScraper):
         soup = BeautifulSoup(html, "html.parser")
         res.meta = self._parse_meta(soup, item_id)
 
+        page_ccy = self._page_currency(soup)
         seen_ccy = set()
         for cond_word, bucket in (("new", "new"), ("used", "used")):
-            for price, qty, ccy, desc in self._find_offers(soup, cond_word):
+            for price, qty, ccy, desc in self._find_offers(soup, cond_word, page_ccy):
                 seen_ccy.add(ccy)
                 res.__dict__[bucket]["stock"].append(
                     Listing(qty=qty, price=price, status="complete",
@@ -78,7 +86,32 @@ class BrickOwlSource(BaseScraper):
             res.currency = seen_ccy.pop()
         return res
 
-    def _find_offers(self, soup, cond_word: str):
+    @staticmethod
+    def _page_currency(soup):
+        """Currency of the page, from its JSON-LD offer block.
+
+        Needed because prices themselves may render with no symbol at all,
+        which leaves nothing to infer the currency from."""
+        import json
+
+        for tag in soup.select("script[type='application/ld+json']"):
+            try:
+                blob = json.loads(tag.string or "{}")
+            except (ValueError, TypeError):
+                continue
+            stack = [blob]
+            while stack:
+                node = stack.pop()
+                if isinstance(node, dict):
+                    ccy = node.get("priceCurrency")
+                    if isinstance(ccy, str) and len(ccy) == 3:
+                        return ccy.upper()
+                    stack.extend(node.values())
+                elif isinstance(node, list):
+                    stack.extend(node)
+        return None
+
+    def _find_offers(self, soup, cond_word: str, page_ccy=None):
         """Yield (price, qty, currency, description) for one condition.
 
         BrickOwl marks offers with condition labels ('New', 'Used, Complete',
@@ -99,14 +132,17 @@ class BrickOwlSource(BaseScraper):
             m = PRICE_RE.search(text)
             if not m:
                 continue
-            price = float(m.group(2).replace(",", ""))
+            price = float(m.group("amt").replace(",", ""))
             if price <= 0:
                 continue
             qty = 1
             qm = re.search(r"(\d+)\s+(?:available|in stock)", low)
             if qm:
                 qty = max(1, min(int(qm.group(1)), 50))
-            yield price, qty, SYMBOL_TO_CCY.get(m.group(1), "GBP"), text[:140]
+            symbol = m.group("sym") or m.group("sym2")
+            ccy = (SYMBOL_TO_CCY.get(symbol) or CODE_TO_CCY.get(m.group("code") or "")
+                   or page_ccy or "GBP")
+            yield price, qty, ccy, text[:140]
 
     @staticmethod
     def _parse_meta(soup, item_id: str):

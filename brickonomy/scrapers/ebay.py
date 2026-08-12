@@ -37,7 +37,11 @@ NEW_RE = re.compile(r"sealed|nisb|nib\b|misb|bnib|new\s+in\s+(?:sealed\s+)?box|"
                     r"brand\s+new|factory\s+sealed|unopened", re.IGNORECASE)
 USED_RE = re.compile(r"\bused\b|pre[- ]?owned|built|complete\s+set|100%\s*complete|"
                      r"assembled|displayed|retired\s+built", re.IGNORECASE)
-PRICE_RE = re.compile(r"[\$£€₪]\s*([\d,]+(?:\.\d{1,2})?)")
+# Leading symbol optional, and a currency code or trailing symbol accepted:
+# eBay formats prices for the viewer's locale, so the same listing reads
+# "$12.34" to one visitor and "ILS 45.60" or "45.60 ₪" to another. Requiring
+# a leading symbol silently parsed zero listings from pages full of them.
+PRICE_RE = re.compile(r"(?:[A-Z]{2,3}\s*)?[\$£€₪]?\s*([\d,]+\.\d{2})")
 
 
 class EbaySource(BaseScraper):
