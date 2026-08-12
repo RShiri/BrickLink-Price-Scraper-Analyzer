@@ -4,7 +4,8 @@ A self-hosted, BrickEconomy-style LEGO value tracker that lives inside this
 repo and builds on its existing BrickLink scraper and `PriceAnalyzer`.
 
 - **Three price sources, no API keys**: BrickLink (the repo's existing Selenium
-  scraper), **eBay** (sold + active listings) and **BrickOwl** (current asks) —
+  scraper, the only one with real sale history), **eBay** and **BrickOwl**
+  (both current asks) —
   all plain scraping.
 - **Real price history**: every scan appends snapshots to `brickonomy.db`
   instead of overwriting, so every set gets a price-over-time chart.
@@ -179,11 +180,30 @@ Notes per source:
 - **BrickLink** — wraps the root `scraper.py` (headless Chrome; prices in the
   session currency, ILS by default). Also fetches the set's full parts list
   and part-out value over plain HTTP.
-- **eBay** — headless Chrome with stealth flags; sold/completed
-  (`LH_Sold=1&LH_Complete=1`) and Buy-It-Now searches; listings are
-  title-classified into new/used and junk lots (instructions-only,
-  minifig-only, bulk, clones) are filtered. Titles run through
-  PriceAnalyzer's completeness blacklist like any other description.
+- **eBay** — headless Chrome with stealth flags; the Buy-It-Now search only.
+  Listings are title-classified into new/used and junk lots
+  (instructions-only, minifig-only, bulk, clones) are filtered; titles run
+  through PriceAnalyzer's completeness blacklist like any other description.
+  **Sold/completed listings are no longer reachable**: eBay answers every
+  anonymous `LH_Sold=1&LH_Complete=1` request with an error, sign-in or
+  security page (five URL shapes checked — reproduce with
+  `python -m brickonomy.doctor <set> --source ebay-sold`), so eBay counts as
+  asks-only and PriceAnalyzer rates it LOW confidence.
+
+## When a source stops returning anything
+
+```bash
+python -m brickonomy.doctor 75192              # all sources
+python -m brickonomy.doctor 75192 --source ebay --dump
+```
+
+Prints, per source: HTTP status and page size, block/captcha detection, how
+many rows each selector still matches, the page's most common CSS classes,
+the text around each price, and what the parser then produced — enough to
+tell "blocked" apart from "the markup changed" and from "this item really has
+no offers". `--dump` writes the fetched HTML next to it for a new fixture.
+`.github/workflows/scraper-doctor.yml` runs the same thing on a GitHub runner
+when you want a clean IP for comparison.
 - **BrickOwl** — plain HTTP; catalog search resolves the item page, whose
   "Buy" offers become current asks. BrickOwl has no public sold history, so
   its confidence is LOW by design.
