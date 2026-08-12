@@ -135,9 +135,59 @@ ITEM_META_COLS = ("name", "theme", "subtheme", "year", "parts", "minifigs",
                   "brickowl_boid", "ebay_query", "item_type", "category_id")
 
 
+# Each source names themes its own way — Rebrickable says "Super Heroes
+# Marvel", BrickEconomy exports say "Marvel Super Heroes", BrickLink says
+# "Super Heroes". Left alone they split one theme across several rows of the
+# coverage table and the Themes page. Canonical name on the right.
+THEME_ALIASES = {
+    "marvel super heroes": "Super Heroes Marvel",
+    "super heroes marvel": "Super Heroes Marvel",
+    "marvel": "Super Heroes Marvel",
+    "dc super heroes": "Super Heroes DC",
+    "super heroes dc": "Super Heroes DC",
+    "dc comics super heroes": "Super Heroes DC",
+    "star wars": "Star Wars",
+    "harry potter": "Harry Potter",
+    "creator expert": "Icons",
+    "lego icons": "Icons",
+    "icons": "Icons",
+    "collectable minifigures": "Collectible Minifigures",
+    "collectible minifigures": "Collectible Minifigures",
+    "minifigures": "Collectible Minifigures",
+}
+
+
+def canonical_theme(theme):
+    if not theme:
+        return theme
+    return THEME_ALIASES.get(theme.strip().lower(), theme.strip())
+
+
+def normalize_themes(conn, log=print):
+    """Fold aliased theme names into their canonical spelling. Idempotent —
+    run it after any import."""
+    changed = 0
+    rows = conn.execute(
+        "SELECT DISTINCT theme FROM items WHERE theme IS NOT NULL AND theme != ''"
+    ).fetchall()
+    for row in rows:
+        canon = canonical_theme(row["theme"])
+        if canon != row["theme"]:
+            cur = conn.execute("UPDATE items SET theme = ? WHERE theme = ?",
+                               (canon, row["theme"]))
+            changed += cur.rowcount
+            log(f"  theme {row['theme']!r} → {canon!r} ({cur.rowcount} items)")
+    conn.commit()
+    if changed:
+        log(f"✔ {changed} items moved onto canonical theme names")
+    return changed
+
+
 def upsert_item(conn, item_id: str, **cols):
     """Insert the item or update the provided (non-None) columns."""
     cols = {k: v for k, v in cols.items() if k in ITEM_META_COLS and v is not None}
+    if cols.get("theme"):
+        cols["theme"] = canonical_theme(cols["theme"])
     row = conn.execute("SELECT item_id FROM items WHERE item_id = ?", (item_id,)).fetchone()
     if row is None:
         cols.setdefault("name", f"Set {item_id}")

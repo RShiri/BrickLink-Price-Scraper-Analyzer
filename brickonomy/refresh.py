@@ -164,7 +164,7 @@ def _stale_items(conn, ttl_days):
 
 
 def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
-                progress=None, log=print):
+                limit=None, progress=None, log=print):
     """Entry point shared by the CLI and the web background job.
 
     progress: optional callback(done, total, current_item, errors: list).
@@ -205,6 +205,13 @@ def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
         else:
             raise ValueError(f"unknown scope {scope!r}")
 
+        if limit and len(targets) > limit:
+            # Targets are ordered never-scanned first, so a limited run always
+            # takes the most useful slice. Say what was left out.
+            log(f"… {len(targets)} items match; scanning the first {limit}, "
+                f"{len(targets) - limit} left for the next run")
+            targets = targets[:limit]
+
         errors = []
         total = len(targets)
         for i, (iid, itype) in enumerate(targets):
@@ -233,13 +240,15 @@ def main():
                                     "e.g. \"Super Heroes Marvel\"")
     ap.add_argument("--force", action="store_true",
                     help="ignore the freshness TTL")
+    ap.add_argument("--limit", type=int,
+                    help="scan at most N items (never-scanned ones first)")
     args = ap.parse_args()
 
     if args.theme and args.scope == "portfolio":
         args.scope = "theme"          # --theme alone implies --scope theme
 
     summary = run_refresh(scope=args.scope, item_id=args.item,
-                          force=args.force, theme=args.theme)
+                          force=args.force, theme=args.theme, limit=args.limit)
     print(f"\nRefreshed {summary['done']} item(s); {len(summary['errors'])} source error(s).")
     for iid, source, err in summary["errors"][:20]:
         print(f"  {iid} · {source}: {err}")

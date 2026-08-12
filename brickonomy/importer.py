@@ -184,6 +184,7 @@ def main():
     n_inv = import_legacy_inventories(conn, cfg.legacy_db_path)
     print(f"[importer] legacy set inventories seeded: {n_inv}")
 
+    dbq.normalize_themes(conn, log=lambda m: print(f"[importer]{m}"))
     items = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
     pf = conn.execute("SELECT COUNT(*) c FROM portfolio").fetchone()["c"]
     snaps = conn.execute("SELECT COUNT(*) c FROM price_snapshots").fetchone()["c"]

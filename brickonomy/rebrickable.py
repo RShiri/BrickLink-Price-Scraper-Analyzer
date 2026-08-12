@@ -136,6 +136,7 @@ def main():
     try:
         counts = import_catalog(conn, from_dir=args.from_dir,
                                 with_minifigs=args.minifigs)
+        dbq.normalize_themes(conn)
         total = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
         print(f"\nCatalog now holds {total:,} items "
               f"({counts['sets']:,} sets from this run).")
