@@ -96,7 +96,11 @@ class EbaySource(BaseScraper):
             urls["sold"] = f"{SEARCH_URL}?_nkw={nkw}&_ipg=120&LH_Sold=1&LH_Complete=1"
 
         htmls = {"sold": "", "active": ""}
-        driver = make_driver(profile_dir=profile)
+        # Headless is what actually blocks a signed-in session: the same
+        # cookies that return 65 sold results in a visible window return an
+        # interstitial headless. When signed in, use a real (off-screen)
+        # window; anonymous asks-only scraping is fine headless.
+        driver = make_driver(profile_dir=profile, headless=not profile)
         try:
             if profile:
                 # Land on the homepage first. Jumping straight to a sold
