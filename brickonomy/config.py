@@ -34,6 +34,10 @@ class Config:
     # brickonomy.ebay_login) unlocks eBay's sold/completed search, which is
     # closed to anonymous clients. "" disables it and keeps eBay asks-only.
     ebay_profile_dir: str = str(REPO_ROOT / ".chrome-ebay")
+    # Once eBay sold data is available, price eBay from sold listings alone
+    # instead of PriceAnalyzer's 70/30 sold-and-asks blend. eBay asks are
+    # aspirational; its sales are the honest number.
+    ebay_price_from_sold_only: bool = True
     rates_ttl_hours: float = 24.0
     fixture_mode: bool = False
     fixtures_dir: str = str(Path(__file__).resolve().parent / "tests" / "fixtures")
