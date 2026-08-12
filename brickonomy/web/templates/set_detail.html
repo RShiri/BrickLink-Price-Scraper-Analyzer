@@ -170,7 +170,9 @@
 </div>
 {% endif %}
 
-<div class="two-col wide-left">
+{# Minifigures moved out into their own full-width section below, so this is
+   no longer a two-column row. #}
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -199,36 +201,79 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
-    {% if figs %}
-    <div class="table-scroll">
-    <table>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— {{ figs|length }} in this set{% if figs_total %}, {{ figs_total|money(ccy) }} together{% endif %}</span></h3>
+  {% if figs %}
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
+    {% for f in figs %}
+    {% set share = (f.total / values.new.value * 100) if f.total and values.new.value else None %}
+    <a class="figtile" href="{{ u('/sets/' ~ f.id) }}" title="{{ f.name }}"
+       data-value="{{ f.value or 0 }}" data-name="{{ f.name|lower }}" data-qty="{{ f.qty or 1 }}">
+      <div class="figtile-img">
+        <img src="{{ img_url(f.id, 'M') }}" alt="{{ f.name }}" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        {% if (f.qty or 1) > 1 %}<span class="figtile-qty">×{{ f.qty }}</span>{% endif %}
+      </div>
+      <div class="figtile-id">{{ f.id }}</div>
+      <div class="figtile-name">{{ f.name }}</div>
+      <div class="figtile-value">{{ f.value|money(ccy) if f.value else 'not priced' }}</div>
+      {% if share %}<div class="figtile-share">{{ "%.1f"|format(share) }}% of set</div>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
+    </thead>
+    <tbody>
       {% for f in figs %}
       <tr>
-        <td>{{ m.thumb(f.id, 'M', img_url) }}<a href="{{ u('/sets/' ~ f.id) }}"><b>{{ f.id }}</b> {{ f.name[:38] }}</a></td>
-        <td class="num">{{ f.qty or 1 }}</td>
-        <td class="num">{{ f.value|money(ccy) if f.value else '—' }}</td>
-        <td class="num">{% if f.total and values.new.value %}{{ "%.1f"|format(f.total / values.new.value * 100) }}%{% else %}—{% endif %}</td>
+        <td>{{ m.thumb(f.id, 'M', img_url) }}<a href="{{ u('/sets/' ~ f.id) }}"><b>{{ f.id }}</b> {{ f.name }}</a></td>
+        <td class="num" data-v="{{ f.qty or 1 }}">{{ f.qty or 1 }}</td>
+        <td class="num" data-v="{{ f.value or '' }}">{{ f.value|money(ccy) if f.value else '—' }}</td>
+        <td class="num" data-v="{{ (f.total / values.new.value * 100) if f.total and values.new.value else '' }}">
+          {%- if f.total and values.new.value %}{{ "%.1f"|format(f.total / values.new.value * 100) }}%{% else %}—{% endif %}</td>
       </tr>
       {% endfor %}
-      {% if figs_total and values.new.value %}
+    </tbody>
+    {% if figs_total and values.new.value %}
+    <tfoot>
       <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">{{ figs_total|money(ccy) }}</td>
           <td class="num">{{ "%.0f"|format(figs_total / values.new.value * 100) }}%</td></tr>
-      {% endif %}
-    </table>
-    </div>
-    {% if figs_total and values.new.value %}
-    <div style="color:var(--muted);font-size:12px;margin-top:8px">
-      {% if figs_total / values.new.value > 0.8 %}Figs exceed 80% of set value → <b>strong part-out candidate</b>.
-      {% else %}Figs are {{ "%.0f"|format(figs_total / values.new.value * 100) }}% of set value → not a part-out candidate (flag raises at 80%).{% endif %}
-    </div>
+    </tfoot>
     {% endif %}
-    {% else %}
-    <div style="color:var(--muted)">No minifig inventory scanned yet — run a BrickLink scan for this set.</div>
-    {% endif %}
+  </table>
   </div>
+
+  {% if figs_total and values.new.value %}
+  <div style="color:var(--muted);font-size:12px;margin-top:10px">
+    {% if figs_total / values.new.value > 0.8 %}Figs exceed 80% of set value → <b>strong part-out candidate</b>.
+    {% else %}Figs are {{ "%.0f"|format(figs_total / values.new.value * 100) }}% of set value → not a part-out candidate (flag raises at 80%).{% endif %}
+  </div>
+  {% endif %}
+  {% else %}
+  <div style="color:var(--muted)">No minifig inventory scanned yet — run a BrickLink scan for this set.</div>
+  {% endif %}
 </div>
 
 <div class="card">

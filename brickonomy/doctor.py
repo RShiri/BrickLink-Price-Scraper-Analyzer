@@ -164,6 +164,45 @@ def check_ebay(item_id, dump=False):
           f"used stock={len(res.used['stock'])}")
 
 
+def check_ebay_sold_variants(item_id, dump=False):
+    """eBay's sold/completed search is the fragile one — it answers with an
+    error page for some parameter combinations while the identical active
+    search works. Try the plausible variants and report which return cards."""
+    from .scrapers.base import make_driver, polite_sleep
+    from .scrapers.ebay import SEARCH_URL
+
+    print(f"\n{SEP}\nEBAY — sold-search URL variants\n{SEP}")
+    nkw = f"lego+{item_id}"
+    variants = {
+        "current (ipg=120)": f"{SEARCH_URL}?_nkw={nkw}&_ipg=120&LH_Sold=1&LH_Complete=1",
+        "no _ipg": f"{SEARCH_URL}?_nkw={nkw}&LH_Sold=1&LH_Complete=1",
+        "sacat + no ipg": f"{SEARCH_URL}?_nkw={nkw}&_sacat=0&LH_Sold=1&LH_Complete=1",
+        "sold only": f"{SEARCH_URL}?_nkw={nkw}&LH_Sold=1",
+        "ipg=60": f"{SEARCH_URL}?_nkw={nkw}&_ipg=60&LH_Sold=1&LH_Complete=1",
+    }
+    driver = make_driver()
+    try:
+        for label, url in variants.items():
+            try:
+                driver.get(url)
+                polite_sleep()
+                html = driver.page_source
+            except Exception as exc:
+                print(f"  {label}: ✘ {type(exc).__name__}: {exc}")
+                continue
+            soup = _soup(html)
+            title = (soup.title.get_text(strip=True) if soup.title else "")[:40]
+            cards = len(soup.select(".s-card, li.s-item"))
+            prices = len(soup.select(".s-card__price, .s-item__price"))
+            verdict = "OK" if cards else "no results"
+            print(f"  {label:<20} {len(html):>9,}b  cards={cards:<4} prices={prices:<4} "
+                  f"{verdict}  title={title!r}")
+            if dump and cards:
+                _dump(html, f"doctor_ebay_{item_id}_sold_{label.split()[0]}.html")
+    finally:
+        driver.quit()
+
+
 def check_bricklink_pov(item_id, dump=False):
     from .scrapers.bricklink import POV_URL, BrickLinkSource
 
@@ -196,7 +235,8 @@ def check_bricklink_pov(item_id, dump=False):
 def main():
     ap = argparse.ArgumentParser(description="Diagnose why a source returns nothing")
     ap.add_argument("item_id", nargs="?", default="75192")
-    ap.add_argument("--source", choices=["ebay", "brickowl", "pov", "all"],
+    ap.add_argument("--source",
+                    choices=["ebay", "brickowl", "pov", "ebay-sold", "all"],
                     default="all")
     ap.add_argument("--dump", action="store_true",
                     help="write the fetched HTML to files in the current directory")
@@ -204,7 +244,7 @@ def main():
 
     print(f"Brickonomy doctor — item {args.item_id}")
     checks = {"brickowl": check_brickowl, "ebay": check_ebay,
-              "pov": check_bricklink_pov}
+              "ebay-sold": check_ebay_sold_variants, "pov": check_bricklink_pov}
     for name, fn in checks.items():
         if args.source in (name, "all"):
             try:

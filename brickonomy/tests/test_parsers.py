@@ -55,8 +55,18 @@ class TestBrickLinkPartsAndPOV:
         assert by_no["2412b"]["qty"] == 2
 
     def test_part_out_value(self):
-        pov = BrickLinkSource().parse_part_out_value(read("bricklink_pov_76031.html"))
+        pov, ccy = BrickLinkSource().parse_part_out_value(read("bricklink_pov_76031.html"))
         assert pov == 612.34
+        assert ccy == "ILS"
+
+    def test_part_out_value_current_layout(self):
+        """The live page labels the total 'Average of last 6 months Sales'
+        and quotes it in US dollars — the old 'Average Value' regex silently
+        returned None for every set."""
+        pov, ccy = BrickLinkSource().parse_part_out_value(
+            read("bricklink_pov_75192_live.html"))
+        assert pov == 1234.66          # sold average, not the 1620.09 asking one
+        assert ccy == "USD"
 
 
 class TestBrickLinkCatalog:

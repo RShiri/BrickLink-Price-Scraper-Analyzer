@@ -461,6 +461,41 @@
     });
   });
 
+  // ── minifig breakdown: sort the tiles, and swap grid ⇄ table ───────────
+  const figGrid = document.getElementById("figGrid");
+  if (figGrid) {
+    const figSort = document.getElementById("figSort");
+    const figTable = document.getElementById("figTable");
+    const viewBox = document.getElementById("figView");
+
+    const sorters = {
+      "value-desc": (a, b) => (+b.dataset.value) - (+a.dataset.value),
+      "value-asc": (a, b) => (+a.dataset.value) - (+b.dataset.value),
+      "name-asc": (a, b) => a.dataset.name.localeCompare(b.dataset.name),
+      "qty-desc": (a, b) => (+b.dataset.qty) - (+a.dataset.qty),
+    };
+    const applySort = () => {
+      const fn = sorters[figSort.value] || sorters["value-desc"];
+      [...figGrid.children].sort(fn).forEach((el) => figGrid.appendChild(el));
+      localStorage.setItem("figSort", figSort.value);
+    };
+    const saved = localStorage.getItem("figSort");
+    if (saved && sorters[saved]) figSort.value = saved;
+    figSort.addEventListener("change", applySort);
+    applySort();
+
+    const setView = (view) => {
+      figGrid.hidden = view !== "grid";
+      figTable.hidden = view !== "table";
+      viewBox.querySelectorAll("[data-view]").forEach((b) =>
+        b.classList.toggle("on", b.dataset.view === view));
+      localStorage.setItem("figView", view);
+    };
+    viewBox.querySelectorAll("[data-view]").forEach((b) =>
+      b.addEventListener("click", () => setView(b.dataset.view)));
+    setView(localStorage.getItem("figView") === "table" ? "table" : "grid");
+  }
+
   // ── auto-scan banner: wait for this item's scan, then show the prices ──
   const autoScan = document.getElementById("autoScan");
   if (autoScan) {

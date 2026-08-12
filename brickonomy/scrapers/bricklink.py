@@ -198,30 +198,52 @@ class BrickLinkSource(BaseScraper):
 
     # ── part-out value ───────────────────────────────────────────────────
 
+    # The page renders one line per basis, e.g.
+    #   "* Average of last 6 months Sales: US $1,234.66 Including 7521 Items in 684 Lots."
+    #   "Current Items For Sale Average: US $1,620.09 Including …"
+    # Sold prices first — that is what the parts actually fetch; the asking
+    # average is the fallback for a set with no recent sales.
+    POV_PATTERNS = (
+        r"Average\s+of\s+last\s+\d+\s+months?\s+Sales\s*:",
+        r"Current\s+Items?\s+For\s+Sale\s+Average\s*:",
+        r"Average\s+Value[^:]{0,40}:",          # older layout
+    )
+    # "US $1,234.66", "ILS ₪1,234.66", "£1,234.66"
+    POV_AMOUNT = r"\s*(?:(US|CA|AU|NZ)\s*)?(?:([A-Z]{2,3})\s*)?([$₪€£])?\s*([\d,]+\.\d{2})"
+    CCY_BY_SYMBOL = {"$": "USD", "₪": "ILS", "€": "EUR", "£": "GBP"}
+
     def parse_part_out_value(self, html: str):
-        """Extract the 'Average of last 6 months Sales' / current-items part-out
-        total from catalogPOV.asp. Returns float or None."""
+        """Part-out total from catalogPOV.asp.
+
+        Returns (value, currency) — the page is fetched without a BrickLink
+        session, so it comes back in the site default (USD) rather than the
+        scraper's session currency, and the caller has to convert."""
         text = BeautifulSoup(html, "html.parser").get_text(" ", strip=True)
-        # e.g. "Total Average Value of 631 Lots (7541 Items): US $1,234.56" or ILS
-        m = re.search(r"Average\s+Value[^:]*:\s*(?:[A-Z]{2,3}\s*)?[$₪€£]?\s*([\d,]+\.\d{2})",
-                      text, re.IGNORECASE)
-        if not m:
-            m = re.search(r"Total[^:]{0,60}:\s*(?:[A-Z]{2,3}\s*)?[$₪€£]?\s*([\d,]+\.\d{2})", text)
-        if not m:
-            return None
-        return float(m.group(1).replace(",", ""))
+        for pattern in self.POV_PATTERNS:
+            m = re.search(pattern + self.POV_AMOUNT, text, re.IGNORECASE)
+            if not m:
+                continue
+            value = float(m.group(4).replace(",", ""))
+            if value <= 0:
+                continue
+            ccy = (m.group(2) if m.group(2) and len(m.group(2)) == 3 else None)
+            if not ccy:
+                ccy = "USD" if m.group(1) else self.CCY_BY_SYMBOL.get(m.group(3), "USD")
+            return value, ccy
+        return None, None
 
     def fetch_part_out_value(self, set_id: str, condition: str = "N"):
+        """Returns (value, currency, error)."""
         num = set_id.split("-")[0]
         url = (f"{POV_URL}?itemType=S&itemNo={num}&itemSeq=1&itemQty=1"
                f"&breakType=M&itemCondition={condition}")
         html, error = self._get(url)
         if html:
-            value = self.parse_part_out_value(html)
+            value, ccy = self.parse_part_out_value(html)
             if value is not None:
-                return value, None
+                return value, ccy, None
             error = "POV total not found on page"
-        return None, error
+        return None, None, error
 
     # ── catalog tree (themes / subthemes) ────────────────────────────────
 
