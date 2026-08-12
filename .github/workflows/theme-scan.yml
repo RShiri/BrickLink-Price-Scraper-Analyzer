@@ -16,8 +16,11 @@ on:
   # Every 6 hours, keep chewing through whatever the catalog is still
   # missing — sets before minifigs, never-scanned before merely stale. No
   # input needed; each run picks up where the last one stopped.
-  schedule:
-    - cron: "0 */6 * * *"
+  # Disabled at the owner's request — scanning happens on their own machine,
+  # where the eBay session lives and sold prices are available. Uncomment to
+  # let GitHub grind through the catalog again (asks-only for eBay).
+  # schedule:
+  #   - cron: "0 */6 * * *"
   workflow_dispatch:
     inputs:
       theme:
