@@ -977,9 +977,12 @@ def refresh_page(request: Request):
                                    "last_scan": last_ever["ts"]})
         n_portfolio = conn.execute("SELECT COUNT(*) c FROM portfolio WHERE owned > 0").fetchone()["c"]
         n_items = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
+        coverage = dbq.theme_coverage(conn, ttl_days=cfg.auto_scan_on_view_days or 30)
+        covered = sum(t["scanned"] for t in coverage)
         return templates.TemplateResponse(request, "refresh.html", ctx(
             request, conn, cfg=cfg, sources_health=sources_health,
-            n_portfolio=n_portfolio, n_items=n_items,
+            n_portfolio=n_portfolio, n_items=n_items, coverage=coverage,
+            covered=covered,
         ))
     finally:
         conn.close()
@@ -987,8 +990,13 @@ def refresh_page(request: Request):
 
 @app.post("/refresh")
 def refresh_start(request: Request, scope: str = Form("portfolio"),
-                  item_id: str = Form(""), force: bool = Form(False)):
-    started = jobs.start(scope=scope, item_id=item_id.strip() or None, force=force)
+                  item_id: str = Form(""), force: bool = Form(False),
+                  theme: str = Form("")):
+    theme = theme.strip()
+    if theme and scope not in ("theme",):
+        scope = "theme"          # picking a theme is the intent, whatever the select says
+    started = jobs.start(scope=scope, item_id=item_id.strip() or None,
+                         force=force, theme=theme or None)
     if request.headers.get("accept", "").startswith("application/json"):
         return JSONResponse(jobs.status(), status_code=200 if started else 409)
     return RedirectResponse("/refresh", status_code=303)

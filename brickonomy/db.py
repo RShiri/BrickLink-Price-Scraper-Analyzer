@@ -103,6 +103,17 @@ def connect(db_path: str = None) -> sqlite3.Connection:
     path = db_path or get_config().db_path
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
+    # A scan holds a write transaction for as long as it takes to scrape an
+    # item. Under the default rollback journal that blocks every page read,
+    # so browsing while scanning raises "database is locked". WAL lets
+    # readers through; the timeout absorbs the brief writer-vs-writer waits.
+    # journal_mode is persisted in the file, so the CLI, the web app and the
+    # exporter all inherit it.
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=15000")
+    except sqlite3.OperationalError:
+        pass  # e.g. a filesystem with no WAL support — plain journal is fine
     conn.executescript(DDL)
     for migration in MIGRATIONS:
         try:
@@ -208,6 +219,48 @@ def last_scrape_time(conn, item_id, source):
         (item_id, source),
     ).fetchone()
     return row["ts"] if row and row["ts"] else None
+
+
+def last_scrape_any(conn, item_id):
+    """Newest snapshot for an item across all sources, or None."""
+    row = conn.execute(
+        "SELECT MAX(scraped_at) AS ts FROM price_snapshots WHERE item_id=?",
+        (item_id,),
+    ).fetchone()
+    return row["ts"] if row and row["ts"] else None
+
+
+def theme_coverage(conn, ttl_days: float = 30.0, limit: int = 400):
+    """Per-theme scan progress: how many items exist, how many have ever been
+    scanned, and how many of those are still fresh. Drives the coverage table
+    on the Refresh page."""
+    cutoff = (datetime.now() - timedelta(days=ttl_days)).isoformat(timespec="seconds")
+    rows = conn.execute(
+        """SELECT i.theme                                   AS theme,
+                  COUNT(*)                                  AS total,
+                  SUM(CASE WHEN s.ts IS NOT NULL THEN 1 ELSE 0 END) AS scanned,
+                  SUM(CASE WHEN s.ts > ?        THEN 1 ELSE 0 END)  AS fresh,
+                  MAX(s.ts)                                 AS last_scan
+           FROM items i
+           LEFT JOIN (SELECT item_id, MAX(scraped_at) ts
+                      FROM price_snapshots GROUP BY item_id) s
+             ON s.item_id = i.item_id
+           WHERE i.theme IS NOT NULL AND i.theme != ''
+           GROUP BY i.theme
+           ORDER BY scanned DESC, total DESC
+           LIMIT ?""",
+        (cutoff, limit),
+    ).fetchall()
+    out = []
+    for r in rows:
+        total, scanned, fresh = r["total"], r["scanned"] or 0, r["fresh"] or 0
+        out.append({
+            "theme": r["theme"], "total": total, "scanned": scanned,
+            "fresh": fresh, "stale": scanned - fresh, "left": total - scanned,
+            "pct": round(scanned / total * 100) if total else 0,
+            "last_scan": r["last_scan"],
+        })
+    return out
 
 
 def is_fresh(conn, item_id, source, ttl_days: float) -> bool:
