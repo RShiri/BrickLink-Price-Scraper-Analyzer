@@ -171,3 +171,36 @@ class TestEbaySoldOnlyPricing:
         for source in ("bricklink", "brickowl"):
             priced, full = self._analyse(source)
             assert priced is full
+
+
+class TestThemeScanScope:
+    """A theme scan must cover the theme's minifigs, not just its sets."""
+
+    def _conn(self, tmp_path, monkeypatch):
+        from brickonomy import db as dbq
+        from brickonomy.config import get_config
+        monkeypatch.setattr(get_config(), "db_path", str(tmp_path / "theme.db"))
+        conn = dbq.connect()
+        dbq.upsert_item(conn, "76031", name="Hulk Buster", theme="Super Heroes Marvel")
+        dbq.upsert_item(conn, "sh0167", name="Iron Man", item_type="M")  # no theme
+        dbq.upsert_item(conn, "10283", name="Shuttle", theme="Icons")
+        dbq.upsert_set_minifigs(conn, "76031",
+                                [{"id": "sh0167", "name": "Iron Man", "qty": 1}])
+        conn.commit()
+        return conn
+
+    def test_targets_include_sets_and_their_figs(self, tmp_path, monkeypatch):
+        from brickonomy.refresh import run_refresh
+        conn = self._conn(tmp_path, monkeypatch)
+        conn.close()
+
+        seen = []
+        import brickonomy.refresh as refresh_mod
+        monkeypatch.setattr(refresh_mod, "refresh_item",
+                            lambda conn, iid, itype, force=False, log=print:
+                            (seen.append(iid), {})[1])
+        monkeypatch.setattr(refresh_mod, "polite_sleep", lambda: None)
+        run_refresh(scope="theme", theme="Super Heroes Marvel", log=lambda *a: None)
+
+        assert seen == ["76031", "sh0167"]     # sets first, then their figs
+        assert "10283" not in seen             # other themes untouched

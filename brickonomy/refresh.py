@@ -181,16 +181,24 @@ def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
         elif scope == "theme":
             if not theme:
                 raise ValueError("scope 'theme' needs a theme name")
-            # Sets first, then the theme's minifigs; oldest data first so an
-            # interrupted run still made progress where it mattered most.
+            # Sets first, then the theme's minifigs; never-scanned before
+            # stale, so an interrupted run made progress where it mattered.
+            #
+            # The minifig half needs the set_minifigs join: figs imported from
+            # the catalog have no theme of their own, so `theme = ?` alone
+            # would scan a theme's sets and silently skip every fig in them.
             targets = [(r["item_id"], r["item_type"]) for r in conn.execute(
                 """SELECT i.item_id, i.item_type FROM items i
                    LEFT JOIN (SELECT item_id, MAX(scraped_at) ts
                               FROM price_snapshots GROUP BY item_id) s
                      ON s.item_id = i.item_id
                    WHERE i.theme = ?
+                      OR i.item_id IN (
+                           SELECT sm.fig_id FROM set_minifigs sm
+                           JOIN items si ON si.item_id = sm.set_id
+                           WHERE si.theme = ?)
                    ORDER BY i.item_type DESC, s.ts IS NOT NULL, s.ts""",
-                (theme,))]
+                (theme, theme))]
         elif scope == "all":
             targets = [(r["item_id"], r["item_type"])
                        for r in conn.execute("SELECT item_id, item_type FROM items")]
