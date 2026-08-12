@@ -128,10 +128,40 @@ def get_display_currency():
     return get_config().display_currency
 
 
+def _run_bricklink_tree(log):
+    """BrickLink's own category tree — themes and subthemes as BrickLink
+    files them, which is finer-grained than Rebrickable's themes."""
+    from .. import db as dbq
+    from ..catalog import sync_tree
+    from ..scrapers.bricklink import BrickLinkSource
+
+    conn = dbq.connect()
+    try:
+        n = sync_tree(conn, BrickLinkSource(), log=log)
+        log(f"✔ {n} BrickLink categories imported")
+    finally:
+        conn.close()
+
+
+def _run_doctor(log):
+    """Answer 'why is this source returning nothing?' from the web UI."""
+    from ..doctor import check_brickowl, check_ebay
+
+    for name, fn in (("brickowl", check_brickowl), ("ebay", check_ebay)):
+        try:
+            fn("75192")
+        except Exception as exc:
+            log(f"✘ {name} check crashed: {type(exc).__name__}: {exc}")
+    log("Full detail is printed in the terminal running the app "
+        "(python -m brickonomy.doctor <set> for another item).")
+
+
 ACTIONS = {
     "catalog": ("full LEGO catalog import", _run_catalog_import),
+    "bl_tree": ("BrickLink category tree", _run_bricklink_tree),
     "export": ("static site export", _run_export),
     "ebay_check": ("eBay session check", _run_ebay_check),
+    "doctor": ("source diagnosis", _run_doctor),
 }
 
 
