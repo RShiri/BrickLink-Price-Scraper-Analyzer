@@ -204,3 +204,44 @@ class TestThemeScanScope:
 
         assert seen == ["76031", "sh0167"]     # sets first, then their figs
         assert "10283" not in seen             # other themes untouched
+
+
+class TestOutlierRejection:
+    """Absurd listings must not move the market price."""
+
+    @staticmethod
+    def _analyze(prices):
+        from brickonomy.compat import PriceAnalyzer
+        L = lambda p: {"qty": 1, "price": p, "status": "complete",
+                       "description": "lego set"}
+        return PriceAnalyzer({"meta": {},
+                              "new": {"sold": [], "stock": [L(p) for p in prices]},
+                              "used": {"sold": [], "stock": []}}).analyze()["new"]
+
+    REAL = [640, 655, 660, 672, 680, 699, 710, 725]
+
+    def test_drops_both_extremes(self):
+        from brickonomy.compat import PriceAnalyzer
+        kept = PriceAnalyzer.reject_outliers(self.REAL + [9999, 1])
+        assert kept == self.REAL
+
+    def test_market_price_is_unmoved_by_a_wild_ask(self):
+        clean = self._analyze(self.REAL)["market_price"]
+        polluted = self._analyze(self.REAL + [9999])["market_price"]
+        assert polluted == clean
+
+    def test_small_samples_are_left_alone(self):
+        from brickonomy.compat import PriceAnalyzer
+        # Three listings carry no information about what is anomalous.
+        assert PriceAnalyzer.reject_outliers([100, 500, 900]) == [100, 500, 900]
+
+    def test_identical_prices_do_not_reject_everything(self):
+        from brickonomy.compat import PriceAnalyzer
+        # MAD is 0 here; a naive implementation drops every differing price.
+        assert PriceAnalyzer.reject_outliers([100, 100, 100, 100, 120]) == \
+            [100, 100, 100, 100, 120]
+
+    def test_wide_but_honest_spread_survives(self):
+        from brickonomy.compat import PriceAnalyzer
+        wide = [400, 520, 610, 700, 810, 930]
+        assert PriceAnalyzer.reject_outliers(wide) == wide
