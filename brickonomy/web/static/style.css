@@ -175,6 +175,22 @@ svg.spark polyline { fill: none; stroke: var(--s1); stroke-width: 2; }
 }
 .facts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 
+/* "we are fetching prices for this page right now" strip */
+.autoscan {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border: 1px solid rgba(79,140,255,0.35); border-radius: 12px;
+  background: rgba(79,140,255,0.08); padding: 10px 14px; margin-bottom: 14px;
+  font-size: 13px; color: var(--ink);
+}
+.autoscan .soft { color: var(--muted); }
+.spinner {
+  width: 14px; height: 14px; flex: none; border-radius: 50%;
+  border: 2px solid rgba(124,160,255,0.25); border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
 .progress { height: 8px; background: rgba(124,160,255,0.12); border-radius: 4px; overflow: hidden; margin-top: 8px; }
 .progress > div { height: 100%; width: 0; background: var(--bar); border-radius: 4px; box-shadow: 0 0 12px rgba(79,140,255,0.6); transition: width .4s ease; }
 

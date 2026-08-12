@@ -3,6 +3,8 @@
 {% block title %}{{ item.item_id }} {{ item.name }} · Brickonomy{% endblock %}
 {% block content %}
 
+{{ m.autoscan_banner(auto_scan, item.item_id) }}
+
 <div class="sethead">
   <figure class="setimg" style="margin:0;width:220px;min-height:220px">
     <img src="{{ img_url(item.item_id, 'M') }}" alt="{{ item.name }}"
