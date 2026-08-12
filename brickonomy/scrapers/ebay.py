@@ -56,32 +56,55 @@ class EbaySource(BaseScraper):
     def _build_query(self, item_id: str) -> str:
         return f"lego {item_id}"
 
+    @staticmethod
+    def signed_in_profile():
+        """Path of the Chrome profile that is signed in to eBay, or None.
+
+        eBay closed the sold/completed search to anonymous clients — every
+        variant of `LH_Sold=1&LH_Complete=1` answers with "Error Page",
+        "Sign in or Register" or "Security Measure" (five URL shapes checked
+        from a clean IP: `python -m brickonomy.doctor <set> --source
+        ebay-sold`). With a signed-in profile it works again, so sold prices
+        are opt-in: run `python -m brickonomy.ebay_login` once.
+        """
+        from pathlib import Path
+
+        from ..config import get_config
+
+        raw = get_config().ebay_profile_dir
+        if not raw:
+            return None
+        path = Path(raw).expanduser()
+        # Chrome writes "Default/" as soon as a profile is really used; an
+        # empty directory means the login was never completed.
+        return str(path) if (path / "Default").exists() else None
+
     def _fetch_html(self, item_id: str, item_type: str = "S"):
-        """Active Buy-It-Now listings only.
+        """Sold/completed listings when signed in, plus active Buy-It-Now asks.
 
-        eBay closed the sold/completed search to anonymous clients: every
-        variant of `LH_Sold=1&LH_Complete=1` now answers with "Error Page",
-        "Sign in or Register" or "Security Measure" (verified across five URL
-        shapes from a clean IP — see `python -m brickonomy.doctor <set>
-        --source ebay-sold`). Asking for it anyway cost a page load and a
-        polite delay per item and returned nothing, so the request is gone.
-
-        The consequence is honest rather than hidden: with no sold data,
-        PriceAnalyzer anchors eBay on its competitive ask and reports LOW
-        confidence, exactly as it does for BrickOwl. BrickLink remains the
-        only source with real sale history.
+        Without a signed-in profile only the active search is fetched — asking
+        for sold anyway costs a page load and a polite delay per item and
+        returns a block page. PriceAnalyzer then anchors eBay on its
+        competitive ask at LOW confidence, exactly as for BrickOwl.
         """
         from .base import make_driver
 
-        url = (f"{SEARCH_URL}?_nkw={self._build_query(item_id).replace(' ', '+')}"
-               f"&_ipg=120&LH_BIN=1")
-        driver = make_driver()
+        nkw = self._build_query(item_id).replace(" ", "+")
+        profile = self.signed_in_profile()
+        urls = {"active": f"{SEARCH_URL}?_nkw={nkw}&_ipg=120&LH_BIN=1"}
+        if profile:
+            urls["sold"] = f"{SEARCH_URL}?_nkw={nkw}&_ipg=120&LH_Sold=1&LH_Complete=1"
+
+        htmls = {"sold": "", "active": ""}
+        driver = make_driver(profile_dir=profile)
         try:
-            driver.get(url)
-            polite_sleep()
-            return {"sold": "", "active": driver.page_source}
+            for key, url in urls.items():
+                driver.get(url)
+                polite_sleep()
+                htmls[key] = driver.page_source
         finally:
             driver.quit()
+        return htmls
 
     # ── parse ────────────────────────────────────────────────────────────
 

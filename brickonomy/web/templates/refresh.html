@@ -4,16 +4,18 @@
 
 <div class="eyebrow">Data engine</div>
 <h1>Refresh &amp; Sources</h1>
-<p class="sub">Three key-free scrapers feed the snapshot database. Trigger scans manually, or schedule them with cron.</p>
+<p class="sub">Every scraping job lives here — nothing needs the command line.
+  {{ "{:,}".format(covered) }} of {{ "{:,}".format(n_items) }} catalog items have been priced
+  ({{ "{:,}".format(fresh) }} still fresh).</p>
 
 <div class="card">
-  <h3>Source health</h3>
+  <h3>1 · Source health</h3>
   <div class="table-scroll">
   <table>
     <tr><th>Source</th><th>Method</th><th>Data</th><th class="num">Items (24h)</th><th>Last scan</th><th>Status</th></tr>
     {% set meta = {
       'bricklink': ('headless Chrome', 'sold 6m + current stock, new & used, inventories', 2),
-      'ebay': ('headless Chrome', 'sold/completed + Buy-It-Now, title-classified', 3),
+      'ebay': ('headless Chrome', 'Buy-It-Now asks' ~ (', + sold/completed (signed in)' if ebay_signed_in else ' only — sold needs sign-in'), 3),
       'brickowl': ('plain HTTP', 'current asks, new & used (no sold history)', 4),
     } %}
     {% for s in sources_health %}
@@ -43,7 +45,7 @@
 
 <div class="two-col">
   <div class="card">
-    <h3>Run a scan</h3>
+    <h3>2 · Run a scan</h3>
     <form class="searchrow" method="post" action="/refresh" style="margin-bottom:10px">
       <select class="inp" name="scope">
         <option value="portfolio">Portfolio ({{ n_portfolio }} sets)</option>
@@ -72,11 +74,39 @@
 {% endfor %}</div>
     </div>
     <div style="color:var(--muted);font-size:12px;margin-top:10px">
-      Scheduling: add to cron — <code>0 6 * * * cd &lt;repo&gt; &amp;&amp; python -m brickonomy.refresh --scope stale</code>
+      Scanning is deliberately slow — a few seconds between requests, about half a minute per set.
+      Schedule it with cron: <code>0 6 * * * cd &lt;repo&gt; &amp;&amp; python -m brickonomy.refresh --scope stale</code>
+    </div>
+
+    <h3 style="margin-top:18px">3 · Catalog &amp; publishing</h3>
+    <div class="searchrow">
+      <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="catalog">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>⬇ Import full LEGO catalog</button>
+      </form>
+      <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="export">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>⬆ Rebuild published site</button>
+      </form>
+      <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="ebay_check">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>⟳ Check eBay session</button>
+      </form>
+    </div>
+    <div style="color:var(--muted);font-size:12px;margin-top:8px">
+      Catalog import refreshes names, years and part counts for every set and minifig from
+      Rebrickable (no prices). Rebuild writes <code>docs/</code> for GitHub Pages.
+      {% if ebay_signed_in %}
+      eBay is <b style="color:var(--good)">signed in</b>, so scans include sold prices.
+      {% else %}
+      eBay sold prices need a one-time sign-in — it opens a browser window, so it runs from a
+      terminal: <code>python -m brickonomy.ebay_login</code>. Until then eBay contributes asking
+      prices only, at LOW confidence.
+      {% endif %}
     </div>
   </div>
   <div class="card">
-    <h3>Configuration <span class="soft">— brickonomy/config.json / BRICKONOMY_* env</span></h3>
+    <h3>4 · Configuration <span class="soft">— brickonomy/config.json / BRICKONOMY_* env</span></h3>
     <dl class="kv">
       <dt>Display currency</dt><dd>{{ cfg.display_currency }} <span style="color:var(--muted)">(switch in header; cookie per browser)</span></dd>
       <dt>Scrape TTL</dt><dd>{{ cfg.scrape_ttl_days|int }} days <span style="color:var(--muted)">— sources scanned more recently are skipped</span></dd>
@@ -96,7 +126,7 @@
 </div>
 
 <div class="card">
-  <h3>Scan coverage <span class="soft">— which themes are done and what is left</span></h3>
+  <h3>5 · Scan coverage <span class="soft">— what has been scanned and what is still missing</span></h3>
   <div class="searchrow" style="margin-bottom:8px">
     <span class="chip on">{{ "{:,}".format(covered) }} of {{ "{:,}".format(n_items) }} items scanned</span>
     <span class="chip">fresh = scanned within {{ (cfg.auto_scan_on_view_days or 30)|int }} days</span>

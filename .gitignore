@@ -4,3 +4,4 @@ brickonomy.db
 .pytest_cache/
 .venv/
 venv/
+.chrome-ebay/

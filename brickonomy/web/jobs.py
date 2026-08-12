@@ -77,6 +77,64 @@ def start(scope="portfolio", item_id=None, force=False, theme=None):
     return True
 
 
+def start_action(name):
+    """Queue a one-off maintenance action (catalog import, static export,
+    eBay sign-in check) so the whole toolset is drivable from the web UI and
+    not only from the command line. Returns False if something is running."""
+    if name not in ACTIONS:
+        raise ValueError(f"unknown action {name!r}")
+    with _lock:
+        if _state["running"] or any(t[0] != "item" for t in _queue):
+            return False
+        _queue.append(("action", name))
+        _state.update(scope=ACTIONS[name][0], current_item=None, done=0,
+                      total=0, errors=[])
+        _state["log"].clear()
+        _spawn_worker()
+    return True
+
+
+def _run_catalog_import(log):
+    from .. import db as dbq
+    from ..rebrickable import import_catalog
+
+    conn = dbq.connect()
+    try:
+        counts = import_catalog(conn, with_minifigs=True, log=log)
+        total = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
+        log(f"✔ catalog now holds {total:,} items "
+            f"({counts['sets']:,} sets, {counts['minifigs']:,} minifigs)")
+    finally:
+        conn.close()
+
+
+def _run_export(log):
+    from ..export import export
+
+    pages, jsons = export("docs", get_display_currency(), quiet=True)
+    log(f"✔ exported {pages} pages + {jsons} JSON files into docs/")
+    log("  Publish with: git add docs && git commit -m \"Update site\" && git push")
+
+
+def _run_ebay_check(log):
+    from ..ebay_login import check
+
+    if not check(log=log):
+        log("  Sign in from a terminal: python -m brickonomy.ebay_login")
+
+
+def get_display_currency():
+    from ..config import get_config
+    return get_config().display_currency
+
+
+ACTIONS = {
+    "catalog": ("full LEGO catalog import", _run_catalog_import),
+    "export": ("static site export", _run_export),
+    "ebay_check": ("eBay session check", _run_ebay_check),
+}
+
+
 def enqueue(item_id):
     """Queue one item scanned because its page was viewed. Returns the 1-based
     queue position, or None when it was not queued (already pending, already
@@ -110,6 +168,8 @@ def _next_task():
         if task[0] == "item":
             _queued_items.discard(task[1])
             _state["scope"] = task[1]
+        elif task[0] == "action":
+            _state["scope"] = ACTIONS[task[1]][0]
         else:
             _state["scope"] = task[1].get("theme") or task[1]["scope"]
         return task
@@ -125,6 +185,9 @@ def _drain():
         try:
             if task[0] == "item":
                 run_refresh(item_id=task[1], progress=_progress, log=_log_line)
+            elif task[0] == "action":
+                _log_line(f"▶ {ACTIONS[task[1]][0]}…")
+                ACTIONS[task[1]][1](_log_line)
             else:
                 run_refresh(progress=_progress, log=_log_line, **task[1])
         except Exception as exc:

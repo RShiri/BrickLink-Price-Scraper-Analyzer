@@ -30,6 +30,10 @@ class Config:
     request_delay_range: list = field(default_factory=lambda: [2.0, 5.0])
     sources_enabled: list = field(default_factory=lambda: ["bricklink", "ebay", "brickowl"])
     scrape_engine: str = "selenium"   # or "playwright" (pip install playwright)
+    # Chrome profile used for eBay. Signing in there (python -m
+    # brickonomy.ebay_login) unlocks eBay's sold/completed search, which is
+    # closed to anonymous clients. "" disables it and keeps eBay asks-only.
+    ebay_profile_dir: str = str(REPO_ROOT / ".chrome-ebay")
     rates_ttl_hours: float = 24.0
     fixture_mode: bool = False
     fixtures_dir: str = str(Path(__file__).resolve().parent / "tests" / "fixtures")
