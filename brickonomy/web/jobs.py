@@ -135,11 +135,12 @@ def _run_repair(log):
     """Fix eBay snapshots recorded in the wrong currency and rebuild the
     blended history they inflated."""
     from .. import db as dbq
-    from ..repair import repair_ebay_currency
+    from ..repair import prune_blended_spikes, repair_ebay_currency
 
     conn = dbq.connect()
     try:
         repair_ebay_currency(conn, log=log)
+        prune_blended_spikes(conn, log=log)
     finally:
         conn.close()
 

@@ -57,6 +57,34 @@ class TestEbayCurrencyRepair:
             "SELECT currency FROM price_snapshots WHERE source='ebay'"
         ).fetchone()["currency"] == "USD"
 
+    def test_prune_drops_spikes_above_current_value(self, conn):
+        from brickonomy.repair import prune_blended_spikes
+
+        dbq.upsert_item(conn, "76178", name="Daily Bugle")
+        seed(conn, "76178", "blended", "ILS", 1250, hours_ago=96)   # sane, old
+        seed(conn, "76178", "blended", "ILS", 2708, hours_ago=24)   # the spike
+        seed(conn, "76178", "blended", "ILS", 1300, hours_ago=1)    # corrected
+        conn.commit()
+
+        n = prune_blended_spikes(conn, log=lambda *a: None)
+        assert n == 1
+        vals = [r["market_price"] for r in conn.execute(
+            "SELECT market_price FROM price_snapshots WHERE source='blended' "
+            "ORDER BY scraped_at")]
+        assert vals == [1250, 1300]                 # spike gone, history kept
+
+    def test_prune_keeps_normal_history(self, conn):
+        from brickonomy.repair import prune_blended_spikes
+
+        dbq.upsert_item(conn, "75192", name="Falcon")
+        seed(conn, "75192", "blended", "ILS", 3400, hours_ago=96)
+        seed(conn, "75192", "blended", "ILS", 3600, hours_ago=24)   # normal drift
+        seed(conn, "75192", "blended", "ILS", 3500, hours_ago=1)
+        conn.commit()
+        assert prune_blended_spikes(conn, log=lambda *a: None) == 0
+        assert conn.execute("SELECT COUNT(*) c FROM price_snapshots "
+                            "WHERE source='blended'").fetchone()["c"] == 3
+
     def test_no_reference_prices_leaves_rows_alone(self, conn):
         dbq.upsert_item(conn, "0012", name="Space Mini-Figures")
         seed(conn, "0012", "ebay", "USD", 400, hours_ago=2)     # nothing to compare
