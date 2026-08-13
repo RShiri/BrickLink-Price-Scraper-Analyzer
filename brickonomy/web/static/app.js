@@ -526,8 +526,12 @@
                                                                    : (wasNumeric ? "desc" : "asc");
         [...head.cells].forEach((o) => { o.dataset.sort = ""; });
         th.dataset.sort = dir;
-        window.brickonomySortRows([...body.rows], idx, dir)
-          .forEach((tr) => body.appendChild(tr));
+        // The portfolio's open edit row has merged cells and no sort values —
+        // pin it to the top instead of letting it sink to the bottom.
+        const pinned = [...body.rows].filter((tr) => tr.classList.contains("editrow"));
+        const rest = [...body.rows].filter((tr) => !tr.classList.contains("editrow"));
+        window.brickonomySortRows(rest, idx, dir);
+        pinned.concat(rest).forEach((tr) => body.appendChild(tr));
       };
       th.addEventListener("click", run);
       th.addEventListener("keydown", (e) => {
@@ -602,6 +606,17 @@
         .catch(() => setTimeout(poll, 6000));
     };
     setTimeout(poll, 2500);
+  }
+
+  // ── portfolio edit panel: don't lose typed changes silently ────────────
+  const editPanel = document.querySelector(".editpanel");
+  if (editPanel) {
+    let dirty = false;
+    editPanel.addEventListener("input", () => { dirty = true; });
+    editPanel.addEventListener("submit", () => { dirty = false; });
+    window.addEventListener("beforeunload", (e) => {
+      if (dirty) { e.preventDefault(); e.returnValue = ""; }
+    });
   }
 
   // ── refresh page: live progress polling ────────────────────────────────

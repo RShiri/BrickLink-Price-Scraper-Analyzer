@@ -1004,13 +1004,85 @@ def portfolio_add(request: Request, item_id: str = Form(...),
         conn.close()
 
 
+# Static /portfolio/* routes live above the /portfolio/{item_id} catch-all —
+# route matching follows registration order, so defining them later would
+# let {item_id} capture "import" and kill the upload with a 422.
+@app.post("/portfolio/import")
+async def portfolio_import(request: Request, file: UploadFile):
+    conn = get_conn()
+    try:
+        content = await file.read()
+        try:
+            rows = parse_import_file(file.filename or "upload", content)
+        except ET.ParseError as exc:
+            rows, parse_error = [], str(exc)
+        else:
+            parse_error = None
+
+        preview = []
+        for r in rows:
+            existing = conn.execute(
+                "SELECT owned FROM portfolio WHERE item_id=?", (r["item_id"],)
+            ).fetchone()
+            known = dbq.get_item(conn, r["item_id"])
+            preview.append({**r,
+                            "status": "merge" if existing else ("known" if known else "new"),
+                            "existing_qty": existing["owned"] if existing else 0})
+        return templates.TemplateResponse(request, "import_preview.html", ctx(
+            request, conn, rows=preview, filename=file.filename,
+            payload=json.dumps(rows), parse_error=parse_error,
+        ))
+    finally:
+        conn.close()
+
+
+@app.post("/portfolio/import/confirm")
+def portfolio_import_confirm(request: Request, payload: str = Form(...)):
+    conn = get_conn()
+    try:
+        rows = json.loads(payload)
+        imported = skipped = 0
+        for r in rows:
+            iid = normalize_item_id(str(r.get("item_id", "")).strip())
+            if not iid:
+                skipped += 1
+                continue
+            dbq.upsert_item(conn, iid, item_type=item_type_for(iid),
+                            name=r.get("name"), theme=r.get("theme"),
+                            subtheme=r.get("subtheme"),
+                            year=r.get("year"), retail_price=r.get("retail"),
+                            retail_currency=r.get("retail_ccy"))
+            dbq.upsert_portfolio(conn, iid, owned=max(1, int(r.get("qty") or 1)),
+                                 purchase_price=r.get("retail"),
+                                 purchase_currency=r.get("retail_ccy") or "USD",
+                                 merge_qty=True)
+            for condition, (v, ccy) in (r.get("values") or {}).items():
+                dbq.insert_snapshot(conn, iid, "brickeconomy", condition,
+                                    "market", ccy, market_price=v,
+                                    confidence="MEDIUM")
+            imported += 1
+        conn.commit()
+        return RedirectResponse(f"/portfolio?imported={imported}&skipped={skipped}",
+                                status_code=303)
+    finally:
+        conn.close()
+
+
 @app.post("/portfolio/{item_id}")
 def portfolio_edit(request: Request, item_id: str,
-                   qty: int = Form(...), condition: str = Form("new"),
+                   qty: str = Form(...), condition: str = Form("new"),
                    paid: str = Form(""), paid_ccy: str = Form("USD"),
                    purchase_date: str = Form("")):
     conn = get_conn()
     try:
+        try:
+            qty = int(qty)
+        except ValueError:
+            # A cleared/garbled qty field must not turn into an error page
+            # that silently discards the edit — reopen the row instead.
+            return RedirectResponse(
+                f"/portfolio?edit={quote(item_id)}#row-{quote(item_id)}",
+                status_code=303)
         price, _ = parse_money(paid)
         if qty <= 0:
             dbq.delete_portfolio(conn, item_id)
@@ -1092,67 +1164,6 @@ def parse_import_file(filename: str, content: bytes):
                          "theme": None, "year": None, "qty": 1,
                          "retail": None, "retail_ccy": None})
     return rows
-
-
-@app.post("/portfolio/import")
-async def portfolio_import(request: Request, file: UploadFile):
-    conn = get_conn()
-    try:
-        content = await file.read()
-        try:
-            rows = parse_import_file(file.filename or "upload", content)
-        except ET.ParseError as exc:
-            rows, parse_error = [], str(exc)
-        else:
-            parse_error = None
-
-        preview = []
-        for r in rows:
-            existing = conn.execute(
-                "SELECT owned FROM portfolio WHERE item_id=?", (r["item_id"],)
-            ).fetchone()
-            known = dbq.get_item(conn, r["item_id"])
-            preview.append({**r,
-                            "status": "merge" if existing else ("known" if known else "new"),
-                            "existing_qty": existing["owned"] if existing else 0})
-        return templates.TemplateResponse(request, "import_preview.html", ctx(
-            request, conn, rows=preview, filename=file.filename,
-            payload=json.dumps(rows), parse_error=parse_error,
-        ))
-    finally:
-        conn.close()
-
-
-@app.post("/portfolio/import/confirm")
-def portfolio_import_confirm(request: Request, payload: str = Form(...)):
-    conn = get_conn()
-    try:
-        rows = json.loads(payload)
-        imported = skipped = 0
-        for r in rows:
-            iid = normalize_item_id(str(r.get("item_id", "")).strip())
-            if not iid:
-                skipped += 1
-                continue
-            dbq.upsert_item(conn, iid, item_type=item_type_for(iid),
-                            name=r.get("name"), theme=r.get("theme"),
-                            subtheme=r.get("subtheme"),
-                            year=r.get("year"), retail_price=r.get("retail"),
-                            retail_currency=r.get("retail_ccy"))
-            dbq.upsert_portfolio(conn, iid, owned=max(1, int(r.get("qty") or 1)),
-                                 purchase_price=r.get("retail"),
-                                 purchase_currency=r.get("retail_ccy") or "USD",
-                                 merge_qty=True)
-            for condition, (v, ccy) in (r.get("values") or {}).items():
-                dbq.insert_snapshot(conn, iid, "brickeconomy", condition,
-                                    "market", ccy, market_price=v,
-                                    confidence="MEDIUM")
-            imported += 1
-        conn.commit()
-        return RedirectResponse(f"/portfolio?imported={imported}&skipped={skipped}",
-                                status_code=303)
-    finally:
-        conn.close()
 
 
 # ── refresh & settings ───────────────────────────────────────────────────

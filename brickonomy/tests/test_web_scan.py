@@ -291,3 +291,41 @@ class TestCatalogCleanup:
         # 2222 predates 2010, 3333 is excluded; the year-less fig stays.
         assert scanned == ["1111", "sw0001"]
         assert out["done"] == 2
+
+
+class TestPortfolioEditing:
+    def test_import_route_not_shadowed_by_item_id(self, env):
+        r = env.client.post("/portfolio/import",
+                            files={"file": ("sets.txt", b"75192\n", "text/plain")})
+        assert r.status_code == 200         # preview page, not a 422
+        assert "75192" in r.text
+
+    def test_edit_saves_and_returns_to_the_row(self, env):
+        conn = dbq.connect()
+        dbq.upsert_portfolio(conn, "75192", owned=1)
+        conn.close()
+        r = env.client.post("/portfolio/75192",
+                            data={"qty": "4", "condition": "used",
+                                  "paid": "500", "paid_ccy": "USD",
+                                  "purchase_date": ""})
+        assert r.status_code == 303
+        assert r.headers["location"].endswith("#row-75192")
+        conn = dbq.connect()
+        row = conn.execute(
+            "SELECT * FROM portfolio WHERE item_id='75192'").fetchone()
+        assert (row["owned"], row["condition"], row["purchase_price"]) == \
+            (4, "used", 500.0)
+        conn.close()
+
+    def test_bad_qty_reopens_the_edit_row_instead_of_erroring(self, env):
+        conn = dbq.connect()
+        dbq.upsert_portfolio(conn, "75192", owned=2)
+        conn.close()
+        r = env.client.post("/portfolio/75192", data={"qty": "abc"})
+        assert r.status_code == 303
+        assert "edit=75192" in r.headers["location"]
+        conn = dbq.connect()
+        assert conn.execute(
+            "SELECT owned FROM portfolio WHERE item_id='75192'"
+        ).fetchone()["owned"] == 2          # nothing was lost or deleted
+        conn.close()
