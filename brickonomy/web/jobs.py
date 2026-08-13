@@ -27,6 +27,7 @@ _state = {
     "errors": [],
     "log": deque(maxlen=40),
     "finished_at": None,
+    "stop_requested": False,
 }
 
 
@@ -54,8 +55,28 @@ def _progress(done, total, current_item, errors):
 def _spawn_worker():
     """Start the drain thread. Caller must hold _lock and have checked that
     nothing is running."""
-    _state.update(running=True, finished_at=None)
+    _state.update(running=True, finished_at=None, stop_requested=False)
     threading.Thread(target=_drain, name="brickonomy-refresh", daemon=True).start()
+
+
+def stop():
+    """Graceful stop: the item being scanned right now finishes and stores
+    its snapshots; everything queued after it is dropped. Returns False when
+    there was nothing to stop."""
+    with _lock:
+        if not _state["running"] and not _queue:
+            return False
+        _queue.clear()
+        _queued_items.clear()
+        _state["stop_requested"] = True
+        _state["log"].append("⏹ stop requested — finishing the current item, "
+                             "then stopping")
+    return True
+
+
+def _should_stop():
+    with _lock:
+        return _state["stop_requested"]
 
 
 def start(scope="portfolio", item_id=None, force=False, theme=None):
@@ -190,9 +211,12 @@ def _next_task():
     queue under the lock is what keeps a task enqueued mid-drain from being
     lost between the last pop and the worker exiting."""
     with _lock:
-        if not _queue:
+        if not _queue or _state["stop_requested"]:
+            _queue.clear()
+            _queued_items.clear()
             _state["running"] = False
             _state["current_item"] = None
+            _state["stop_requested"] = False
             _state["finished_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
             return None
         task = _queue.popleft()
@@ -216,12 +240,14 @@ def _drain():
         try:
             if task[0] == "item":
                 run_refresh(item_id=task[1], force=task[2],
-                            progress=_progress, log=_log_line)
+                            progress=_progress, log=_log_line,
+                            should_stop=_should_stop)
             elif task[0] == "action":
                 _log_line(f"▶ {ACTIONS[task[1]][0]}…")
                 ACTIONS[task[1]][1](_log_line)
             else:
-                run_refresh(progress=_progress, log=_log_line, **task[1])
+                run_refresh(progress=_progress, log=_log_line,
+                            should_stop=_should_stop, **task[1])
         except Exception as exc:
             _log_line(f"✘ refresh crashed: {type(exc).__name__}: {exc}")
 
@@ -232,5 +258,5 @@ def reset():
         _queue.clear()
         _queued_items.clear()
         _state.update(running=False, scope=None, current_item=None, done=0,
-                      total=0, errors=[], finished_at=None)
+                      total=0, errors=[], finished_at=None, stop_requested=False)
         _state["log"].clear()

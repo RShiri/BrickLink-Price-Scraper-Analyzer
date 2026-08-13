@@ -62,6 +62,13 @@
       <label class="chip"><input type="checkbox" name="force" value="true" style="accent-color:var(--accent)"> force</label>
       <button class="btn-primary" type="submit" {{ 'disabled' if job.running }}>▶ Start scan</button>
     </form>
+    {% if job.running %}
+    <form method="post" action="/refresh/stop" style="margin:0 0 10px">
+      <button class="btn-ghost" type="submit" {{ 'disabled' if job.stop_requested }}
+              title="The item being scanned finishes and saves; the rest of the queue is dropped">
+        {{ '⏳ Stopping after the current item…' if job.stop_requested else '⏹ Stop scan' }}</button>
+    </form>
+    {% endif %}
     <div id="scanStatus" data-running="{{ 1 if job.running else 0 }}">
       {% if job.running %}
       <div style="color:var(--ink-2)">Scanning <span id="scanDone">{{ job.done }}</span> / <span id="scanTotal">{{ job.total }}</span>

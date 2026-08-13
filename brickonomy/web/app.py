@@ -1187,6 +1187,17 @@ def refresh_start(request: Request, scope: str = Form("portfolio"),
     return RedirectResponse("/refresh", status_code=303)
 
 
+@app.post("/refresh/stop")
+def refresh_stop(request: Request):
+    """Graceful stop: the item being scanned finishes (its snapshots are
+    stored), the rest of the queue is dropped."""
+    jobs.stop()
+    if request.headers.get("accept", "").startswith("application/json"):
+        return JSONResponse(jobs.status())
+    return RedirectResponse(request.headers.get("referer", "/refresh"),
+                            status_code=303)
+
+
 @app.post("/refresh/action")
 def refresh_action(request: Request, action: str = Form(...)):
     """Catalog import / static export / eBay session check, so every scraping

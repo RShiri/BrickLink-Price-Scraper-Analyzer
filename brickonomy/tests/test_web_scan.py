@@ -81,6 +81,27 @@ class TestScanButton:
                 t.join(timeout=5)
         assert env.calls == [{"item_id": "75192", "force": True}]
 
+    def test_stop_finishes_current_item_and_drops_queue(self, env):
+        env.client.post("/sets/75192/scan")
+        assert env.started.wait(5)
+        env.client.post("/sets/10294/scan")        # queued behind the first
+        r = env.client.post("/refresh/stop")
+        assert r.status_code == 303
+        assert jobs.status()["queue"] == []        # queued work dropped
+        assert jobs.status()["stop_requested"] is True
+
+        env.release.set()
+        for t in threading.enumerate():
+            if t.name == "brickonomy-refresh":
+                t.join(timeout=5)
+        s = jobs.status()
+        assert s["running"] is False and s["stop_requested"] is False
+        # The in-flight item completed; the queued one never ran.
+        assert env.calls == [{"item_id": "75192", "force": True}]
+
+    def test_stop_with_nothing_running_is_a_noop(self, env):
+        assert jobs.stop() is False
+
     def test_queued_scan_keeps_its_force_flag(self, env):
         env.client.post("/sets/75192/scan")
         assert env.started.wait(5)
@@ -93,3 +114,27 @@ class TestScanButton:
                 t.join(timeout=5)
         assert env.calls == [{"item_id": "75192", "force": True},
                              {"item_id": "10294", "force": True}]
+
+
+class TestGracefulStopLoop:
+    def test_run_refresh_stops_between_items(self, tmp_path, monkeypatch):
+        """should_stop is honored between items: the current item finishes,
+        the rest of the target list is skipped."""
+        from brickonomy import refresh as refresh_mod
+        from brickonomy.config import get_config
+
+        monkeypatch.setattr(get_config(), "db_path", str(tmp_path / "stop.db"))
+        conn = dbq.connect(db_path=str(tmp_path / "stop.db"))
+        for iid in ("1111", "2222", "3333"):
+            dbq.upsert_item(conn, iid, name=f"Set {iid}")
+        conn.commit()
+        conn.close()
+
+        scanned = []
+        monkeypatch.setattr(refresh_mod, "refresh_item",
+                            lambda conn, iid, itype=None, force=False, log=print:
+                            scanned.append(iid) or {})
+        monkeypatch.setattr(refresh_mod, "polite_sleep", lambda: None)
+        out = refresh_mod.run_refresh(scope="all", log=lambda *a: None,
+                                      should_stop=lambda: len(scanned) >= 1)
+        assert scanned == ["1111"] and out["done"] == 1

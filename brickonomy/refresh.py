@@ -196,10 +196,13 @@ def _stale_items(conn, ttl_days):
 
 
 def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
-                limit=None, progress=None, log=print):
+                limit=None, progress=None, log=print, should_stop=None):
     """Entry point shared by the CLI and the web background job.
 
     progress: optional callback(done, total, current_item, errors: list).
+    should_stop: optional callback; checked between items so a running scan
+    can be stopped cleanly — the current item always finishes and stores
+    its snapshots.
     Returns {'done': n, 'errors': [(item, source, error), ...]}."""
     cfg = get_config()
     conn = dbq.connect()
@@ -257,6 +260,12 @@ def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
         errors = []
         total = len(targets)
         for i, (iid, itype) in enumerate(targets):
+            if should_stop and should_stop():
+                log(f"⏹ scan stopped after {i} of {total} items — "
+                    f"everything scanned so far is saved")
+                if progress:
+                    progress(i, total, None, errors)
+                return {"done": i, "errors": errors}
             log(f"[{i + 1}/{total}] {iid}")
             if progress:
                 progress(i, total, iid, errors)
