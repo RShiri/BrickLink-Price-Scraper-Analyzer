@@ -138,3 +138,33 @@ class TestGracefulStopLoop:
         out = refresh_mod.run_refresh(scope="all", log=lambda *a: None,
                                       should_stop=lambda: len(scanned) >= 1)
         assert scanned == ["1111"] and out["done"] == 1
+
+
+class TestMissingScope:
+    def test_targets_only_items_never_scraped(self, tmp_path, monkeypatch):
+        """scope='missing' scans only items no marketplace was scraped for;
+        imported-only values count as missing, and sets go before minifigs."""
+        from brickonomy import refresh as refresh_mod
+        from brickonomy.config import get_config
+
+        monkeypatch.setattr(get_config(), "db_path", str(tmp_path / "miss.db"))
+        conn = dbq.connect(db_path=str(tmp_path / "miss.db"))
+        dbq.upsert_item(conn, "1111", name="Bare set")
+        dbq.upsert_item(conn, "2222", name="Scraped set")
+        dbq.insert_snapshot(conn, "2222", "bricklink", "new", "market", "ILS",
+                            market_price=100.0)
+        dbq.upsert_item(conn, "3333", name="CSV-imported set")
+        dbq.insert_snapshot(conn, "3333", "brickeconomy", "new", "market", "USD",
+                            market_price=50.0)
+        dbq.upsert_item(conn, "sw0001", name="Bare fig", item_type="M")
+        conn.commit()
+        conn.close()
+
+        scanned = []
+        monkeypatch.setattr(refresh_mod, "refresh_item",
+                            lambda conn, iid, itype=None, force=False, log=print:
+                            scanned.append(iid) or {})
+        monkeypatch.setattr(refresh_mod, "polite_sleep", lambda: None)
+        out = refresh_mod.run_refresh(scope="missing", log=lambda *a: None)
+        assert scanned == ["1111", "3333", "sw0001"]     # sets first, no 2222
+        assert out["done"] == 3

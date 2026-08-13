@@ -234,6 +234,18 @@ def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
                            WHERE si.theme = ?)
                    ORDER BY i.item_type DESC, s.ts IS NOT NULL, s.ts""",
                 (theme, theme))]
+        elif scope == "missing":
+            # Only items no marketplace has ever been scraped for — the pure
+            # backlog, nothing already-priced is revisited. Items holding only
+            # imported (BrickEconomy CSV) values count as missing too: they
+            # show a value but have never had a real market scan.
+            targets = [(r["item_id"], r["item_type"]) for r in conn.execute(
+                """SELECT i.item_id, i.item_type FROM items i
+                   WHERE NOT EXISTS (
+                       SELECT 1 FROM price_snapshots s
+                       WHERE s.item_id = i.item_id
+                         AND s.source IN ('bricklink', 'ebay', 'brickowl'))
+                   ORDER BY i.item_type DESC, i.item_id""")]
         elif scope == "gaps":
             # Whatever the catalog is still missing, most-useful first: sets
             # before minifigs, never-scanned before merely stale. Feeding this
@@ -286,7 +298,7 @@ def main():
     ap = argparse.ArgumentParser(description="Refresh prices across sources")
     ap.add_argument("--item", help="single item id, e.g. 75192 or sw0636")
     ap.add_argument("--scope", default="portfolio",
-                    choices=["portfolio", "stale", "theme", "gaps", "all"])
+                    choices=["portfolio", "stale", "theme", "missing", "gaps", "all"])
     ap.add_argument("--theme", help="theme name for --scope theme, "
                                     "e.g. \"Super Heroes Marvel\"")
     ap.add_argument("--force", action="store_true",

@@ -1159,13 +1159,23 @@ def refresh_page(request: Request):
                                    "last_scan": last_ever["ts"]})
         n_portfolio = conn.execute("SELECT COUNT(*) c FROM portfolio WHERE owned > 0").fetchone()["c"]
         n_items = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
+        # Backlog for the "Never scanned" scope: items no marketplace has
+        # ever been scraped for (imported-only values count as unscanned).
+        n_never = conn.execute(
+            """SELECT COUNT(*) c FROM items i
+               WHERE NOT EXISTS (
+                   SELECT 1 FROM price_snapshots s
+                   WHERE s.item_id = i.item_id
+                     AND s.source IN ('bricklink', 'ebay', 'brickowl'))"""
+        ).fetchone()["c"]
         coverage = dbq.theme_coverage(conn, ttl_days=cfg.auto_scan_on_view_days or 30)
         covered = sum(t["scanned"] for t in coverage)
         fresh = sum(t["fresh"] for t in coverage)
         from ..scrapers.ebay import EbaySource
         return templates.TemplateResponse(request, "refresh.html", ctx(
             request, conn, cfg=cfg, sources_health=sources_health,
-            n_portfolio=n_portfolio, n_items=n_items, coverage=coverage,
+            n_portfolio=n_portfolio, n_items=n_items, n_never=n_never,
+            coverage=coverage,
             covered=covered, fresh=fresh,
             ebay_signed_in=bool(EbaySource.signed_in_profile()),
         ))

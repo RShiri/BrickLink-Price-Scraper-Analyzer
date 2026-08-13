@@ -48,9 +48,10 @@
     <h3>2 · Run a scan</h3>
     <form class="searchrow" method="post" action="/refresh" style="margin-bottom:10px">
       <select class="inp" name="scope">
+        <option value="missing">Never scanned ({{ "{:,}".format(n_never) }} items — only what has no data yet)</option>
         <option value="portfolio">Portfolio ({{ n_portfolio }} sets)</option>
         <option value="stale">Stale only (TTL &gt; {{ cfg.scrape_ttl_days|int }} days)</option>
-        <option value="all">Everything ({{ n_items }} items)</option>
+        <option value="all">Everything ({{ "{:,}".format(n_items) }} items)</option>
       </select>
       <select class="inp" name="theme" style="max-width:230px">
         <option value="">…or a whole theme</option>
