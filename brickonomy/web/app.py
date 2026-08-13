@@ -1014,12 +1014,13 @@ def portfolio_edit(request: Request, item_id: str,
         price, _ = parse_money(paid)
         if qty <= 0:
             dbq.delete_portfolio(conn, item_id)
-        else:
-            dbq.upsert_portfolio(conn, item_id, owned=qty, condition=condition,
-                                 purchase_price=price,
-                                 purchase_currency=paid_ccy if paid_ccy in SUPPORTED_CURRENCIES else "USD",
-                                 purchase_date=purchase_date or None)
-        return RedirectResponse("/portfolio", status_code=303)
+            return RedirectResponse("/portfolio", status_code=303)
+        dbq.upsert_portfolio(conn, item_id, owned=qty, condition=condition,
+                             purchase_price=price,
+                             purchase_currency=paid_ccy if paid_ccy in SUPPORTED_CURRENCIES else "USD",
+                             purchase_date=purchase_date or None)
+        # Land back on the edited row instead of the top of the page.
+        return RedirectResponse(f"/portfolio#row-{quote(item_id)}", status_code=303)
     finally:
         conn.close()
 

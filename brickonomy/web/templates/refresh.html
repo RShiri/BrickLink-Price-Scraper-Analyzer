@@ -101,6 +101,11 @@
         <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>🗂 BrickLink themes</button>
       </form>
       <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="repair">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}
+                title="Relabel eBay snapshots stored in the wrong currency and rebuild the blended history they inflated">🩹 Repair eBay history</button>
+      </form>
+      <form method="post" action="/refresh/action" style="margin:0">
         <input type="hidden" name="action" value="cleanup">
         <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}
                 title="Flag bundles, collections, gear and books so scans skip them">🧹 Mark bundles &amp; gear</button>

@@ -131,6 +131,19 @@ def _run_catalog_import(log):
         conn.close()
 
 
+def _run_repair(log):
+    """Fix eBay snapshots recorded in the wrong currency and rebuild the
+    blended history they inflated."""
+    from .. import db as dbq
+    from ..repair import repair_ebay_currency
+
+    conn = dbq.connect()
+    try:
+        repair_ebay_currency(conn, log=log)
+    finally:
+        conn.close()
+
+
 def _run_cleanup(log):
     """Re-derive the bundles/gear exclusion flags over the whole catalog."""
     from .. import db as dbq
@@ -194,6 +207,7 @@ def _run_doctor(log):
 ACTIONS = {
     "catalog": ("full LEGO catalog import", _run_catalog_import),
     "cleanup": ("catalog cleanup — bundles & gear", _run_cleanup),
+    "repair": ("eBay currency history repair", _run_repair),
     "bl_tree": ("BrickLink category tree", _run_bricklink_tree),
     "export": ("static site export", _run_export),
     "ebay_check": ("eBay session check", _run_ebay_check),
