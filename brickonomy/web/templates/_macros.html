@@ -74,7 +74,7 @@
     {%- else -%}
       {%- if info.age_days > 0 %}Prices are {{ info.age_days }} days old — queued for a refresh
       {%- else %}Queued for a rescan{% endif %}
-      {%- if info.position > 1 %}, {{ info.position - 1 }} ahead{% endif %}.
+      {%- if info.ahead %} — {{ info.ahead }} ahead{% else %} — starting next{% endif %}.
     {%- endif %}
   </span>
   <span class="soft">The page updates by itself when it finishes.</span>

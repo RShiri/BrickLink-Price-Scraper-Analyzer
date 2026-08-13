@@ -591,10 +591,13 @@ def _maybe_auto_scan(conn, item_id):
     # via the page's Scan button — shows the banner whatever the prices' age.
     status = jobs.status()
     if status.get("current_item") == item_id:
-        return {"state": "scanning", "position": 0, "age_days": age_days}
+        return {"state": "scanning", "position": 0, "ahead": 0,
+                "age_days": age_days}
     if item_id in status.get("queue", []):
-        return {"state": "queued",
-                "position": status["queue"].index(item_id) + 1,
+        idx = status["queue"].index(item_id)
+        # Items ahead = the queue before us, plus the one being scanned now.
+        return {"state": "queued", "position": idx + 1,
+                "ahead": idx + (1 if status["running"] else 0),
                 "age_days": age_days}
 
     if not cfg.auto_scan_on_view_days:
@@ -630,8 +633,11 @@ def _maybe_auto_scan(conn, item_id):
     position = jobs.enqueue(item_id)
     if position is None:
         return None                       # queue is full
-    return {"state": "scanning" if position == 1 and not status["running"] else "queued",
-            "position": position, "age_days": age_days}
+    scanning = position == 1 and not status["running"]
+    return {"state": "scanning" if scanning else "queued",
+            "position": position,
+            "ahead": 0 if scanning else position - 1 + (1 if status["running"] else 0),
+            "age_days": age_days}
 
 
 @app.get("/sets/{item_id}")

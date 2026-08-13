@@ -612,9 +612,12 @@
           if (active || queued >= 0) {
             seen = true;
             if (text) {
+              // Items ahead = everything before us in the queue, plus the
+              // one being scraped right now (if any).
+              const ahead = queued + (s.current_item ? 1 : 0);
               text.textContent = active
                 ? "Fetching prices from BrickLink, eBay and BrickOwl…"
-                : `Queued for a refresh, ${queued} ahead.`;
+                : `Queued for a refresh — ${ahead ? `${ahead} ahead` : "starting next"}.`;
             }
             setTimeout(poll, 3000);
           } else if (seen || !s.running) {

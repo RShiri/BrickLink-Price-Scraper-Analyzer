@@ -122,6 +122,13 @@ class TestScanButton:
         # The in-flight item completed; the queued one never ran.
         assert env.calls == [{"item_id": "75192", "force": True, "limit": None, "min_year": None}]
 
+    def test_queued_banner_counts_the_scanning_item_as_ahead(self, env):
+        env.client.post("/sets/75192/scan")         # being scraped
+        assert env.started.wait(5)
+        env.client.post("/sets/10294/scan")         # queued behind it
+        page = env.client.get("/sets/10294")
+        assert "1 ahead" in page.text               # not "0 ahead"
+
     def test_stop_with_nothing_running_is_a_noop(self, env):
         assert jobs.stop() is False
 
