@@ -415,11 +415,16 @@
   if (lite) {
     const id = new URLSearchParams(location.search).get("id") || "";
     document.getElementById("liteId").textContent = id || "<set>";
-    const blNum = id.includes("-") ? id : `${id}-1`;
-    document.getElementById("liteBL").href =
-      `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${encodeURIComponent(blNum)}`;
-    document.getElementById("liteBE").href =
-      `https://www.brickeconomy.com/set/${encodeURIComponent(blNum)}`;
+    // Ids with letters (sw0001, sh0727…) are minifigs: BrickLink wants M=
+    // instead of S=, and BrickEconomy minifig pages only resolve via search.
+    const isFig = /[a-z]/i.test(id);
+    const blNum = id.includes("-") || isFig ? id : `${id}-1`;
+    document.getElementById("liteBL").href = isFig
+      ? `https://www.bricklink.com/v2/catalog/catalogitem.page?M=${encodeURIComponent(id)}`
+      : `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${encodeURIComponent(blNum)}`;
+    document.getElementById("liteBE").href = isFig
+      ? `https://www.brickeconomy.com/search?query=${encodeURIComponent(id)}`
+      : `https://www.brickeconomy.com/set/${encodeURIComponent(blNum)}`;
     document.getElementById("liteEbay").href =
       `https://www.ebay.com/sch/i.html?_nkw=lego+${encodeURIComponent(id)}`;
 

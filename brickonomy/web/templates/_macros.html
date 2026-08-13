@@ -57,7 +57,13 @@
 {%- endmacro %}
 
 {% macro autoscan_banner(info, item_id) -%}
-{%- if info %}
+{%- if info and info.state == 'nothing' %}
+<div class="autoscan" style="opacity:.8" {% if info.note %}title="{{ info.note }}"{% endif %}>
+  <span>○</span>
+  <span>Scanned recently — no listings found on BrickLink, eBay or BrickOwl.
+    Old or rare items often have no live market; the ⟳ Scan now button retries anyway.</span>
+</div>
+{%- elif info %}
 <div class="autoscan" id="autoScan" data-item="{{ item_id }}">
   <span class="spinner"></span>
   <span id="autoScanText">

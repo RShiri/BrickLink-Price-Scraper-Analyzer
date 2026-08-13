@@ -116,6 +116,39 @@ class TestScanButton:
                              {"item_id": "10294", "force": True}]
 
 
+class TestEmptyScanMemory:
+    def test_recent_empty_scan_is_not_requeued_on_view(self, env):
+        conn = dbq.connect()
+        dbq.upsert_item(conn, "0012", name="Space Mini-Figures", year=1979)
+        dbq.record_scan_attempt(
+            conn, "0012", "bricklink: empty, ebay: empty, brickowl: empty")
+        conn.close()
+        r = env.client.get("/sets/0012")
+        assert r.status_code == 200
+        assert "no listings found" in r.text
+        assert 'id="autoScan"' not in r.text
+        assert jobs.status()["queue_len"] == 0     # no futile rescan queued
+
+    def test_old_empty_attempt_rescans(self, env):
+        conn = dbq.connect()
+        dbq.upsert_item(conn, "0013", name="Castle Mini-Figures", year=1979)
+        conn.execute(
+            "INSERT INTO scan_attempts (item_id, attempted_at, note) VALUES (?,?,?)",
+            ("0013", "2020-01-01T00:00:00", "bricklink: empty"))
+        conn.commit()
+        conn.close()
+        r = env.client.get("/sets/0013")
+        assert 'id="autoScan"' in r.text           # stale attempt → try again
+        assert env.started.wait(5)
+
+    def test_minifig_brickeconomy_link_goes_via_search(self, env):
+        from brickonomy.web.app import brickeconomy_url
+        assert brickeconomy_url("sh0727", "M") == \
+            "https://www.brickeconomy.com/search?query=sh0727"
+        assert brickeconomy_url("76178", "S") == \
+            "https://www.brickeconomy.com/set/76178-1"
+
+
 class TestGracefulStopLoop:
     def test_run_refresh_stops_between_items(self, tmp_path, monkeypatch):
         """should_stop is honored between items: the current item finishes,

@@ -129,7 +129,9 @@ def bricklink_url(item_id: str, item_type: str = "S") -> str:
 
 def brickeconomy_url(item_id: str, item_type: str = "S") -> str:
     if item_type == "M" or any(c.isalpha() for c in item_id):
-        return f"https://www.brickeconomy.com/minifig/{quote(item_id)}"
+        # BrickEconomy minifig pages need a name slug after the id, so the
+        # bare /minifig/<id> path 404s — their search resolves the id fine.
+        return f"https://www.brickeconomy.com/search?query={quote(item_id)}"
     suffix = item_id if "-" in item_id else f"{item_id}-1"
     return f"https://www.brickeconomy.com/set/{quote(suffix)}"
 
@@ -595,6 +597,21 @@ def _maybe_auto_scan(conn, item_id):
                         and not dbq.get_set_minifigs(conn, item_id))
         if not figs_missing:
             return None
+
+    if last is None:
+        # No snapshots — but if a scan already ran recently and found nothing
+        # on any marketplace, say so instead of re-queueing the same futile
+        # scan on every page view. The Scan now button still forces a retry.
+        attempt = dbq.last_scan_attempt(conn, item_id)
+        if attempt:
+            try:
+                attempt_age = (datetime.now()
+                               - datetime.fromisoformat(attempt["attempted_at"])).days
+            except (TypeError, ValueError):
+                attempt_age = None
+            if attempt_age is not None and attempt_age < cfg.scrape_ttl_days:
+                return {"state": "nothing", "position": 0, "age_days": None,
+                        "note": attempt["note"]}
 
     position = jobs.enqueue(item_id)
     if position is None:

@@ -90,6 +90,9 @@ def refresh_item(conn, item_id, item_type=None, force=False, log=print):
         results[source_name] = "ok"
         log(f"  ✔ {source_name}: {n} listings ({res.currency})")
 
+    dbq.record_scan_attempt(
+        conn, item_id, ", ".join(f"{s}: {r}" for s, r in results.items()))
+
     blended = store_blended(conn, item_id)
     if blended:
         log(f"  ≈ blended: " + ", ".join(f"{c} {v:,.0f}" for c, v in blended.items()))

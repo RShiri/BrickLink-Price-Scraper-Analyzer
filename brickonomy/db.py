@@ -99,6 +99,12 @@ CREATE TABLE IF NOT EXISTS colors (          -- BrickLink color id → name
     name TEXT NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS scan_attempts (   -- last scrape try per item, kept
+    item_id TEXT PRIMARY KEY,                -- even when nothing was found so
+    attempted_at TIMESTAMP NOT NULL,         -- empty items aren't rescanned
+    note TEXT                                -- on every page view
+);
 """
 
 MIGRATIONS = [
@@ -348,6 +354,25 @@ def last_scrape_time(conn, item_id, source):
         (item_id, source),
     ).fetchone()
     return row["ts"] if row and row["ts"] else None
+
+
+def record_scan_attempt(conn, item_id, note=None):
+    """Remember that a scrape ran for this item just now — snapshot rows only
+    exist when listings were found, so this is what tells 'never scanned'
+    apart from 'scanned, nothing on the market'."""
+    conn.execute(
+        """INSERT INTO scan_attempts (item_id, attempted_at, note)
+           VALUES (?,?,?)
+           ON CONFLICT(item_id) DO UPDATE SET
+             attempted_at=excluded.attempted_at, note=excluded.note""",
+        (item_id, now_iso(), note))
+    conn.commit()
+
+
+def last_scan_attempt(conn, item_id):
+    return conn.execute(
+        "SELECT * FROM scan_attempts WHERE item_id=?", (item_id,)
+    ).fetchone()
 
 
 def last_scrape_any(conn, item_id):
