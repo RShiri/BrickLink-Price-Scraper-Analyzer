@@ -79,7 +79,8 @@ def _should_stop():
         return _state["stop_requested"]
 
 
-def start(scope="portfolio", item_id=None, force=False, theme=None, limit=None):
+def start(scope="portfolio", item_id=None, force=False, theme=None, limit=None,
+          min_year=None):
     """Queue a manual scan. Returns False if one is already running or queued
     (the Refresh page disables its button on that)."""
     with _lock:
@@ -90,7 +91,8 @@ def start(scope="portfolio", item_id=None, force=False, theme=None, limit=None):
             _queued_items.add(item_id)
         else:
             _queue.append(("scope", {"scope": scope, "force": force,
-                                     "theme": theme, "limit": limit}))
+                                     "theme": theme, "limit": limit,
+                                     "min_year": min_year}))
         _state.update(scope=item_id or theme or scope, current_item=None,
                       done=0, total=0, errors=[])
         _state["log"].clear()
@@ -125,6 +127,18 @@ def _run_catalog_import(log):
         total = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
         log(f"✔ catalog now holds {total:,} items "
             f"({counts['sets']:,} sets, {counts['minifigs']:,} minifigs)")
+    finally:
+        conn.close()
+
+
+def _run_cleanup(log):
+    """Re-derive the bundles/gear exclusion flags over the whole catalog."""
+    from .. import db as dbq
+    from ..rebrickable import mark_untradeable
+
+    conn = dbq.connect()
+    try:
+        mark_untradeable(conn, log=log)
     finally:
         conn.close()
 
@@ -179,6 +193,7 @@ def _run_doctor(log):
 
 ACTIONS = {
     "catalog": ("full LEGO catalog import", _run_catalog_import),
+    "cleanup": ("catalog cleanup — bundles & gear", _run_cleanup),
     "bl_tree": ("BrickLink category tree", _run_bricklink_tree),
     "export": ("static site export", _run_export),
     "ebay_check": ("eBay session check", _run_ebay_check),

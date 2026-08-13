@@ -120,7 +120,37 @@ def import_catalog(conn, from_dir=None, with_minifigs=False, log=print):
         conn.commit()
         log(f"✔ minifigs imported/updated: {n_figs}")
 
+    mark_untradeable(conn, log=log)
     return {"themes": len(themes), "sets": n_sets, "minifigs": n_figs}
+
+
+# Whole Rebrickable themes that are not buildable, tradeable sets: key
+# chains, magnets, books, sticker sheets, replacement-part packs, and the
+# bundle/collection meta-entries that wrap other sets.
+EXCLUDED_THEMES = {"Gear", "Books", "Stickers", "Service Packs",
+                   "Bulk Bricks", "Value Packs", "Product Collection"}
+# Bundle-style catalog entries hiding inside normal themes.
+BUNDLE_NAME_RE = re.compile(
+    r"collection|bundle|value pack|super pack|co-?pack|gift card|bonus pack",
+    re.IGNORECASE)
+
+
+def mark_untradeable(conn, log=print):
+    """Flag catalog entries no marketplace meaningfully trades — bundles,
+    collections, gear, books — so scans skip them. Recomputed from scratch
+    each run (it's derived data); returns how many are excluded."""
+    rows = conn.execute("SELECT item_id, name, theme FROM items").fetchall()
+    flags = [
+        (1 if ((r["theme"] and r["theme"] in EXCLUDED_THEMES)
+               or (r["name"] and BUNDLE_NAME_RE.search(r["name"]))) else 0,
+         r["item_id"])
+        for r in rows
+    ]
+    conn.executemany("UPDATE items SET excluded=? WHERE item_id=?", flags)
+    conn.commit()
+    n = sum(f for f, _ in flags)
+    log(f"🧹 catalog cleanup: {n:,} bundles/gear/book items excluded from scans")
+    return n
 
 
 def main():

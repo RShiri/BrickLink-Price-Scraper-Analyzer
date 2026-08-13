@@ -109,6 +109,9 @@ CREATE TABLE IF NOT EXISTS scan_attempts (   -- last scrape try per item, kept
 
 MIGRATIONS = [
     "ALTER TABLE items ADD COLUMN category_id INTEGER",
+    # Bundles, gear, books — catalog entries no marketplace meaningfully
+    # trades. Kept browsable but skipped by every scope scan.
+    "ALTER TABLE items ADD COLUMN excluded INTEGER DEFAULT 0",
 ]
 
 

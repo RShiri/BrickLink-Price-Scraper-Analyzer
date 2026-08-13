@@ -199,13 +199,16 @@ def _stale_items(conn, ttl_days):
 
 
 def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
-                limit=None, progress=None, log=print, should_stop=None):
+                limit=None, min_year=None, progress=None, log=print,
+                should_stop=None):
     """Entry point shared by the CLI and the web background job.
 
     progress: optional callback(done, total, current_item, errors: list).
     should_stop: optional callback; checked between items so a running scan
     can be stopped cleanly — the current item always finishes and stores
     its snapshots.
+    min_year: scope scans skip items released before this year; items with
+    no known year (most minifigs) are kept.
     Returns {'done': n, 'errors': [(item, source, error), ...]}."""
     cfg = get_config()
     conn = dbq.connect()
@@ -273,6 +276,27 @@ def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
         else:
             raise ValueError(f"unknown scope {scope!r}")
 
+        if not item_id and targets:
+            # Scope-wide filters: excluded catalog entries (bundles, gear —
+            # see rebrickable.mark_untradeable) never scan; a min_year keeps
+            # scans to modern sets while items with no known year (most
+            # minifigs) stay in.
+            info = {r["item_id"]: (r["year"], r["excluded"]) for r in
+                    conn.execute("SELECT item_id, year, excluded FROM items")}
+
+            def keep(iid):
+                year, excluded = info.get(iid, (None, 0))
+                if excluded:
+                    return False
+                return not (min_year and year and year < min_year)
+
+            before = len(targets)
+            targets = [(iid, t) for iid, t in targets if keep(iid)]
+            if before != len(targets):
+                log(f"… skipping {before - len(targets)} items (bundles/gear"
+                    + (f", or released before {min_year}" if min_year else "")
+                    + ")")
+
         if limit and len(targets) > limit:
             # Targets are ordered never-scanned first, so a limited run always
             # takes the most useful slice. Say what was left out.
@@ -316,13 +340,17 @@ def main():
                     help="ignore the freshness TTL")
     ap.add_argument("--limit", type=int,
                     help="scan at most N items (never-scanned ones first)")
+    ap.add_argument("--min-year", type=int,
+                    help="skip items released before this year "
+                         "(unknown-year items are kept)")
     args = ap.parse_args()
 
     if args.theme and args.scope == "portfolio":
         args.scope = "theme"          # --theme alone implies --scope theme
 
     summary = run_refresh(scope=args.scope, item_id=args.item,
-                          force=args.force, theme=args.theme, limit=args.limit)
+                          force=args.force, theme=args.theme, limit=args.limit,
+                          min_year=args.min_year)
     print(f"\nRefreshed {summary['done']} item(s); {len(summary['errors'])} source error(s).")
     for iid, source, err in summary["errors"][:20]:
         print(f"  {iid} · {source}: {err}")

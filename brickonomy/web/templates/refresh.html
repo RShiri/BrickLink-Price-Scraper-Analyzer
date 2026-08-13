@@ -62,6 +62,8 @@
       <input class="inp" type="text" name="item_id" placeholder="…or a single set, e.g. 75192" style="width:190px">
       <input class="inp" type="number" name="limit" min="1" placeholder="max items" style="width:110px"
              title="Stop after this many items — the never-scanned ones go first, the rest wait for the next run">
+      <input class="inp" type="number" name="min_year" value="2010" min="1949" max="2035" style="width:110px"
+             title="Skip items released before this year (clear the field to scan all years; minifigs with no known year are kept)">
       <label class="chip"><input type="checkbox" name="force" value="true" style="accent-color:var(--accent)"> force</label>
       <button class="btn-primary" type="submit" {{ 'disabled' if job.running }}>▶ Start scan</button>
     </form>
@@ -97,6 +99,11 @@
       <form method="post" action="/refresh/action" style="margin:0">
         <input type="hidden" name="action" value="bl_tree">
         <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}>🗂 BrickLink themes</button>
+      </form>
+      <form method="post" action="/refresh/action" style="margin:0">
+        <input type="hidden" name="action" value="cleanup">
+        <button class="btn-ghost" type="submit" {{ 'disabled' if job.running }}
+                title="Flag bundles, collections, gear and books so scans skip them">🧹 Mark bundles &amp; gear</button>
       </form>
       <form method="post" action="/refresh/action" style="margin:0">
         <input type="hidden" name="action" value="export">
