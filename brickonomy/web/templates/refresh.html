@@ -148,6 +148,7 @@
   <div class="searchrow" style="margin-bottom:8px">
     <span class="chip on">{{ "{:,}".format(covered) }} of {{ "{:,}".format(n_items) }} items scanned</span>
     <span class="chip">fresh = scanned within {{ (cfg.auto_scan_on_view_days or 30)|int }} days</span>
+    {% if n_nodata %}<a class="chip" href="{{ u('/nodata') }}" title="Collections, promos and other items no marketplace trades">{{ "{:,}".format(n_nodata) }} scanned, nothing found →</a>{% endif %}
     <span class="spacer"></span>
     <input class="inp" type="search" data-filter-table="coverageTable" placeholder="Filter themes…" aria-label="Filter themes">
   </div>

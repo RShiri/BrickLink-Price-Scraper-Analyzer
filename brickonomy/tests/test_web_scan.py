@@ -152,6 +152,18 @@ class TestEmptyScanMemory:
         assert 'id="autoScan"' in r.text           # stale attempt → try again
         assert env.started.wait(5)
 
+    def test_nodata_page_lists_empty_items_with_retry(self, env):
+        conn = dbq.connect()
+        dbq.upsert_item(conn, "0012", name="Space Mini-Figures", year=1979)
+        dbq.record_scan_attempt(
+            conn, "0012", "bricklink: empty, ebay: empty, brickowl: empty")
+        conn.close()
+        r = env.client.get("/nodata")
+        assert r.status_code == 200
+        assert "Space Mini-Figures" in r.text
+        assert "/sets/0012/scan" in r.text          # retry button
+        assert "75192" not in r.text                # never attempted → not listed
+
     def test_minifig_brickeconomy_link_goes_via_search(self, env):
         from brickonomy.web.app import brickeconomy_url
         assert brickeconomy_url("sh0727", "M") == \
@@ -201,6 +213,14 @@ class TestMissingScope:
         dbq.insert_snapshot(conn, "3333", "brickeconomy", "new", "market", "USD",
                             market_price=50.0)
         dbq.upsert_item(conn, "sw0001", name="Bare fig", item_type="M")
+        # 4444: tried recently, nothing anywhere → sits out until the TTL.
+        dbq.upsert_item(conn, "4444", name="Collection pack")
+        dbq.record_scan_attempt(conn, "4444", "bricklink: empty, ebay: empty")
+        # 5555: tried long ago → retried, but after the never-attempted sets.
+        dbq.upsert_item(conn, "5555", name="Old attempt")
+        conn.execute(
+            "INSERT INTO scan_attempts (item_id, attempted_at, note) VALUES (?,?,?)",
+            ("5555", "2020-01-01T00:00:00", "bricklink: empty"))
         conn.commit()
         conn.close()
 
@@ -210,5 +230,7 @@ class TestMissingScope:
                             scanned.append(iid) or {})
         monkeypatch.setattr(refresh_mod, "polite_sleep", lambda: None)
         out = refresh_mod.run_refresh(scope="missing", log=lambda *a: None)
-        assert scanned == ["1111", "3333", "sw0001"]     # sets first, no 2222
-        assert out["done"] == 3
+        # Sets first (never-attempted before old-attempted), then figs;
+        # 2222 has data and 4444 was tried recently — both skipped.
+        assert scanned == ["1111", "3333", "5555", "sw0001"]
+        assert out["done"] == 4

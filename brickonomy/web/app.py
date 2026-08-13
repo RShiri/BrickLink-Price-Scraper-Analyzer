@@ -10,7 +10,7 @@ import re
 import sqlite3
 import xml.etree.ElementTree as ET
 from urllib.parse import quote
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request, UploadFile
@@ -1177,9 +1177,23 @@ def refresh_page(request: Request):
         n_portfolio = conn.execute("SELECT COUNT(*) c FROM portfolio WHERE owned > 0").fetchone()["c"]
         n_items = conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"]
         # Backlog for the "Never scanned" scope: items no marketplace has
-        # ever been scraped for (imported-only values count as unscanned).
+        # ever been scraped for (imported-only values count as unscanned),
+        # minus those tried recently that returned nothing — mirrors the
+        # scope's own target query.
+        cutoff = (datetime.now() - timedelta(days=cfg.scrape_ttl_days)
+                  ).isoformat(timespec="seconds")
         n_never = conn.execute(
             """SELECT COUNT(*) c FROM items i
+               LEFT JOIN scan_attempts a ON a.item_id = i.item_id
+               WHERE NOT EXISTS (
+                   SELECT 1 FROM price_snapshots s
+                   WHERE s.item_id = i.item_id
+                     AND s.source IN ('bricklink', 'ebay', 'brickowl'))
+                 AND (a.attempted_at IS NULL OR a.attempted_at < ?)""",
+            (cutoff,)).fetchone()["c"]
+        n_nodata = conn.execute(
+            """SELECT COUNT(*) c FROM items i
+               JOIN scan_attempts a ON a.item_id = i.item_id
                WHERE NOT EXISTS (
                    SELECT 1 FROM price_snapshots s
                    WHERE s.item_id = i.item_id
@@ -1192,7 +1206,7 @@ def refresh_page(request: Request):
         return templates.TemplateResponse(request, "refresh.html", ctx(
             request, conn, cfg=cfg, sources_health=sources_health,
             n_portfolio=n_portfolio, n_items=n_items, n_never=n_never,
-            coverage=coverage,
+            n_nodata=n_nodata, coverage=coverage,
             covered=covered, fresh=fresh,
             ebay_signed_in=bool(EbaySource.signed_in_profile()),
         ))
@@ -1213,6 +1227,29 @@ def refresh_start(request: Request, scope: str = Form("portfolio"),
     if request.headers.get("accept", "").startswith("application/json"):
         return JSONResponse(jobs.status(), status_code=200 if started else 409)
     return RedirectResponse("/refresh", status_code=303)
+
+
+@app.get("/nodata")
+def nodata_page(request: Request):
+    """Items that were scanned but returned nothing on any marketplace —
+    collections, packs, promos, vintage supplements. They sit out of the
+    regular scan rotation (retried only after the TTL, or via Retry here)."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """SELECT i.item_id, i.name, i.theme, i.year, i.item_type,
+                      a.attempted_at, a.note
+               FROM items i JOIN scan_attempts a ON a.item_id = i.item_id
+               WHERE NOT EXISTS (
+                   SELECT 1 FROM price_snapshots s
+                   WHERE s.item_id = i.item_id
+                     AND s.source IN ('bricklink', 'ebay', 'brickowl'))
+               ORDER BY a.attempted_at DESC LIMIT 500""").fetchall()
+        return templates.TemplateResponse(request, "nodata.html", ctx(
+            request, conn, items=rows,
+            ttl=int(get_config().scrape_ttl_days)))
+    finally:
+        conn.close()
 
 
 @app.post("/refresh/stop")

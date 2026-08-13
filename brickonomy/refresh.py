@@ -241,14 +241,22 @@ def run_refresh(scope="portfolio", item_id=None, force=False, theme=None,
             # Only items no marketplace has ever been scraped for — the pure
             # backlog, nothing already-priced is revisited. Items holding only
             # imported (BrickEconomy CSV) values count as missing too: they
-            # show a value but have never had a real market scan.
+            # show a value but have never had a real market scan. Items tried
+            # recently that returned nothing (collections, promos — see the
+            # No-market-data page) wait out the TTL and then queue after the
+            # never-attempted ones, so they can't clog the backlog.
+            cutoff = (datetime.now() - timedelta(days=cfg.scrape_ttl_days)
+                      ).isoformat(timespec="seconds")
             targets = [(r["item_id"], r["item_type"]) for r in conn.execute(
                 """SELECT i.item_id, i.item_type FROM items i
+                   LEFT JOIN scan_attempts a ON a.item_id = i.item_id
                    WHERE NOT EXISTS (
                        SELECT 1 FROM price_snapshots s
                        WHERE s.item_id = i.item_id
                          AND s.source IN ('bricklink', 'ebay', 'brickowl'))
-                   ORDER BY i.item_type DESC, i.item_id""")]
+                     AND (a.attempted_at IS NULL OR a.attempted_at < ?)
+                   ORDER BY i.item_type DESC, a.attempted_at IS NOT NULL,
+                            i.item_id""", (cutoff,))]
         elif scope == "gaps":
             # Whatever the catalog is still missing, most-useful first: sets
             # before minifigs, never-scanned before merely stale. Feeding this

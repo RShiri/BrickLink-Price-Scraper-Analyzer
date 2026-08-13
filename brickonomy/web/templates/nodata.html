@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}No market data · Brickonomy{% endblock %}
+{% block content %}
+
+<div class="eyebrow">Catalog corner cases</div>
+<h1>No market data</h1>
+<p class="sub">{{ items|length }} items were scanned but returned no listings on any
+  marketplace — typically collections, packs, promos and vintage supplements that
+  simply aren't traded. They sit out of the regular scan rotation (retried only
+  after {{ ttl }} days, or with the Retry button here), so they never slow a scan down.</p>
+
+<div class="card">
+  <div class="searchrow" style="margin-bottom:8px">
+    <input class="inp" type="search" data-filter-table="nodataTable"
+           placeholder="Filter by id, name or theme…" aria-label="Filter">
+  </div>
+  <div class="table-scroll">
+  <table id="nodataTable" data-sortable>
+    <thead>
+      <tr><th>Item</th><th>Type</th><th>Theme</th><th class="num">Year</th>
+          <th>Last tried</th><th>Result per source</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>{{ m.thumb(it.item_id, it.item_type, img_url) }}<a href="{{ u('/sets/' ~ it.item_id) }}"><b>{{ it.item_id }}</b> {{ (it.name or '')[:40] }}</a></td>
+        <td>{{ 'minifig' if it.item_type == 'M' else 'set' }}</td>
+        <td>{{ it.theme or '—' }}</td>
+        <td class="num" data-v="{{ it.year or 0 }}">{{ it.year or '—' }}</td>
+        <td data-v="{{ it.attempted_at }}" style="white-space:nowrap">{{ it.attempted_at[:16].replace('T', ' ') }}</td>
+        <td style="color:var(--muted);font-size:12px">{{ it.note or '—' }}</td>
+        <td style="white-space:nowrap">
+          <a class="chip" href="{{ bricklink_url(it.item_id, it.item_type) }}" target="_blank" rel="noopener">BrickLink ↗</a>
+          {% if not static_mode %}
+          <form method="post" action="/sets/{{ it.item_id }}/scan" style="display:inline;margin:0">
+            <button class="chip" type="submit" style="cursor:pointer"
+                    title="Force a fresh scan of this item now">⟳ Retry</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td style="color:var(--muted)">Nothing here — every scanned item found at least one listing.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <div style="color:var(--muted);font-size:12px;margin-top:8px">
+    An item leaves this list the moment any scan finds a listing for it.
+    “error” in the result column means the marketplace blocked or failed rather
+    than answered “no listings” — those are worth a Retry.
+  </div>
+</div>
+
+{% endblock %}
