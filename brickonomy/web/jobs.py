@@ -79,7 +79,7 @@ def _should_stop():
         return _state["stop_requested"]
 
 
-def start(scope="portfolio", item_id=None, force=False, theme=None):
+def start(scope="portfolio", item_id=None, force=False, theme=None, limit=None):
     """Queue a manual scan. Returns False if one is already running or queued
     (the Refresh page disables its button on that)."""
     with _lock:
@@ -90,7 +90,7 @@ def start(scope="portfolio", item_id=None, force=False, theme=None):
             _queued_items.add(item_id)
         else:
             _queue.append(("scope", {"scope": scope, "force": force,
-                                     "theme": theme}))
+                                     "theme": theme, "limit": limit}))
         _state.update(scope=item_id or theme or scope, current_item=None,
                       done=0, total=0, errors=[])
         _state["log"].clear()

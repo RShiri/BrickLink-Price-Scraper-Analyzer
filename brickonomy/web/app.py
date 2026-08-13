@@ -1203,12 +1203,13 @@ def refresh_page(request: Request):
 @app.post("/refresh")
 def refresh_start(request: Request, scope: str = Form("portfolio"),
                   item_id: str = Form(""), force: bool = Form(False),
-                  theme: str = Form("")):
+                  theme: str = Form(""), limit: str = Form("")):
     theme = theme.strip()
     if theme and scope not in ("theme",):
         scope = "theme"          # picking a theme is the intent, whatever the select says
     started = jobs.start(scope=scope, item_id=item_id.strip() or None,
-                         force=force, theme=theme or None)
+                         force=force, theme=theme or None,
+                         limit=int(limit) if limit.strip().isdigit() else None)
     if request.headers.get("accept", "").startswith("application/json"):
         return JSONResponse(jobs.status(), status_code=200 if started else 409)
     return RedirectResponse("/refresh", status_code=303)

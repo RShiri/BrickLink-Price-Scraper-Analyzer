@@ -38,7 +38,8 @@ def env(tmp_path, monkeypatch):
 
     def fake_run_refresh(scope="portfolio", item_id=None, force=False,
                          progress=None, log=print, **kw):
-        calls.append({"item_id": item_id, "force": force})
+        calls.append({"item_id": item_id, "force": force,
+                      "limit": kw.get("limit")})
         if progress:
             progress(0, 1, item_id, [])
         started.set()
@@ -79,7 +80,17 @@ class TestScanButton:
         for t in threading.enumerate():
             if t.name == "brickonomy-refresh":
                 t.join(timeout=5)
-        assert env.calls == [{"item_id": "75192", "force": True}]
+        assert env.calls == [{"item_id": "75192", "force": True, "limit": None}]
+
+    def test_scope_scan_carries_the_form_limit(self, env):
+        r = env.client.post("/refresh", data={"scope": "missing", "limit": "5"})
+        assert r.status_code == 303
+        assert env.started.wait(5)
+        env.release.set()
+        for t in threading.enumerate():
+            if t.name == "brickonomy-refresh":
+                t.join(timeout=5)
+        assert env.calls == [{"item_id": None, "force": False, "limit": 5}]
 
     def test_stop_finishes_current_item_and_drops_queue(self, env):
         env.client.post("/sets/75192/scan")
@@ -97,7 +108,7 @@ class TestScanButton:
         s = jobs.status()
         assert s["running"] is False and s["stop_requested"] is False
         # The in-flight item completed; the queued one never ran.
-        assert env.calls == [{"item_id": "75192", "force": True}]
+        assert env.calls == [{"item_id": "75192", "force": True, "limit": None}]
 
     def test_stop_with_nothing_running_is_a_noop(self, env):
         assert jobs.stop() is False
@@ -112,8 +123,8 @@ class TestScanButton:
         for t in threading.enumerate():
             if t.name == "brickonomy-refresh":
                 t.join(timeout=5)
-        assert env.calls == [{"item_id": "75192", "force": True},
-                             {"item_id": "10294", "force": True}]
+        assert env.calls == [{"item_id": "75192", "force": True, "limit": None},
+                             {"item_id": "10294", "force": True, "limit": None}]
 
 
 class TestEmptyScanMemory:

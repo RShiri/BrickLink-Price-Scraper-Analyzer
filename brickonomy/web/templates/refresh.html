@@ -60,6 +60,8 @@
         {% endfor %}
       </select>
       <input class="inp" type="text" name="item_id" placeholder="…or a single set, e.g. 75192" style="width:190px">
+      <input class="inp" type="number" name="limit" min="1" placeholder="max items" style="width:110px"
+             title="Stop after this many items — the never-scanned ones go first, the rest wait for the next run">
       <label class="chip"><input type="checkbox" name="force" value="true" style="accent-color:var(--accent)"> force</label>
       <button class="btn-primary" type="submit" {{ 'disabled' if job.running }}>▶ Start scan</button>
     </form>
