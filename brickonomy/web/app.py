@@ -100,6 +100,19 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 templates.env.filters["money"] = money
 
 
+def asset_version() -> int:
+    """Cache-buster for style.css/app.js: the newest mtime of the static
+    files, added as ?v=… so browsers fetch fresh assets after every update
+    instead of serving a stale cached copy until a hard refresh."""
+    try:
+        return int(max(p.stat().st_mtime for p in (BASE_DIR / "static").iterdir()))
+    except (OSError, ValueError):
+        return 0
+
+
+ASSET_VERSION = asset_version()
+
+
 # ── helpers ──────────────────────────────────────────────────────────────
 
 def get_conn():
@@ -174,6 +187,7 @@ def ctx(request: Request, conn, **extra):
         "static_mode": STATIC_MODE,
         "base_path": static_prefix(),
         "u": static_url,
+        "asset_v": ASSET_VERSION,
         **extra,
     }
 
