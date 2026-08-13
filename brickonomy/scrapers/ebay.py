@@ -126,12 +126,28 @@ class EbaySource(BaseScraper):
         res = self.empty_result(item_id)
         res.meta = {"item_id": item_id, "query": self._build_query(item_id)}
 
+        rows = []
         for page_kind, bucket in (("sold", "sold"), ("active", "stock")):
             html = htmls.get(page_kind) or ""
             if not html:
                 continue
-            for listing, condition in self._parse_cards(html, item_id):
-                res.__dict__[condition][bucket].append(listing.as_dict())
+            for listing, condition, ccy in self._parse_cards(html, item_id):
+                rows.append((listing, condition, bucket, ccy))
+
+        # eBay renders prices in the visitor's locale — the same search shows
+        # "$379.99" to a US visitor and "ILS 1,357.00" or "1,357.00 ₪" to an
+        # Israeli one. Trust the page's own symbols over the USD default:
+        # majority currency wins, and stray listings in another currency are
+        # dropped rather than mixed into the same stats.
+        tally = {}
+        for _, _, _, ccy in rows:
+            if ccy:
+                tally[ccy] = tally.get(ccy, 0) + 1
+        res.currency = max(tally, key=tally.get) if tally else self.currency
+        for listing, condition, bucket, ccy in rows:
+            if ccy and ccy != res.currency:
+                continue
+            res.__dict__[condition][bucket].append(listing.as_dict())
         return res
 
     def _parse_cards(self, html: str, item_id: str):
@@ -166,12 +182,13 @@ class EbaySource(BaseScraper):
         prices = find_prices(price_text)
         if not prices:
             return None
-        price = prices[0][0]
+        price, ccy = prices[0]
 
         condition = self._classify_condition(card, title)
         if condition is None:
             return None
-        return Listing(qty=1, price=price, status="complete", description=title), condition
+        return (Listing(qty=1, price=price, status="complete", description=title),
+                condition, ccy)
 
     @staticmethod
     def _classify_condition(card, title: str):

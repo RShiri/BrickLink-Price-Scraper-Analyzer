@@ -37,7 +37,10 @@ USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
 #
 # Accepts: "$12.34", "US $12.34", "ILS 45.60", "45.60 ₪", "45.60".
 SYMBOL_TO_CCY = {"£": "GBP", "$": "USD", "€": "EUR", "₪": "ILS"}
-CODE_TO_CCY = {"US": "USD", "CA": "CAD", "AU": "AUD", "NZ": "NZD"}
+# Country prefixes ("US $12.34") and full ISO codes ("ILS 45.60") both appear.
+CODE_TO_CCY = {"US": "USD", "CA": "CAD", "AU": "AUD", "NZ": "NZD",
+               "USD": "USD", "CAD": "CAD", "AUD": "AUD", "NZD": "NZD",
+               "EUR": "EUR", "GBP": "GBP", "ILS": "ILS"}
 
 PRICE_RE = re.compile(
     r"(?:(?P<code>[A-Z]{2,3})\s*)?(?P<sym>[£$€₪])?\s*"

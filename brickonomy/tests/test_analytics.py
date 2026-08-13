@@ -113,6 +113,33 @@ class TestBlend:
         assert value == pytest.approx(3500.0)
         assert per_source["bricklink"]["stale"] is True
 
+    def test_gross_outlier_source_ignored(self, conn):
+        # The Daily Bugle case: eBay's locale (ILS) prices mislabeled as USD
+        # made it ~3.5x the other sources. With three fresh sources, the
+        # blend drops whatever sits far off the median and flags it.
+        dbq.upsert_item(conn, "9999", name="Test", year=2018)
+        seed_series(conn, "9999", [(1241, 0)], source="bricklink",
+                    currency="ILS", confidence="HIGH")
+        seed_series(conn, "9999", [(1357, 0)], source="ebay",
+                    currency="USD", confidence="HIGH")     # = 4749.5 ILS
+        seed_series(conn, "9999", [(1503, 0)], source="brickowl",
+                    currency="ILS", confidence="LOW")
+        value, confidence, per_source = blend(conn, "9999", "new")
+        assert per_source["ebay"].get("outlier") is True
+        assert value == pytest.approx((1241 * 3 + 1503 * 1) / 4, rel=1e-6)
+        assert confidence == "HIGH"
+
+    def test_outlier_guard_needs_three_sources(self, conn):
+        # With only two sources there is no majority to trust — keep both.
+        dbq.upsert_item(conn, "9998", name="Test", year=2018)
+        seed_series(conn, "9998", [(1000, 0)], source="bricklink",
+                    currency="ILS", confidence="HIGH")
+        seed_series(conn, "9998", [(9000, 0)], source="ebay",
+                    currency="ILS", confidence="MEDIUM")
+        value, _, per_source = blend(conn, "9998", "new")
+        assert not any(s.get("outlier") for s in per_source.values())
+        assert value == pytest.approx((1000 * 3 + 9000 * 2) / 5, rel=1e-6)
+
     def test_store_blended_persists_series(self, conn):
         dbq.upsert_item(conn, "6666", name="Test", year=2018)
         seed_series(conn, "6666", [(3500, 0)], source="bricklink",

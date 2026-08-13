@@ -13,6 +13,7 @@ from ..currency import convert
 CONFIDENCE_WEIGHT = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
 BLEND_CURRENCY = "ILS"          # blended snapshots are stored in this currency
 MAX_SOURCE_AGE_DAYS = 14        # ignore sources with no recent scan
+OUTLIER_FACTOR = 2.5            # a source this far off the median is dropped
 
 SOURCES = ("bricklink", "ebay", "brickowl")
 
@@ -35,8 +36,7 @@ def blend(conn, item_id, condition, max_age_days=MAX_SOURCE_AGE_DAYS):
     """
     cutoff = datetime.now() - timedelta(days=max_age_days)
     per_source = {}
-    weighted_sum, weight_total = 0.0, 0
-    best_confidence = "LOW"
+    eligible = {}                # source -> (converted, confidence)
 
     for source, row in latest_per_source(conn, item_id, condition).items():
         try:
@@ -52,13 +52,30 @@ def blend(conn, item_id, condition, max_age_days=MAX_SOURCE_AGE_DAYS):
             "scraped_at": row["scraped_at"],
             "stale": not age_ok,
         }
-        if not age_ok or not converted or converted <= 0:
-            continue
-        w = CONFIDENCE_WEIGHT.get(row["confidence"], 1)
+        if age_ok and converted and converted > 0:
+            eligible[source] = (converted, row["confidence"])
+
+    # One marketplace wildly off the rest (a mislabeled currency, scalper
+    # asks) must not drag the blend. With three or more fresh sources the
+    # median is trustworthy: drop whatever sits more than OUTLIER_FACTOR
+    # away from it, and mark it so the UI can say the source was ignored.
+    if len(eligible) >= 3:
+        prices = sorted(p for p, _ in eligible.values())
+        n = len(prices)
+        median = prices[n // 2] if n % 2 else (prices[n // 2 - 1] + prices[n // 2]) / 2
+        for source, (price, _) in list(eligible.items()):
+            if price > median * OUTLIER_FACTOR or price < median / OUTLIER_FACTOR:
+                per_source[source]["outlier"] = True
+                del eligible[source]
+
+    weighted_sum, weight_total = 0.0, 0
+    best_confidence = "LOW"
+    for source, (converted, confidence) in eligible.items():
+        w = CONFIDENCE_WEIGHT.get(confidence, 1)
         weighted_sum += converted * w
         weight_total += w
-        if CONFIDENCE_WEIGHT.get(row["confidence"], 1) > CONFIDENCE_WEIGHT.get(best_confidence, 1):
-            best_confidence = row["confidence"]
+        if w > CONFIDENCE_WEIGHT.get(best_confidence, 1):
+            best_confidence = confidence
 
     if weight_total == 0:
         return None, None, per_source

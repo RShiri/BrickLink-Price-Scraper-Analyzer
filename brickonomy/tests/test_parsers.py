@@ -192,6 +192,30 @@ class TestEbayParser:
     def test_titles_flow_into_description_for_blacklist(self, result):
         assert all(r["description"] for r in result.new["sold"])
 
+    def test_us_locale_pages_stay_usd(self, result):
+        assert result.currency == "USD"
+
+
+class TestEbayLocaleCurrency:
+    """eBay formats prices for the visitor's locale — an Israeli scraper sees
+    "ILS 1,357.00", not "$379.99". The page's own symbols must win over the
+    USD default, or every local price is recorded ~3.5x too high."""
+
+    ILS_ACTIVE = """<ul>
+      <li class="s-item"><div class="s-item__title">LEGO 76178 Daily Bugle NEW SEALED</div>
+        <span class="s-item__price">ILS 1,357.00</span></li>
+      <li class="s-item"><div class="s-item__title">LEGO 76178 Daily Bugle factory sealed</div>
+        <span class="s-item__price">1,420.50 ₪</span></li>
+      <li class="s-item"><div class="s-item__title">LEGO 76178 Daily Bugle brand new import</div>
+        <span class="s-item__price">$379.99</span></li>
+    </ul>"""
+
+    def test_majority_currency_wins_and_stray_rows_drop(self):
+        res = EbaySource().parse({"sold": "", "active": self.ILS_ACTIVE}, "76178")
+        assert res.currency == "ILS"
+        prices = sorted(x["price"] for x in res.new["stock"])
+        assert prices == [1357.00, 1420.50]     # the lone $ row is dropped
+
 
 # ── BrickOwl ─────────────────────────────────────────────────────────────
 
@@ -241,7 +265,7 @@ class TestPriceParsing:
     CASES = [
         ("$1,234.56", 1234.56, "USD"),
         ("US $12.34", 12.34, "USD"),
-        ("ILS 45.60", 45.60, None),      # code isn't a symbol map entry
+        ("ILS 45.60", 45.60, "ILS"),     # ISO code counts as well as a symbol
         ("45.60 ₪", 45.60, "ILS"),
         ("612.00", 612.00, None),        # bare — currency comes from the page
         ("€ 99.90", 99.90, "EUR"),

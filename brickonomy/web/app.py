@@ -134,6 +134,16 @@ def brickeconomy_url(item_id: str, item_type: str = "S") -> str:
     return f"https://www.brickeconomy.com/set/{quote(suffix)}"
 
 
+def source_site_url(source: str, item_id: str, item_type: str = "S") -> str:
+    """Outbound link to this item on the marketplace itself, so every source
+    name in the price tables can be clicked through."""
+    if source == "bricklink":
+        return bricklink_url(item_id, item_type)
+    if source == "ebay":
+        return f"https://www.ebay.com/sch/i.html?_nkw=lego+{quote(item_id)}&LH_BIN=1"
+    return f"https://www.brickowl.com/search/catalog?query={quote(item_id)}"
+
+
 def part_url(part_no: str, color_id: int = None) -> str:
     """Outbound link to the part's BrickLink catalog page, in its color."""
     base = f"https://www.bricklink.com/v2/catalog/catalogitem.page?P={quote(part_no)}"
@@ -158,6 +168,7 @@ def ctx(request: Request, conn, **extra):
         "part_img_url": part_img_url,
         "bricklink_url": bricklink_url,
         "brickeconomy_url": brickeconomy_url,
+        "source_site_url": source_site_url,
         "static_mode": STATIC_MODE,
         "base_path": static_prefix(),
         "u": static_url,
