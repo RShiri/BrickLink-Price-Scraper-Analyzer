@@ -512,10 +512,37 @@
     const body = table.tBodies[0];
     if (!head || !body) return;
 
+    // Sorting is client-side, so a plain reload (e.g. opening a row's edit
+    // panel) used to forget it and rows "jumped" back to server order.
+    // Remember the choice per table for this tab and re-apply it on load.
+    const storeKey = table.id ? `sort:${table.id}` : null;
+
+    const doSort = (idx, dir) => {
+      const th = head.cells[idx];
+      if (!th || th.dataset.nosort !== undefined) return;
+      [...head.cells].forEach((o) => { o.dataset.sort = ""; });
+      th.dataset.sort = dir;
+      // The portfolio's open edit row has merged cells and no sort values —
+      // pin it to the top instead of letting it sink to the bottom.
+      const pinned = [...body.rows].filter((tr) => tr.classList.contains("editrow"));
+      const rest = [...body.rows].filter((tr) => !tr.classList.contains("editrow"));
+      window.brickonomySortRows(rest, idx, dir);
+      pinned.concat(rest).forEach((tr) => body.appendChild(tr));
+      if (storeKey) sessionStorage.setItem(storeKey, `${idx}:${dir}`);
+    };
+
+    const saved = storeKey && sessionStorage.getItem(storeKey);
+    if (saved) {
+      const [i, d] = saved.split(":");
+      if (!Number.isNaN(parseInt(i, 10)) && (d === "asc" || d === "desc")) {
+        doSort(parseInt(i, 10), d);
+      }
+    }
+
     [...head.cells].forEach((th, idx) => {
       if (th.dataset.nosort !== undefined) return;
       th.tabIndex = 0;
-      th.dataset.sort = "";
+      th.dataset.sort = th.dataset.sort || "";
       const run = () => {
         // First click on a numeric column sorts high→low; text sorts A→Z.
         const wasNumeric = body.rows[0] &&
@@ -524,14 +551,7 @@
         const current = th.dataset.sort;
         const dir = current === "asc" ? "desc" : current === "desc" ? "asc"
                                                                    : (wasNumeric ? "desc" : "asc");
-        [...head.cells].forEach((o) => { o.dataset.sort = ""; });
-        th.dataset.sort = dir;
-        // The portfolio's open edit row has merged cells and no sort values —
-        // pin it to the top instead of letting it sink to the bottom.
-        const pinned = [...body.rows].filter((tr) => tr.classList.contains("editrow"));
-        const rest = [...body.rows].filter((tr) => !tr.classList.contains("editrow"));
-        window.brickonomySortRows(rest, idx, dir);
-        pinned.concat(rest).forEach((tr) => body.appendChild(tr));
+        doSort(idx, dir);
       };
       th.addEventListener("click", run);
       th.addEventListener("keydown", (e) => {
