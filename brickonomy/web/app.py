@@ -63,11 +63,18 @@ def static_url(path: str) -> str:
         rel = "index.html"
     elif path == "/sets":
         m = re.search(r"theme=([^&]+)", query)
-        if m:
+        if re.search(r"(?:^|&)(?:year|sub|type)=", query):
+            # Faceted browses (year / subtheme / type) have no pre-rendered
+            # page — deep-link into the client-side catalog browser, which
+            # reads these params from the query string.
+            rel = f"sets/index.html?{query}"
+        elif m:
             from urllib.parse import unquote_plus
             rel = f"sets/theme-{slugify(unquote_plus(m.group(1)))}.html"
         else:
             rel = "sets/index.html"
+    elif path == "/catalog":
+        rel = "catalog.html"
     elif path == "/portfolio":
         rel = "portfolio.html"
     elif path == "/set":
@@ -111,6 +118,32 @@ def img_url(item_id: str, item_type: str = "S") -> str:
     return f"https://img.bricklink.com/ItemImage/SN/0/{suffix}.png"
 
 
+def bricklink_url(item_id: str, item_type: str = "S") -> str:
+    """Outbound link to the item's BrickLink catalog page."""
+    if item_type == "M" or any(c.isalpha() for c in item_id):
+        return ("https://www.bricklink.com/v2/catalog/catalogitem.page"
+                f"?M={quote(item_id)}")
+    suffix = item_id if "-" in item_id else f"{item_id}-1"
+    return f"https://www.bricklink.com/v2/catalog/catalogitem.page?S={quote(suffix)}"
+
+
+def brickeconomy_url(item_id: str, item_type: str = "S") -> str:
+    if item_type == "M" or any(c.isalpha() for c in item_id):
+        return f"https://www.brickeconomy.com/minifig/{quote(item_id)}"
+    suffix = item_id if "-" in item_id else f"{item_id}-1"
+    return f"https://www.brickeconomy.com/set/{quote(suffix)}"
+
+
+def part_url(part_no: str, color_id: int = None) -> str:
+    """Outbound link to the part's BrickLink catalog page, in its color."""
+    base = f"https://www.bricklink.com/v2/catalog/catalogitem.page?P={quote(part_no)}"
+    return f"{base}&idColor={color_id}" if color_id else base
+
+
+def part_img_url(part_no: str, color_id: int = None) -> str:
+    return f"https://img.bricklink.com/ItemImage/PN/{color_id or 0}/{quote(part_no)}.png"
+
+
 def ctx(request: Request, conn, **extra):
     ccy = display_ccy(request)
     return {
@@ -121,6 +154,10 @@ def ctx(request: Request, conn, **extra):
         "rates": rates_status(),
         "job": jobs.status(),
         "img_url": img_url,
+        "part_url": part_url,
+        "part_img_url": part_img_url,
+        "bricklink_url": bricklink_url,
+        "brickeconomy_url": brickeconomy_url,
         "static_mode": STATIC_MODE,
         "base_path": static_prefix(),
         "u": static_url,
@@ -340,6 +377,35 @@ def dashboard(request: Request):
         conn.close()
 
 
+@app.get("/catalog")
+def catalog_page(request: Request):
+    """Browse hub — the whole catalog by theme, subtheme, year and type,
+    BrickLink-style."""
+    conn = get_conn()
+    try:
+        tree = dbq.catalog_tree(conn)
+        years = dbq.year_histogram(conn)
+        decades = {}
+        for y in years:
+            decades.setdefault(y["year"] // 10 * 10, []).append(y)
+        decade_list = sorted(decades.items(), key=lambda kv: -kv[0])
+        counts = {
+            # "total", not "items" — counts.items in Jinja would resolve to
+            # the dict method instead of the key.
+            "total": conn.execute("SELECT COUNT(*) c FROM items").fetchone()["c"],
+            "sets": conn.execute(
+                "SELECT COUNT(*) c FROM items WHERE item_type != 'M'").fetchone()["c"],
+            "figs": conn.execute(
+                "SELECT COUNT(*) c FROM items WHERE item_type = 'M'").fetchone()["c"],
+            "themes": len(tree),
+        }
+        return templates.TemplateResponse(request, "catalog.html", ctx(
+            request, conn, tree=tree, decades=decade_list, counts=counts,
+        ))
+    finally:
+        conn.close()
+
+
 @app.get("/themes")
 def themes_page(request: Request):
     """Theme analysis: how each LEGO theme is performing."""
@@ -427,13 +493,17 @@ def deals_page(request: Request, min_margin: float = 0.0, rating: str = ""):
 
 @app.get("/sets")
 def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "growth",
-              theme: str = ""):
+              theme: str = "", sub: str = "", year: int = 0, type: str = ""):
     conn = get_conn()
     try:
         ccy = display_ccy(request)
-        rows = dbq.list_items(conn, search=q, limit=400)
-        if theme:
-            rows = [r for r in rows if (r["theme"] or "") == theme]
+        # Facet filters go into the SQL so they see the whole catalog, not
+        # just the first 400 ids; the raised cap only guards pathological
+        # renders (the template shows 200 rows anyway).
+        faceted = bool(theme or sub or year or type)
+        rows = dbq.list_items(conn, search=q, limit=2000 if faceted else 400,
+                              theme=theme or None, subtheme=sub or None,
+                              year=year or None, item_type=type or None)
         if filter == "portfolio":
             owned = {r["item_id"] for r in dbq.get_portfolio(conn)}
             rows = [r for r in rows if r["item_id"] in owned]
@@ -463,7 +533,8 @@ def sets_page(request: Request, q: str = "", filter: str = "", sort: str = "grow
         template = "sets_static.html" if STATIC_MODE else "sets.html"
         return templates.TemplateResponse(request, template, ctx(
             request, conn, items=items[:200], q=q, filter=filter, sort=sort,
-            theme=theme, themes=themes, n_categories=n_categories,
+            theme=theme, sub=sub, year=year, itype=type,
+            themes=themes, n_categories=n_categories,
             total=len(items), catalog_total=catalog_total,
         ))
     finally:
@@ -489,7 +560,17 @@ def _maybe_auto_scan(conn, item_id):
         except ValueError:
             age_days = None
         if age_days is not None and age_days < cfg.auto_scan_on_view_days:
-            return None
+            # Fresh prices — but a set whose specs promise minifigs while none
+            # are stored has a failed/missing inventory scan (e.g. BrickLink
+            # served the plain client a redirect): scan it anyway, the fresh
+            # sources are skipped and only the inventory is fetched.
+            row = dbq.get_item(conn, item_id)
+            figs_missing = (row is not None
+                            and (row["item_type"] or "S") == "S"
+                            and (row["minifigs"] or 0) > 0
+                            and not dbq.get_set_minifigs(conn, item_id))
+            if not figs_missing:
+                return None
 
     status = jobs.status()
     if status.get("current_item") == item_id:
@@ -518,7 +599,7 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
 
         if row["item_type"] == "M" or (any(c.isalpha() for c in item_id)
                                        and not item_id[0].isdigit()):
-            return _minifig_detail(request, conn, row)
+            return _minifig_detail(request, conn, row, parts_q=parts_q)
 
         values = {}
         per_source_all = {}
@@ -540,6 +621,9 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
             for h in fc["horizons"].values():
                 for k in ("value", "low", "high"):
                     h[k] = disp(conn, h[k], "ILS", ccy)
+            if fc["at_retirement"]:
+                fc["at_retirement"]["value"] = disp(
+                    conn, fc["at_retirement"]["value"], "ILS", ccy)
         ph = lifecycle.phase(row["year"], row["theme"])
 
         buy_target = values["new"]["value"] * 0.8 if values["new"]["value"] else None
@@ -632,8 +716,9 @@ def set_detail(request: Request, item_id: str, parts_q: str = ""):
         conn.close()
 
 
-def _minifig_detail(request: Request, conn, row):
-    """Dedicated minifig page: values, history, and which sets contain it."""
+def _minifig_detail(request: Request, conn, row, parts_q: str = ""):
+    """Dedicated minifig page: values, history, part list, and which sets
+    contain it."""
     ccy = display_ccy(request)
     fig_id = row["item_id"]
 
@@ -666,11 +751,16 @@ def _minifig_detail(request: Request, conn, row):
         o["display"] = disp(conn, o["price"], o["currency"], ccy)
     best_source = min(offers, key=lambda s: offers[s]["display"] or 1e18) if offers else None
 
+    parts = dbq.get_set_parts(conn, fig_id, search=parts_q, limit=100)
+    psum = dbq.parts_summary(conn, fig_id)
+
     return templates.TemplateResponse(request, "minifig_detail.html", ctx(
         request, conn, auto_scan=_maybe_auto_scan(conn, fig_id),
         item=row, values=values, per_source=per_source_all,
         growth_cagr=g_cagr, delta30=delta30, appears_in=appears_in,
         offers=offers, best_source=best_source,
+        parts=parts, parts_summary=psum, parts_q=parts_q,
+        pov=None, pov_premium=None,
     ))
 
 
@@ -692,7 +782,8 @@ def search_index(request: Request):
     conn = get_conn()
     try:
         rows = conn.execute(
-            "SELECT item_id, name, theme, year, parts, item_type FROM items ORDER BY item_id"
+            "SELECT item_id, name, theme, subtheme, year, parts, item_type "
+            "FROM items ORDER BY item_id"
         ).fetchall()
         # `p` marks items that have their own page in the static export (only
         # price-scraped items get one — the catalog is far too big to render
@@ -703,13 +794,17 @@ def search_index(request: Request):
         # ~23k+ entries, and the compact form is roughly 40% smaller.
         themes = sorted({r["theme"] for r in rows if r["theme"]})
         theme_ix = {t: i for i, t in enumerate(themes)}
+        subs = sorted({r["subtheme"] for r in rows if r["subtheme"]})
+        sub_ix = {s: i for i, s in enumerate(subs)}
         return JSONResponse({
-            "fields": ["id", "name", "theme", "year", "parts", "type", "p"],
+            "fields": ["id", "name", "theme", "year", "parts", "type", "p", "sub"],
             "themes": themes,
+            "subs": subs,
             "rows": [
                 [r["item_id"], r["name"] or "", theme_ix.get(r["theme"], -1),
                  r["year"] or 0, r["parts"] or 0,
-                 r["item_type"] or "S", 1 if r["item_id"] in priced else 0]
+                 r["item_type"] or "S", 1 if r["item_id"] in priced else 0,
+                 sub_ix.get(r["subtheme"], -1)]
                 for r in rows
             ],
         })
@@ -731,7 +826,7 @@ def history_api(request: Request, item_id: str, condition: str = "new"):
                 for ts, v, c in growth_mod.series(conn, item_id, condition=cond, source=source)
             ]
 
-        for source in ("blended", "bricklink", "ebay", "brickowl"):
+        for source in ("blended", "bricklink", "ebay", "brickowl", "brickeconomy"):
             out["series"][source] = points(source, condition)
         # Used prices ride along so the chart can show both conditions without
         # a second request (and so the static export stays a single file).
@@ -741,12 +836,15 @@ def history_api(request: Request, item_id: str, condition: str = "new"):
         if fc and out["series"]["blended"]:
             last = out["series"]["blended"][-1]
             fpts = [{"t": last["t"], "v": last["v"], "lo": last["v"], "hi": last["v"]}]
-            for years, h in sorted(fc["horizons"].items()):
-                fpts.append({"t": f"{h['year']}-12-31",
-                             "v": round(disp(conn, h["value"], "ILS", ccy) or 0, 2),
-                             "lo": round(disp(conn, h["low"], "ILS", ccy) or 0, 2),
-                             "hi": round(disp(conn, h["high"], "ILS", ccy) or 0, 2)})
+            for p in fc["points"]:
+                fpts.append({"t": f"{p['year']}-12-31",
+                             "v": round(disp(conn, p["value"], "ILS", ccy) or 0, 2),
+                             "lo": round(disp(conn, p["low"], "ILS", ccy) or 0, 2),
+                             "hi": round(disp(conn, p["high"], "ILS", ccy) or 0, 2)})
             out["forecast"] = fpts
+            out["forecast_meta"] = {"basis": fc["basis"],
+                                    "growth_pct": fc["growth_pct"],
+                                    "phase": fc["phase"]["phase"]}
         return JSONResponse(out)
     finally:
         conn.close()
@@ -915,19 +1013,29 @@ def parse_import_file(filename: str, content: bytes):
     sniff = text.splitlines()[0] if text.splitlines() else ""
     if "," in sniff and "number" in sniff.lower():
         # BrickEconomy CSV export
+        from ..importer import BE_VALUE_COLS
         for row in csv.DictReader(io.StringIO(text)):
             number = (row.get("Number") or "").strip()
             if not number:
                 continue
             retail, retail_ccy = parse_money(row.get("Retail", ""))
             year = row.get("Year", "").strip()
+            # BrickEconomy's own valuation columns, when the export has them —
+            # confirmed imports store these as 'brickeconomy' snapshots.
+            values = {}
+            for condition, cols in BE_VALUE_COLS.items():
+                v, ccy = parse_money(next((row[c] for c in cols if row.get(c)), "") or "")
+                if v and v > 0:
+                    values[condition] = [v, ccy or "USD"]
             rows.append({
                 "item_id": normalize_item_id(number),
                 "name": (row.get("Name") or "").strip() or None,
                 "theme": (row.get("Theme") or "").strip() or None,
+                "subtheme": (row.get("Subtheme") or "").strip() or None,
                 "year": int(year) if year.isdigit() else None,
                 "qty": max(1, int(row.get("Owned") or 1)),
                 "retail": retail, "retail_ccy": retail_ccy,
+                "values": values or None,
             })
         return rows
 
@@ -983,13 +1091,19 @@ def portfolio_import_confirm(request: Request, payload: str = Form(...)):
                 continue
             dbq.upsert_item(conn, iid, item_type=item_type_for(iid),
                             name=r.get("name"), theme=r.get("theme"),
+                            subtheme=r.get("subtheme"),
                             year=r.get("year"), retail_price=r.get("retail"),
                             retail_currency=r.get("retail_ccy"))
             dbq.upsert_portfolio(conn, iid, owned=max(1, int(r.get("qty") or 1)),
                                  purchase_price=r.get("retail"),
                                  purchase_currency=r.get("retail_ccy") or "USD",
                                  merge_qty=True)
+            for condition, (v, ccy) in (r.get("values") or {}).items():
+                dbq.insert_snapshot(conn, iid, "brickeconomy", condition,
+                                    "market", ccy, market_price=v,
+                                    confidence="MEDIUM")
             imported += 1
+        conn.commit()
         return RedirectResponse(f"/portfolio?imported={imported}&skipped={skipped}",
                                 status_code=303)
     finally:

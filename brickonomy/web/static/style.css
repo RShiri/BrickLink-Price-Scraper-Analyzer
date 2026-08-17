@@ -177,7 +177,30 @@ svg.spark polyline { fill: none; stroke: var(--s1); stroke-width: 2; }
   border: 1px solid var(--border); margin-right: 10px; object-fit: contain;
   background: rgba(232,237,251,0.92);
 }
+.partthumb {
+  width: 34px; height: 26px; border-radius: 6px; vertical-align: middle;
+  border: 1px solid var(--border); margin-right: 8px; object-fit: contain;
+  background: rgba(232,237,251,0.92);
+}
 .facts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+/* catalog browser (theme cards, year chips) + breadcrumbs */
+.themegrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 12px;
+}
+.themecard {
+  border: 1px solid var(--border); border-radius: 14px;
+  background: rgba(10,16,31,0.5); padding: 12px 14px;
+}
+.themecard .themename { font-size: 15px; text-decoration: none; color: var(--ink); }
+.themecard .themename:hover { color: var(--accent); }
+.themecard .thememeta { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
+.subchips, .yearchips { display: flex; gap: 6px; flex-wrap: wrap; }
+.subchips .chip .soft, .yearchips .chip .soft { color: var(--muted); }
+.crumbs { font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
+.crumbs a { color: var(--ink-2); text-decoration: none; }
+.crumbs a:hover { color: var(--accent); }
 
 /* "we are fetching prices for this page right now" strip */
 .autoscan {

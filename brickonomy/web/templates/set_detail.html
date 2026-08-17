@@ -5,6 +5,12 @@
 
 {{ m.autoscan_banner(auto_scan, item.item_id) }}
 
+<nav class="crumbs"><a href="{{ u('/catalog') }}">Browse</a>
+  {%- if item.theme %} › <a href="{{ u('/sets?theme=' ~ item.theme|urlencode) }}">{{ item.theme }}</a>{% endif %}
+  {%- if item.subtheme %} › <a href="{{ u('/sets?theme=' ~ item.theme|urlencode ~ '&sub=' ~ item.subtheme|urlencode) }}">{{ item.subtheme }}</a>{% endif %}
+  {%- if item.year %} › <a href="{{ u('/sets?year=' ~ item.year) }}">{{ item.year }}</a>{% endif %}
+  › <span>{{ item.item_id }}</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="{{ img_url(item.item_id, item.item_type) }}" alt="{{ item.name }}"
@@ -23,6 +29,8 @@
       {% if item.weight_g %}<span class="chip">⚖️ {{ "{:,.0f}".format(item.weight_g) }} g</span>{% endif %}
       {% if item.parts and values.new.value %}<span class="chip">{{ (values.new.value / item.parts)|money(ccy) }} / part</span>{% endif %}
       {{ m.phase_chip(phase) }}
+      <a class="chip" href="{{ bricklink_url(item.item_id, item.item_type) }}" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="{{ brickeconomy_url(item.item_id, item.item_type) }}" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     {% if phase.phase and item.year %}
     <div class="phasebar" style="margin-top:16px">
@@ -53,7 +61,9 @@
   <div class="tile">
     <div class="label">Forecast {{ forecast.horizons[2].year if forecast }} <span title="Trend estimate, not a guarantee">ⓘ</span></div>
     <div class="value">{% if forecast %}{{ forecast.horizons[2].value|money(ccy) }}{% else %}—{% endif %}</div>
-    <div class="delta">{% if forecast %}trend estimate · ±20% band{% else %}needs price history{% endif %}</div>
+    <div class="delta">{% if forecast %}trend estimate
+      {%- if forecast.basis == 'theme' %} · theme comparables{% elif forecast.basis == 'retail-cagr' %} · vs retail{% endif %}
+      · ±{{ forecast.horizons[2].band_pct }}% band{% else %}needs price history{% endif %}</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -90,12 +100,27 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="{{ item.item_id }}"
        data-retired="{{ phase.retirement_year if phase.retirement_year else '' }}"></canvas></div>
+  {% if forecast %}
+  <div class="facts" style="margin-top:8px">
+    {% for t in (1, 3, 5) %}{% if t in forecast.horizons %}
+    <span class="chip">+{{ t }}y ({{ forecast.horizons[t].year }}): <b style="color:var(--ink)">&nbsp;{{ forecast.horizons[t].value|money(ccy) }}</b></span>
+    {% endif %}{% endfor %}
+    {% if forecast.at_retirement %}
+    <span class="chip">est. at retirement ({{ forecast.at_retirement.year }}): <b style="color:var(--ink)">&nbsp;{{ forecast.at_retirement.value|money(ccy) }}</b></span>
+    {% endif %}
+    <span class="chip">{{ "%+.1f"|format(forecast.growth_pct) }}%/yr
+      {{- ' · theme comparables' if forecast.basis == 'theme' else (' · observed' if forecast.basis == 'observed' else (' · vs retail' if forecast.basis == 'retail-cagr' else ' · default')) }}</span>
+  </div>
+  {% endif %}
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     {% if phase.retirement_year %}The vertical marker is the estimated retirement ({{ phase.retirement_year }}).{% endif %}
   </div>
 </div>
@@ -276,52 +301,7 @@
   {% endif %}
 </div>
 
-<div class="card">
-  <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
-  {% if parts_summary.lots > 0 %}
-  {% if static_mode %}
-  <div class="searchrow" style="margin-bottom:8px">
-    <span class="chip on">{{ "{:,}".format(parts_summary.lots) }} lots · {{ "{:,}".format(parts_summary.pieces) }} parts</span>
-    {% if pov %}
-    <span class="chip">Part-out value: <b style="color:var(--ink)">&nbsp;{{ pov|money(ccy) }}</b>
-      {% if pov_premium is not none %}&nbsp;· premium {{ m.delta(pov_premium, 0) }} vs set{% endif %}</span>
-    {% endif %}
-    <span class="spacer"></span>
-    <input class="inp" type="search" data-filter-table="partsTable" placeholder="Filter parts…" aria-label="Filter parts">
-  </div>
-  {% else %}
-  <form class="searchrow" method="get" action="/sets/{{ item.item_id }}" style="margin-bottom:8px">
-    <span class="chip on">{{ "{:,}".format(parts_summary.lots) }} lots · {{ "{:,}".format(parts_summary.pieces) }} parts</span>
-    {% if pov %}
-    <span class="chip">Part-out value: <b style="color:var(--ink)">&nbsp;{{ pov|money(ccy) }}</b>
-      {% if pov_premium is not none %}&nbsp;· premium {{ m.delta(pov_premium, 0) }} vs set{% endif %}</span>
-    {% endif %}
-    <span class="spacer"></span>
-    <input class="inp" type="search" name="parts_q" value="{{ parts_q }}" placeholder="Filter parts…" aria-label="Filter parts">
-  </form>
-  {% endif %}
-  <div class="table-scroll">
-  <table id="partsTable">
-    <tr><th>Part</th><th>Name</th><th>Color</th><th class="num">Qty</th><th class="num">Avg each</th><th class="num">Lot value</th></tr>
-    {% for p in parts %}
-    <tr>
-      <td>{{ p.part_no }}</td>
-      <td>{{ p.part_name }}</td>
-      <td>{{ p.color_name or '—' }}</td>
-      <td class="num">{{ p.qty }}</td>
-      <td class="num">{{ p.avg_price|money(p.price_currency) if p.avg_price else '—' }}</td>
-      <td class="num">{{ (p.avg_price * p.qty)|money(p.price_currency) if p.avg_price else '—' }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  </div>
-  {% if parts_summary.lots > parts|length %}
-  <div style="color:var(--muted);font-size:12px;margin-top:8px">Showing {{ parts|length }} of {{ "{:,}".format(parts_summary.lots) }} lots — use the filter to narrow.</div>
-  {% endif %}
-  {% else %}
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
-  {% endif %}
-</div>
+{% include "_parts_card.html" %}
 
 {% if related %}
 <div class="card">

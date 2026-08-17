@@ -5,3 +5,5 @@ brickonomy.db
 .venv/
 venv/
 .chrome-ebay/
+brickonomy.db-shm
+brickonomy.db-wal

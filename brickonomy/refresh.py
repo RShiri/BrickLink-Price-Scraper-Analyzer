@@ -8,8 +8,9 @@
 
 Per item and source: skip if a snapshot newer than scrape_ttl_days exists
 (unless --force), otherwise fetch → PriceAnalyzer → snapshot rows. After the
-sources, the blended value is computed and stored. For sets, the BrickLink
-parts inventory and part-out value are refreshed when older than 30 days.
+sources, the blended value is computed and stored. For sets and minifigs,
+the BrickLink parts inventory is refreshed when missing; the part-out value
+(sets only) when older than 30 days.
 
 Used by both the CLI and the web app's background job (via run_refresh with a
 progress callback).
@@ -93,9 +94,10 @@ def refresh_item(conn, item_id, item_type=None, force=False, log=print):
     if blended:
         log(f"  ≈ blended: " + ", ".join(f"{c} {v:,.0f}" for c, v in blended.items()))
 
-    if item_type == "S" and "bricklink" in cfg.sources_enabled and not cfg.fixture_mode:
-        _refresh_parts(conn, item_id, force=force, log=log)
-        _refresh_minifigs(conn, item_id, force=force, log=log)
+    if "bricklink" in cfg.sources_enabled and not cfg.fixture_mode:
+        _refresh_parts(conn, item_id, item_type=item_type, force=force, log=log)
+        if item_type == "S":
+            _refresh_minifigs(conn, item_id, force=force, log=log)
 
     return results
 
@@ -117,11 +119,41 @@ def _refresh_minifigs(conn, set_id, force=False, log=print):
         log(f"  ✘ minifig inventory: {err}")
 
 
-def _refresh_parts(conn, set_id, force=False, log=print):
+def _color_map(conn, src, log=print):
+    """BrickLink color id → name, synced once from catalogColors.asp; the
+    parser falls back to its builtin list while the table is empty."""
+    colors = dbq.color_map(conn)
+    if colors:
+        return colors
+    colors, err = src.fetch_color_table()
+    if colors:
+        dbq.upsert_colors(conn, colors)
+        log(f"  ⚙ color table: {len(colors)} colors")
+    elif err:
+        log(f"  ✘ color table: {err}")
+    return colors
+
+
+def _refresh_parts(conn, item_id, item_type="S", force=False, log=print):
+    """Parts inventory for sets and minifigs alike; the part-out value is
+    set-only (catalogPOV.asp has no minifig mode)."""
     from .scrapers.bricklink import BrickLinkSource
 
-    summary = dbq.parts_summary(conn, set_id)
-    pov = dbq.get_part_out(conn, set_id)
+    summary = dbq.parts_summary(conn, item_id)
+    src = BrickLinkSource()
+
+    if item_type != "S":
+        if summary["lots"] == 0 or force:
+            parts, err = src.fetch_parts_inventory(
+                item_id, item_type, color_map=_color_map(conn, src, log))
+            if parts:
+                dbq.upsert_set_parts(conn, item_id, parts)
+                log(f"  ⚙ parts inventory: {len(parts)} lots")
+            elif err:
+                log(f"  ✘ parts inventory: {err}")
+        return
+
+    pov = dbq.get_part_out(conn, item_id)
     stale_cutoff = datetime.now() - timedelta(days=PARTS_TTL_DAYS)
     pov_fresh = False
     if pov:
@@ -132,20 +164,20 @@ def _refresh_parts(conn, set_id, force=False, log=print):
     if not force and summary["lots"] > 0 and pov_fresh:
         return
 
-    src = BrickLinkSource()
     if summary["lots"] == 0 or force:
-        parts, err = src.fetch_parts_inventory(set_id)
+        parts, err = src.fetch_parts_inventory(
+            item_id, item_type, color_map=_color_map(conn, src, log))
         if parts:
-            dbq.upsert_set_parts(conn, set_id, parts)
+            dbq.upsert_set_parts(conn, item_id, parts)
             log(f"  ⚙ parts inventory: {len(parts)} lots")
         elif err:
             log(f"  ✘ parts inventory: {err}")
     if not pov_fresh or force:
-        value, pov_ccy, err = src.fetch_part_out_value(set_id)
+        value, pov_ccy, err = src.fetch_part_out_value(item_id)
         if value is not None:
             # The POV page is fetched without a session, so it is in the site
             # default currency, not the scraper's — store what it actually is.
-            dbq.upsert_part_out(conn, set_id, value, pov_ccy or "USD")
+            dbq.upsert_part_out(conn, item_id, value, pov_ccy or "USD")
             log(f"  ⚙ part-out value: {value:,.2f} {pov_ccy or 'USD'}")
         elif err:
             log(f"  ✘ part-out value: {err}")

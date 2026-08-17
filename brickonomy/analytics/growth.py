@@ -1,10 +1,16 @@
 """Growth metrics from the blended snapshot series and retail price."""
+import time
 from datetime import datetime
 
 from .. import db as dbq
 from ..currency import convert
 
 MIN_SPAN_DAYS = 7   # snapshot-to-snapshot growth needs at least this span
+
+# theme_growth() is O(items-in-theme); pages that build the estimate for every
+# item would make it O(n²), so the per-theme medians are memoized briefly.
+_THEME_CACHE_TTL = 600.0
+_theme_cache = {}
 
 
 def series(conn, item_id, condition="new", source="blended"):
@@ -57,12 +63,49 @@ def observed_growth(conn, item_id, condition="new"):
     return ((p1 / p0) ** (1.0 / years) - 1.0) * 100.0
 
 
+def theme_growth(conn, theme, condition="new"):
+    """Median annualized growth across the theme's priced items — the
+    BrickEconomy-style comparable for items with no history of their own.
+    Only observed/retail growth feeds the median (never the theme fallback
+    itself, which would recurse). None when under 3 items contribute."""
+    theme = dbq.canonical_theme(theme)
+    if not theme:
+        return None
+    key = (theme, condition)
+    hit = _theme_cache.get(key)
+    if hit and time.monotonic() - hit[1] < _THEME_CACHE_TTL:
+        return hit[0]
+
+    growths = []
+    for row in conn.execute(
+            "SELECT item_id FROM items WHERE theme = ?", (theme,)):
+        g = observed_growth(conn, row["item_id"], condition)
+        if g is None:
+            _, g = growth_vs_retail(conn, row["item_id"], condition)
+        if g is not None:
+            growths.append(g)
+    result = None
+    if len(growths) >= 3:
+        growths.sort()
+        mid = len(growths) // 2
+        result = (growths[mid] if len(growths) % 2
+                  else (growths[mid - 1] + growths[mid]) / 2.0)
+    _theme_cache[key] = (result, time.monotonic())
+    return result
+
+
 def best_growth_estimate(conn, item_id, condition="new"):
-    """Observed snapshot growth when available, else retail-based CAGR."""
+    """Observed snapshot growth when available, else retail-based CAGR, else
+    the theme's median growth (comparable items, BrickEconomy-style)."""
     g = observed_growth(conn, item_id, condition)
     if g is not None:
         return g, "observed"
     _, cagr = growth_vs_retail(conn, item_id, condition)
     if cagr is not None:
         return cagr, "retail-cagr"
+    item = dbq.get_item(conn, item_id)
+    if item is not None and item["theme"]:
+        g = theme_growth(conn, item["theme"], condition)
+        if g is not None:
+            return g, "theme"
     return None, None

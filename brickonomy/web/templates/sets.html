@@ -4,7 +4,15 @@
 {% block content %}
 
 <div class="eyebrow">Catalog</div>
-<h1>Sets</h1>
+{% if theme or sub or year or itype %}
+<nav class="crumbs"><a href="{{ u('/catalog') }}">Browse</a>
+  {%- if theme %} › <a href="{{ u('/sets?theme=' ~ theme|urlencode) }}">{{ theme }}</a>{% endif %}
+  {%- if sub %} › <span>{{ sub }}</span>{% endif %}
+  {%- if year %} › <span>{{ year }}</span>{% endif %}
+  {%- if itype %} › <span>{{ 'Minifigs' if itype == 'M' else 'Sets' }}</span>{% endif %}
+</nav>
+{% endif %}
+<h1>{{ theme or 'Sets' }}{% if sub %} · {{ sub }}{% endif %}{% if year %} · {{ year }}{% endif %}</h1>
 <p class="sub">{{ total }} tracked sets and minifigs — search, filter, sort by value or growth.</p>
 
 {% if static_mode %}
@@ -17,6 +25,9 @@
   <input class="inp" type="search" name="q" value="{{ q }}" placeholder="Search set number or name… (e.g. 75192, Falcon)" aria-label="Search sets">
   <input type="hidden" name="sort" value="{{ sort }}">
   {% if theme %}<input type="hidden" name="theme" value="{{ theme }}">{% endif %}
+  {% if sub %}<input type="hidden" name="sub" value="{{ sub }}">{% endif %}
+  {% if year %}<input type="hidden" name="year" value="{{ year }}">{% endif %}
+  {% if itype %}<input type="hidden" name="type" value="{{ itype }}">{% endif %}
   <a class="chip {{ 'on' if not filter }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&sort={{ sort }}">All</a>
   <a class="chip {{ 'on' if filter == 'retired' }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&filter=retired&sort={{ sort }}">Retired only</a>
   <a class="chip {{ 'on' if filter == 'portfolio' }}" href="/sets?q={{ q }}&theme={{ theme|urlencode }}&filter=portfolio&sort={{ sort }}">In portfolio</a>

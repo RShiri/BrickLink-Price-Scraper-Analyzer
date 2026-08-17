@@ -4,11 +4,12 @@ Price guide: delegates to the root BrickLinkScraper (same Selenium flow and
 HTML parser the repo already uses; prices arrive in ILS).
 
 Additions over the root scraper:
-  - fetch_parts_inventory(): the exact parts list from the set page
-    (catalogItemInv.asp — the page root code already scrapes for minifigs,
-    here with viewItemType=P).
+  - fetch_parts_inventory(): the exact parts list of a set or a minifig
+    (catalogItemInv.asp with viewItemType=P).
   - fetch_part_out_value(): the set's part-out total from catalogPOV.asp,
     one request per set instead of per-part price lookups.
+  - fetch_color_table(): BrickLink's color id → name table, used to split
+    "ColorName PartName" descriptions without a hardcoded color list.
 """
 import re
 
@@ -25,6 +26,15 @@ INV_URL = "https://www.bricklink.com/catalogItemInv.asp"
 POV_URL = "https://www.bricklink.com/catalogPOV.asp"
 TREE_URL = "https://www.bricklink.com/catalogTree.asp"
 LIST_URL = "https://www.bricklink.com/catalogList.asp"
+COLORS_URL = "https://www.bricklink.com/catalogColors.asp"
+
+
+def inv_ref(item_id: str, item_type: str = "S") -> str:
+    """Inventory-page reference: sets need the -1 sequence suffix, minifig
+    ids are used as-is."""
+    if item_type == "S" and "-" not in item_id:
+        return f"{item_id}-1"
+    return item_id
 
 
 class BrickLinkSource(BaseScraper):
@@ -137,9 +147,15 @@ class BrickLinkSource(BaseScraper):
         "Brown", "Lime", "Purple", "Magenta", "Coral", "Lavender", "Azure",
     ], key=len, reverse=True)
 
-    def parse_parts_inventory(self, html: str):
-        """Rows: {part_no, part_name, color_id, color_name, qty}."""
+    def parse_parts_inventory(self, html: str, color_map=None):
+        """Rows: {part_no, part_name, color_id, color_name, qty}.
+
+        color_map: optional {color_id: color_name} from the DB-synced BrickLink
+        color table (see fetch_color_table); the builtin _COLOR_NAMES list is
+        only the fallback when the table hasn't been synced yet."""
         soup = BeautifulSoup(html, "html.parser")
+        names = list((color_map or {}).values()) + self._COLOR_NAMES
+        names = sorted(set(names), key=len, reverse=True)
         parts = []
         for tr in soup.find_all("tr"):
             links = tr.find_all("a", href=re.compile(r"\?P="))
@@ -150,30 +166,56 @@ class BrickLinkSource(BaseScraper):
                 continue
             part_no = m.group(1)
 
-            tds = tr.find_all("td")
+            # Column order is Image | Qty | Item No | Description: the qty
+            # cell sits right before the item-number link's cell. The
+            # first-all-digit-cell scan is only the fallback — it grabs a
+            # color id or year when the layout shifts.
             qty = None
-            for td in tds:
-                txt = td.get_text(strip=True)
-                if txt.isdigit():
-                    qty = int(txt)
-                    break
+            link_td = links[0].find_parent("td")
+            if link_td is not None:
+                prev = link_td.find_previous_sibling("td")
+                if prev is not None and prev.get_text(strip=True).isdigit():
+                    qty = int(prev.get_text(strip=True))
+            if qty is None:
+                for td in tr.find_all("td"):
+                    txt = td.get_text(strip=True)
+                    if txt.isdigit():
+                        qty = int(txt)
+                        break
             if qty is None:
                 continue
+
+            # The part's own links carry its color id; a row-wide search must
+            # not win, because unrelated links earlier in the row (counterpart
+            # or alternate-item references) can carry a different color.
+            color_id = 0
+            for link in links:
+                cid = re.search(r"(?:idColor|colorID)=(\d+)", link.get("href", ""))
+                if cid:
+                    color_id = int(cid.group(1))
+                    break
+            if not color_id:
+                cid = re.search(r"(?:idColor|colorID)=(\d+)", str(tr))
+                if cid:
+                    color_id = int(cid.group(1))
 
             # The description link is the longest-text ?P= link in the row
             # (the item-number link's text is just the part number itself).
             desc = max((l.get_text(" ", strip=True) for l in links), key=len)
             color_name, part_name = None, desc
-            for cname in self._COLOR_NAMES:
+            for cname in names:
                 if desc.startswith(cname + " "):
                     color_name = cname
                     part_name = desc[len(cname):].strip()
                     break
-
-            color_id = 0
-            cid = re.search(r"(?:idColor|colorID)=(\d+)", str(tr))
-            if cid:
-                color_id = int(cid.group(1))
+            if color_name is None and color_id and color_map:
+                # Name split failed but the id is known — resolve the name
+                # from the table and un-glue it from the description.
+                mapped = color_map.get(color_id)
+                if mapped:
+                    color_name = mapped
+                    if desc.startswith(mapped + " "):
+                        part_name = desc[len(mapped):].strip()
 
             parts.append({
                 "part_no": part_no,
@@ -184,17 +226,88 @@ class BrickLinkSource(BaseScraper):
             })
         return parts
 
-    def fetch_parts_inventory(self, set_id: str):
-        """Returns (parts, error). Uses plain HTTP first (server-rendered page),
-        Selenium as fallback."""
-        url = f"{INV_URL}?S={set_id if '-' in set_id else set_id + '-1'}&viewItemType=P"
+    def _get_inventory_html(self, url, parse):
+        """Fetch an inventory page and parse it: plain HTTP first (the page
+        is server-rendered), a real browser as fallback — BrickLink sometimes
+        serves plain clients a redirect/interstitial instead of the table,
+        which parses as an empty inventory."""
         html, error = self._get(url)
+        rows = parse(html) if html else []
+        if rows:
+            return rows, None
+        browser_html, browser_err = self._get_with_browser(url)
+        if browser_html:
+            rows = parse(browser_html)
+            if rows:
+                return rows, None
+            error = "no rows parsed from inventory page (plain and browser)"
+        return [], error or browser_err
+
+    @staticmethod
+    def _get_with_browser(url):
+        """Load a page in the stealth Selenium driver and return its HTML."""
+        try:
+            from selenium.webdriver.common.by import By
+            from selenium.webdriver.support import expected_conditions as EC
+            from selenium.webdriver.support.ui import WebDriverWait
+
+            from .base import make_driver
+        except ImportError as exc:
+            return None, f"ImportError: {exc}"
+        try:
+            driver = make_driver(headless=True)
+        except Exception as exc:
+            return None, f"{type(exc).__name__}: {exc}"
+        try:
+            driver.get(url)
+            WebDriverWait(driver, 15).until(
+                EC.presence_of_element_located((By.TAG_NAME, "table")))
+            return driver.page_source, None
+        except Exception as exc:
+            return None, f"{type(exc).__name__}: {exc}"
+        finally:
+            driver.quit()
+
+    def fetch_parts_inventory(self, item_id: str, item_type: str = "S",
+                              color_map=None):
+        """Parts inventory of a set ('S') or a minifig ('M').
+        Returns (parts, error)."""
+        url = f"{INV_URL}?{item_type}={inv_ref(item_id, item_type)}&viewItemType=P"
+        return self._get_inventory_html(
+            url, lambda html: self.parse_parts_inventory(html, color_map=color_map))
+
+    # ── color table ──────────────────────────────────────────────────────
+
+    def parse_color_table(self, html: str):
+        """{color_id: name} from catalogColors.asp. Row shape is
+        [swatch] [id] [name] [counts...]: the first all-digit cell is the id,
+        the first following non-numeric cell is the name."""
+        soup = BeautifulSoup(html, "html.parser")
+        colors = {}
+        for tr in soup.find_all("tr"):
+            tds = tr.find_all("td")
+            for i, td in enumerate(tds):
+                txt = td.get_text(strip=True)
+                if not txt.isdigit():
+                    continue
+                for td2 in tds[i + 1:]:
+                    name = td2.get_text(" ", strip=True)
+                    if name and not re.fullmatch(r"[\d,.\s%-]*", name):
+                        if re.fullmatch(r"[A-Za-z][\w\s().'/-]*", name):
+                            colors[int(txt)] = name
+                        break
+                break
+        return colors
+
+    def fetch_color_table(self):
+        """Returns ({color_id: name}, error)."""
+        html, error = self._get(COLORS_URL)
         if html:
-            parts = self.parse_parts_inventory(html)
-            if parts:
-                return parts, None
-            error = "no parts parsed from inventory page"
-        return [], error
+            colors = self.parse_color_table(html)
+            if colors:
+                return colors, None
+            error = "no colors parsed from color table page"
+        return {}, error
 
     # ── part-out value ───────────────────────────────────────────────────
 
@@ -375,25 +488,57 @@ class BrickLinkSource(BaseScraper):
         return figs
 
     def fetch_minifig_inventory(self, set_id: str):
-        url = f"{INV_URL}?S={set_id if '-' in set_id else set_id + '-1'}&viewItemType=M"
-        html, error = self._get(url)
-        if html:
-            figs = self.parse_minifig_inventory(html)
-            if figs:
-                return figs, None
-            error = "no minifigs parsed from inventory page"
-        return [], error
+        url = f"{INV_URL}?S={inv_ref(set_id)}&viewItemType=M"
+        return self._get_inventory_html(url, self.parse_minifig_inventory)
 
     # ── helpers ──────────────────────────────────────────────────────────
 
-    @staticmethod
-    def _get(url):
-        try:
-            resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=25)
-            resp.raise_for_status()
-            return resp.text, None
-        except Exception as exc:
-            return None, f"{type(exc).__name__}: {exc}"
+    _session = None
+    _RETRY_DELAYS = (0, 2, 5, 12)     # seconds before each attempt, + jitter
+
+    @classmethod
+    def _get(cls, url):
+        """GET with a shared session and exponential backoff. Retries network
+        errors, 5xx and 429 (honoring Retry-After); other 4xx fail fast."""
+        import random
+        import time
+
+        if cls._session is None:
+            cls._session = requests.Session()
+            cls._session.headers.update({
+                "User-Agent": USER_AGENT,
+                "Accept-Language": "en-US,en;q=0.9",
+            })
+            # Warm the session first: BrickLink redirects catalog deep links
+            # away when it has never seen the client before (same reason the
+            # Playwright engine loads the homepage before the item page), and
+            # a redirected inventory page parses as "0 minifigs / 0 parts".
+            try:
+                cls._session.get("https://www.bricklink.com", timeout=25)
+            except requests.RequestException:
+                pass
+        last_err = None
+        for delay in cls._RETRY_DELAYS:
+            if delay:
+                time.sleep(delay + random.uniform(0, 1.5))
+            try:
+                resp = cls._session.get(url, timeout=25)
+                if resp.status_code == 429:
+                    last_err = "HTTPError: 429 rate limited"
+                    retry_after = resp.headers.get("Retry-After", "")
+                    if retry_after.isdigit():
+                        time.sleep(min(int(retry_after), 60))
+                    continue
+                resp.raise_for_status()
+                return resp.text, None
+            except requests.HTTPError as exc:
+                last_err = f"{type(exc).__name__}: {exc}"
+                status = exc.response.status_code if exc.response is not None else 0
+                if 400 <= status < 500:
+                    break
+            except requests.RequestException as exc:
+                last_err = f"{type(exc).__name__}: {exc}"
+        return None, last_err
 
 
 if __name__ == "__main__":

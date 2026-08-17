@@ -21,6 +21,7 @@ def seeded_db(tmp_path, monkeypatch):
     dbq.upsert_rate(conn, "USD", "GBP", 0.8)
 
     dbq.upsert_item(conn, "75192", name="Millennium Falcon", theme="Star Wars",
+                    subtheme="Ultimate Collector Series",
                     year=2017, retail_price=849.99, retail_currency="USD")
     dbq.upsert_item(conn, "sw0879", name="Han Solo", item_type="M", theme="Star Wars")
     dbq.upsert_set_minifigs(conn, "75192", [{"id": "sw0879", "name": "Han Solo", "qty": 1}])
@@ -99,9 +100,41 @@ class TestExport:
         assert not (out / "sets" / "99999.html").exists()
 
         index = json.loads((out / "api" / "index.json").read_text())
+        p_col = index["fields"].index("p")
         by_id = {r[0]: r for r in index["rows"]}
-        assert by_id["99999"][-1] == 0       # not priced -> client-rendered page
-        assert by_id["75192"][-1] == 1
+        assert by_id["99999"][p_col] == 0    # not priced -> client-rendered page
+        assert by_id["75192"][p_col] == 1
+
+    def test_catalog_browse_page_exported(self, seeded_db, tmp_path):
+        out = tmp_path / "site"
+        export(str(out), "ILS", quiet=True)
+        assert (out / "catalog.html").exists()
+        html = (out / "catalog.html").read_text()
+        assert "Star Wars" in html                       # theme card
+        assert 'href="sets/theme-star-wars.html"' in html
+        assert "2017" in html                            # year chip
+        # Faceted links deep-link into the client-side browser with the query.
+        assert 'href="sets/index.html?type=M"' in html
+
+    def test_index_json_carries_subthemes(self, seeded_db, tmp_path):
+        out = tmp_path / "site"
+        export(str(out), "ILS", quiet=True)
+        index = json.loads((out / "api" / "index.json").read_text())
+        assert index["fields"][-1] == "sub"
+        assert "Ultimate Collector Series" in index["subs"]
+        sub_col = index["fields"].index("sub")
+        by_id = {r[0]: r for r in index["rows"]}
+        assert index["subs"][by_id["75192"][sub_col]] == "Ultimate Collector Series"
+        assert by_id["sw0879"][sub_col] == -1            # no subtheme
+
+    def test_theme_page_prefiltered(self, seeded_db, tmp_path):
+        """Exported per-theme pages carry their facet as data attributes so
+        the client-side browser starts filtered."""
+        out = tmp_path / "site"
+        export(str(out), "ILS", quiet=True)
+        html = (out / "sets" / "theme-star-wars.html").read_text()
+        assert 'data-theme="Star Wars"' in html
+        assert 'id="catalogYear"' in html and 'id="catalogType"' in html
 
     def test_dynamic_mode_restored_after_export(self, seeded_db, tmp_path):
         from brickonomy.web import app as webapp

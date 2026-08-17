@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}Browse the catalog · Brickonomy{% endblock %}
+{% block content %}
+
+<div class="eyebrow">Catalog</div>
+<h1>Browse</h1>
+<p class="sub">The whole LEGO universe — {{ "{:,}".format(counts.total) }} items across
+   {{ counts.themes }} themes. Drill in by theme, subtheme, year or type, BrickLink-style.</p>
+
+<div class="searchrow" style="margin-bottom:14px">
+  <a class="chip on" href="{{ u('/sets?type=S') }}">📦 All sets ({{ "{:,}".format(counts.sets) }})</a>
+  <a class="chip on" href="{{ u('/sets?type=M') }}">🧍 All minifigs ({{ "{:,}".format(counts.figs) }})</a>
+  <a class="chip" href="{{ u('/themes') }}">📈 Theme performance →</a>
+</div>
+
+<div class="card">
+  <h3>By theme <span class="soft">— {{ counts.themes }} themes, largest first</span></h3>
+  <div class="themegrid">
+    {% for t in tree %}
+    <div class="themecard">
+      <a class="themename" href="{{ u('/sets?theme=' ~ t.theme|urlencode) }}"><b>{{ t.theme }}</b></a>
+      <div class="thememeta">
+        {{ "{:,}".format(t.count) }} items
+        {%- if t.sets and t.figs %} · {{ "{:,}".format(t.sets) }} sets / {{ "{:,}".format(t.figs) }} figs{% endif %}
+        {%- if t.y_min %} · {{ t.y_min }}–{{ t.y_max }}{% endif %}
+      </div>
+      {% if t.subthemes %}
+      <div class="subchips">
+        {% for s in t.subthemes[:8] %}
+        <a class="chip" href="{{ u('/sets?theme=' ~ t.theme|urlencode ~ '&sub=' ~ s.name|urlencode) }}">{{ s.name }} <span class="soft">{{ s.count }}</span></a>
+        {% endfor %}
+        {% if t.subthemes|length > 8 %}<span class="chip soft">+{{ t.subthemes|length - 8 }} more</span>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>By year <span class="soft">— every release year in the catalog</span></h3>
+  {% for decade, years in decades %}
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">{{ decade }}s</div>
+    <div class="yearchips">
+      {% for y in years %}
+      <a class="chip" href="{{ u('/sets?year=' ~ y.year) }}"
+         title="{{ y.sets }} sets{% if y.figs %}, {{ y.figs }} minifigs{% endif %}">
+        {{ y.year }} <span class="soft">{{ "{:,}".format(y.total) }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
