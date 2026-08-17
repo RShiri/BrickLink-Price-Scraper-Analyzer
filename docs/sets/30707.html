@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>30707 Venom&#39;s Museum Robbery · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-super-heroes-marvel.html">Super Heroes Marvel</a> › <a href="../sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Spider-Man">Spider-Man</a> › <a href="../sets/index.html?year=2025">2025</a>
+  › <span>30707</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/30707-1.png" alt="Venom&#39;s Museum Robbery"
@@ -54,7 +62,7 @@
     <h1 style="font-size:26px">Venom&#39;s Museum Robbery <span style="color:var(--muted);font-weight:400">· 30707</span></h1>
     <p class="sub" style="margin-bottom:6px">
       Released 2025
-       · Retail ₪14.97
+       · Retail ₪14.72
     </p>
     <div class="facts">
       <span class="chip">🧱 35 parts</span>
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 30 g</span>
       
       <span class="chip"><span class="dot" style="background:var(--s3)"></span>Available</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=30707-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/30707-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -117,12 +127,16 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="30707"
        data-retired="2028"></canvas></div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2028).
   </div>
 </div>
@@ -135,7 +149,7 @@
     <div class="vsbars">
       <div class="vsrow"><span>Retail</span>
         <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
-        <span class="num">₪14.97</span></div>
+        <span class="num">₪14.72</span></div>
       <div class="vsrow"><span>Value new</span>
         <div class="track"><div class="fill" style="width:0.0%"></div></div>
         <span class="num">—</span></div>
@@ -152,7 +166,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -207,41 +222,97 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 2 in this set, ₪17.08 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/sh0542.html" title="Venom - Teeth Parted"
+       data-value="9.2" data-name="venom - teeth parted" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0542.png" alt="Venom - Teeth Parted" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0542</div>
+      <div class="figtile-name">Venom - Teeth Parted</div>
+      <div class="figtile-value">₪9.20</div>
+      
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0684.html" title="Spider-Man - Printed Blue Arms, Plain Legs"
+       data-value="7.88" data-name="spider-man - printed blue arms, plain legs" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0684.png" alt="Spider-Man - Printed Blue Arms, Plain Legs" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0684</div>
+      <div class="figtile-name">Spider-Man - Printed Blue Arms, Plain Legs</div>
+      <div class="figtile-value">₪7.88</div>
+      
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
+    </thead>
+    <tbody>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0542.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/sh0542.html"><b>sh0542</b> Venom - Teeth Parted</a></td>
-        <td class="num">1</td>
-        <td class="num">₪9.20</td>
-        <td class="num">—</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="9.2">₪9.20</td>
+        <td class="num" data-v="">—</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0684.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0684.html"><b>sh0684</b> Spider-Man - Printed Blue Arms, Plain </a></td>
-        <td class="num">1</td>
-        <td class="num">₪7.88</td>
-        <td class="num">—</td>
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0684.html"><b>sh0684</b> Spider-Man - Printed Blue Arms, Plain Legs</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="7.88">₪7.88</td>
+        <td class="num" data-v="">—</td>
       </tr>
       
-      
-    </table>
-    </div>
+    </tbody>
     
-    
+  </table>
   </div>
+
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 
@@ -254,42 +325,42 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76313-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76313</b> MARVEL Logo</div>
       <div class="relmeta">2025 · ₪215
-        · <span class="delta down">▼ 28%</span></div>
+        · <span class="delta down">▼ 27%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76316.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76316-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76316</b> Fantastic Four vs. Galactus Constr</div>
       <div class="relmeta">2025 · ₪143
-        · <span class="delta down">▼ 21%</span></div>
+        · <span class="delta down">▼ 19%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76327.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76327-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76327</b> Iron Man MK4 Bust</div>
       <div class="relmeta">2025 · ₪136
-        · <span class="delta down">▼ 24%</span></div>
+        · <span class="delta down">▼ 23%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76315.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76315-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76315</b> Iron Man&#39;s Laboratory: Hall of Arm</div>
       <div class="relmeta">2025 · ₪63.50
-        · <span class="delta down">▼ 62%</span></div>
+        · <span class="delta down">▼ 61%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76320.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76320-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76320</b> Iron Man &amp; War Machine vs. Hammer </div>
       <div class="relmeta">2025 · ₪50.12
-        · <span class="delta down">▼ 27%</span></div>
+        · <span class="delta down">▼ 26%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76307.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76307-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76307</b> Iron Man Mech vs. Ultron</div>
       <div class="relmeta">2025 · ₪45.94
-        · <span class="delta up">▲ 2%</span></div>
+        · <span class="delta up">▲ 4%</span></div>
     </a>
     
   </div>

@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browse the catalog · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body data-static="1" data-base="">
+<header class="app">
+  <a class="logo" href="index.html">
+    <svg width="28" height="22" viewBox="0 0 26 20" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4f8cff"/><stop offset="1" stop-color="#38d4e0"/>
+      </linearGradient></defs>
+      <rect x="4"  y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="15" y="0" width="7" height="4" rx="1.2" fill="url(#lg)"/>
+      <rect x="0" y="4" width="26" height="16" rx="2.5" fill="url(#lg)"/>
+    </svg>
+    Brick<b>onomy</b>
+  </a>
+  <nav class="tabs">
+    
+    <a href="index.html" class="">Dashboard</a>
+    <a href="catalog.html" class="active">Browse</a>
+    <a href="sets/index.html" class="">Sets</a>
+    <a href="themes.html" class="">Themes</a>
+    <a href="deals.html" class="">Deals</a>
+    <a href="portfolio.html" class="">Portfolio</a>
+    
+  </nav>
+  <div class="spacer"></div>
+  <div class="sitesearch">
+    <input class="inp" id="siteSearch" type="search" autocomplete="off"
+           placeholder="Search sets &amp; minifigs…" aria-label="Search the catalog">
+    <div class="sresults" id="siteSearchResults" hidden></div>
+  </div>
+  
+  <span class="chip" title="Static snapshot published to GitHub Pages">📄 snapshot · ILS</span>
+  
+</header>
+
+<main>
+
+
+<div class="eyebrow">Catalog</div>
+<h1>Browse</h1>
+<p class="sub">The whole LEGO universe — 34,282 items across
+   146 themes. Drill in by theme, subtheme, year or type, BrickLink-style.</p>
+
+<div class="searchrow" style="margin-bottom:14px">
+  <a class="chip on" href="sets/index.html?type=S">📦 All sets (16,937)</a>
+  <a class="chip on" href="sets/index.html?type=M">🧍 All minifigs (17,345)</a>
+  <a class="chip" href="themes.html">📈 Theme performance →</a>
+</div>
+
+<div class="card">
+  <h3>By theme <span class="soft">— 146 themes, largest first</span></h3>
+  <div class="themegrid">
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-duplo.html"><b>Duplo</b></a>
+      <div class="thememeta">
+        1,366 items · 1969–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Basic%20Set">Basic Set <span class="soft">395</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Town">Town <span class="soft">325</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Town%20/%20Legoville">Town / Legoville <span class="soft">70</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Trains">Trains <span class="soft">68</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Playhouse">Playhouse <span class="soft">58</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Bob%20the%20Builder">Bob the Builder <span class="soft">31</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Rattles">Rattles <span class="soft">23</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Duplo&amp;sub=Disney%20/%20Cars">Disney / Cars <span class="soft">22</span></a>
+        
+        <span class="chip soft">+31 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-educational-and-dacta.html"><b>Educational and Dacta</b></a>
+      <div class="thememeta">
+        1,086 items · 1960–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Service%20Packs%20/%20Technic">Service Packs / Technic <span class="soft">280</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Duplo%20and%20Explore">Duplo and Explore <span class="soft">279</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Service%20Packs">Service Packs <span class="soft">89</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Technic">Technic <span class="soft">53</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Mindstorms%20/%20WeDo">Mindstorms / WeDo <span class="soft">37</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=SPIKE">SPIKE <span class="soft">32</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Town">Town <span class="soft">31</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Educational%20and%20Dacta&amp;sub=Mindstorms">Mindstorms <span class="soft">29</span></a>
+        
+        <span class="chip soft">+12 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-star-wars.html"><b>Star Wars</b></a>
+      <div class="thememeta">
+        997 items · 1999–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Star%20Wars&amp;sub=Ultimate%20Collector%20Series">Ultimate Collector Series <span class="soft">50</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-city.html"><b>City</b></a>
+      <div class="thememeta">
+        971 items · 2005–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Police">Police <span class="soft">191</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Fire">Fire <span class="soft">111</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Construction">Construction <span class="soft">86</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Traffic">Traffic <span class="soft">76</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Airport">Airport <span class="soft">37</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Trains">Trains <span class="soft">33</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Arctic">Arctic <span class="soft">29</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=City&amp;sub=Coast%20Guard">Coast Guard <span class="soft">29</span></a>
+        
+        <span class="chip soft">+10 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-friends.html"><b>Friends</b></a>
+      <div class="thememeta">
+        671 items · 2012–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-ninjago.html"><b>Ninjago</b></a>
+      <div class="thememeta">
+        642 items · 2011–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Ninjago&amp;sub=The%20LEGO%20Ninjago%20Movie">The LEGO Ninjago Movie <span class="soft">32</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-creator.html"><b>Creator</b></a>
+      <div class="thememeta">
+        599 items · 1999–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=Creator%203-in-1">Creator 3-in-1 <span class="soft">274</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=Designer%20Sets">Designer Sets <span class="soft">46</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=Creator%20Expert">Creator Expert <span class="soft">43</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=Early%20Creator">Early Creator <span class="soft">33</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=X-Pod">X-Pod <span class="soft">14</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=Inventor">Inventor <span class="soft">6</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Creator&amp;sub=Police">Police <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-town.html"><b>Town</b></a>
+      <div class="thememeta">
+        589 items · 1978–2008
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=Classic%20Town">Classic Town <span class="soft">361</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=Town%20Jr.">Town Jr. <span class="soft">34</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=World%20City">World City <span class="soft">29</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=City%20Center">City Center <span class="soft">21</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=Space%20Port">Space Port <span class="soft">21</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=Extreme%20Team">Extreme Team <span class="soft">20</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=Paradisa">Paradisa <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Town&amp;sub=Race">Race <span class="soft">15</span></a>
+        
+        <span class="chip soft">+6 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-technic.html"><b>Technic</b></a>
+      <div class="thememeta">
+        578 items · 1977–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Expert%20Builder">Expert Builder <span class="soft">38</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Universal%20Building%20Set">Universal Building Set <span class="soft">21</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=RoboRiders">RoboRiders <span class="soft">20</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Competition">Competition <span class="soft">17</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Supplemental">Supplemental <span class="soft">16</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Throwbot%20Slizer">Throwbot Slizer <span class="soft">14</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Star%20Wars">Star Wars <span class="soft">10</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Technic&amp;sub=Speed%20Slammers">Speed Slammers <span class="soft">5</span></a>
+        
+        <span class="chip soft">+1 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-seasonal.html"><b>Seasonal</b></a>
+      <div class="thememeta">
+        485 items · 1977–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Christmas">Christmas <span class="soft">178</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Easter">Easter <span class="soft">57</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Christmas%20/%20Creator">Christmas / Creator <span class="soft">36</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Halloween">Halloween <span class="soft">35</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Chinese%20%28Lunar%29%20New%20Year">Chinese (Lunar) New Year <span class="soft">26</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Valentine">Valentine <span class="soft">26</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Advent%20/%20City">Advent / City <span class="soft">22</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Seasonal&amp;sub=Advent%20/%20Star%20Wars">Advent / Star Wars <span class="soft">16</span></a>
+        
+        <span class="chip soft">+12 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-service-packs.html"><b>Service Packs</b></a>
+      <div class="thememeta">
+        429 items · 1977–2013
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Service%20Packs&amp;sub=Technic">Technic <span class="soft">125</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Service%20Packs&amp;sub=Train">Train <span class="soft">60</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Service%20Packs&amp;sub=12V">12V <span class="soft">6</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Service%20Packs&amp;sub=Vehicle">Vehicle <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-bionicle.html"><b>Bionicle</b></a>
+      <div class="thememeta">
+        384 items · 2001–2016
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Bionicle&amp;sub=Playsets">Playsets <span class="soft">12</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Bionicle&amp;sub=Protectors">Protectors <span class="soft">6</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-super-heroes-marvel.html"><b>Super Heroes Marvel</b></a>
+      <div class="thememeta">
+        382 items · 378 sets / 4 figs · 2002–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Spider-Man">Spider-Man <span class="soft">117</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Avengers">Avengers <span class="soft">98</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=The%20Infinity%20Saga">The Infinity Saga <span class="soft">58</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Spider-Man%20/%20Spidey%20and%20His%20Amazing%20Friends">Spider-Man / Spidey and His Amazing Friends <span class="soft">16</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Guardians%20of%20the%20Galaxy">Guardians of the Galaxy <span class="soft">14</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=X-Men">X-Men <span class="soft">8</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Captain%20America">Captain America <span class="soft">7</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Iron%20Man">Iron Man <span class="soft">5</span></a>
+        
+        <span class="chip soft">+3 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-lego-brand-store.html"><b>LEGO Brand Store</b></a>
+      <div class="thememeta">
+        356 items · 2010–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=LEGO%20Brand%20Store&amp;sub=Monthly%20Mini%20Model%20Build">Monthly Mini Model Build <span class="soft">109</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=LEGO%20Brand%20Store&amp;sub=Pick%20A%20Model">Pick A Model <span class="soft">24</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=LEGO%20Brand%20Store&amp;sub=Cities%20of%20Wonders">Cities of Wonders <span class="soft">10</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-universal-building-set.html"><b>Universal Building Set</b></a>
+      <div class="thememeta">
+        324 items · 1969–2002
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Basic">Basic <span class="soft">167</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Supplemental">Supplemental <span class="soft">70</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Classic%20Basic">Classic Basic <span class="soft">51</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Gears">Gears <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=4.5V">4.5V <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Basic%20Set">Basic Set <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Building">Building <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Universal%20Building%20Set&amp;sub=Hospital">Hospital <span class="soft">1</span></a>
+        
+        <span class="chip soft">+2 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-system.html"><b>System</b></a>
+      <div class="thememeta">
+        319 items · 1955–1971
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Supplemental">Supplemental <span class="soft">144</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Samsonite">Samsonite <span class="soft">85</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=HO%201%3A87%20Vehicles">HO 1:87 Vehicles <span class="soft">49</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Town%20Plan">Town Plan <span class="soft">19</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Jumbo%20Bricks">Jumbo Bricks <span class="soft">6</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Basic">Basic <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Basic%20Set">Basic Set <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=System&amp;sub=Town">Town <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-space.html"><b>Space</b></a>
+      <div class="thememeta">
+        304 items · 1979–2015
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Classic%20Space">Classic Space <span class="soft">80</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Life%20On%20Mars">Life On Mars <span class="soft">24</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Mars%20Mission">Mars Mission <span class="soft">19</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Insectoids">Insectoids <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=UFO">UFO <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Futuron">Futuron <span class="soft">17</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Space%20Police%20III">Space Police III <span class="soft">16</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Space&amp;sub=Blacktron%20II">Blacktron II <span class="soft">14</span></a>
+        
+        <span class="chip soft">+12 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-disney.html"><b>Disney</b></a>
+      <div class="thememeta">
+        285 items · 2000–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Disney%20Princess">Disney Princess <span class="soft">114</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Frozen">Frozen <span class="soft">36</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Toy%20Story">Toy Story <span class="soft">26</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Pirates%20of%20the%20Caribbean">Pirates of the Caribbean <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Mickey%20Mouse">Mickey Mouse <span class="soft">14</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Prince%20of%20Persia">Prince of Persia <span class="soft">6</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=Lightyear">Lightyear <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Disney&amp;sub=One%20Hundred%20and%20One%20Dalmatians">One Hundred and One Dalmatians <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-racers.html"><b>Racers</b></a>
+      <div class="thememeta">
+        246 items · 1998–2012
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Racers&amp;sub=Ferrari">Ferrari <span class="soft">28</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Racers&amp;sub=RC">RC <span class="soft">24</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Racers&amp;sub=World%20Racers">World Racers <span class="soft">9</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Racers&amp;sub=Promotional">Promotional <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-castle.html"><b>Castle</b></a>
+      <div class="thememeta">
+        245 items · 1979–2016
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Knights%20Kingdom%20II">Knights Kingdom II <span class="soft">67</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Fantasy%20Era">Fantasy Era <span class="soft">29</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Lion%20Knights">Lion Knights <span class="soft">26</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Knights%20Kingdom%20I">Knights Kingdom I <span class="soft">19</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Kingdoms">Kingdoms <span class="soft">17</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Fright%20Knights">Fright Knights <span class="soft">16</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Black%20Knights">Black Knights <span class="soft">13</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Castle&amp;sub=Dragon%20Knights">Dragon Knights <span class="soft">13</span></a>
+        
+        <span class="chip soft">+6 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-super-heroes-dc.html"><b>Super Heroes DC</b></a>
+      <div class="thememeta">
+        227 items · 2006–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20DC&amp;sub=Batman">Batman <span class="soft">133</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20DC&amp;sub=Batman%20/%20The%20LEGO%20Batman%20Movie">Batman / The LEGO Batman Movie <span class="soft">42</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20DC&amp;sub=Justice%20League">Justice League <span class="soft">16</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20DC&amp;sub=Superman">Superman <span class="soft">9</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Super%20Heroes%20DC&amp;sub=Batman%20/%20UCS">Batman / UCS <span class="soft">6</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-minecraft.html"><b>Minecraft</b></a>
+      <div class="thememeta">
+        200 items · 2013–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-brickheadz.html"><b>Brickheadz</b></a>
+      <div class="thememeta">
+        198 items · 2016–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Brickheadz&amp;sub=Marvel%20Super%20Heroes">Marvel Super Heroes <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Brickheadz&amp;sub=Avatar">Avatar <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Brickheadz&amp;sub=Fortnite">Fortnite <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-harry-potter.html"><b>Harry Potter</b></a>
+      <div class="thememeta">
+        195 items · 2001–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Harry%20Potter&amp;sub=Fantastic%20Beasts">Fantastic Beasts <span class="soft">2</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Harry%20Potter&amp;sub=Chamber%20of%20Secrets">Chamber of Secrets <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-train.html"><b>Train</b></a>
+      <div class="thememeta">
+        179 items · 1966–2006
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Train&amp;sub=4.5V">4.5V <span class="soft">71</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Train&amp;sub=9V">9V <span class="soft">64</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Train&amp;sub=12V">12V <span class="soft">44</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-collectible-minifigures.html"><b>Collectible Minifigures</b></a>
+      <div class="thememeta">
+        154 items · 150 sets / 4 figs · 2008–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Marvel%20Series%202">Marvel Series 2 <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Disney%20100">Disney 100 <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Series%2019%20Minifigures">Series 19 Minifigures <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Series%2021%20Minifigures">Series 21 Minifigures <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Series%2022%20Minifigures">Series 22 Minifigures <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Series%2025%20Minifigures">Series 25 Minifigures <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Series%2026%20Minifigures">Series 26 Minifigures <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Collectible%20Minifigures&amp;sub=Series%2027%20Minifigures">Series 27 Minifigures <span class="soft">3</span></a>
+        
+        <span class="chip soft">+44 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-sports.html"><b>Sports</b></a>
+      <div class="thememeta">
+        144 items · 1998–2007
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Sports&amp;sub=Soccer">Soccer <span class="soft">83</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Sports&amp;sub=Basketball">Basketball <span class="soft">30</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Sports&amp;sub=Hockey">Hockey <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Sports&amp;sub=Gravity%20Games">Gravity Games <span class="soft">10</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-legends-of-chima.html"><b>Legends of Chima</b></a>
+      <div class="thememeta">
+        142 items · 2013–2015
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Legends%20of%20Chima&amp;sub=Speedorz">Speedorz <span class="soft">30</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legends%20of%20Chima&amp;sub=Constraction">Constraction <span class="soft">16</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legends%20of%20Chima&amp;sub=Technic">Technic <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-primo.html"><b>Primo</b></a>
+      <div class="thememeta">
+        133 items · 1995–2005
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-bulk-bricks.html"><b>Bulk Bricks</b></a>
+      <div class="thememeta">
+        128 items · 2000–2004
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-mixels.html"><b>Mixels</b></a>
+      <div class="thememeta">
+        123 items · 2014–2016
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-jurassic-world.html"><b>Jurassic World</b></a>
+      <div class="thememeta">
+        122 items · 2015–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-super-mario.html"><b>Super Mario</b></a>
+      <div class="thememeta">
+        118 items · 2020–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-hero-factory.html"><b>Hero Factory</b></a>
+      <div class="thememeta">
+        111 items · 2010–2014
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Hero%20Factory&amp;sub=Heroes">Heroes <span class="soft">44</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Hero%20Factory&amp;sub=Villains">Villains <span class="soft">33</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-other.html"><b>Other</b></a>
+      <div class="thememeta">
+        111 items · 1957–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Other&amp;sub=Database%20Sets">Database Sets <span class="soft">10</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-make-create.html"><b>Make &amp; Create</b></a>
+      <div class="thememeta">
+        108 items · 2003–2014
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Make%20%26%20Create&amp;sub=Bricks%20%26%20More">Bricks &amp; More <span class="soft">64</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Make%20%26%20Create&amp;sub=Early%20Creator">Early Creator <span class="soft">2</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-speed-champions.html"><b>Speed Champions</b></a>
+      <div class="thememeta">
+        105 items · 2015–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Speed%20Champions&amp;sub=Formula%201">Formula 1 <span class="soft">2</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-nexo-knights.html"><b>Nexo Knights</b></a>
+      <div class="thememeta">
+        104 items · 2016–2018
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-lego-ideas-and-cuusoo.html"><b>LEGO Ideas and CUUSOO</b></a>
+      <div class="thememeta">
+        95 items · 2011–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dots.html"><b>DOTS</b></a>
+      <div class="thememeta">
+        94 items · 2020–2024
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-fabuland.html"><b>Fabuland</b></a>
+      <div class="thememeta">
+        94 items · 1979–1989
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Fabuland&amp;sub=4.5V">4.5V <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Fabuland&amp;sub=Basic">Basic <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Fabuland&amp;sub=Building">Building <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Fabuland&amp;sub=Hospital">Hospital <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-legoland.html"><b>Legoland</b></a>
+      <div class="thememeta">
+        92 items · 1969–1978
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Construction">Construction <span class="soft">27</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Vehicle">Vehicle <span class="soft">17</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Airport">Airport <span class="soft">13</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Building">Building <span class="soft">8</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Fire">Fire <span class="soft">6</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Police">Police <span class="soft">6</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Gas%20Station">Gas Station <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Legoland&amp;sub=Hospital">Hospital <span class="soft">4</span></a>
+        
+        <span class="chip soft">+4 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-pirates.html"><b>Pirates</b></a>
+      <div class="thememeta">
+        87 items · 1989–2015
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Pirates&amp;sub=Pirates%20I">Pirates I <span class="soft">64</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Pirates&amp;sub=Pirates%20II">Pirates II <span class="soft">14</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Pirates&amp;sub=Pirates%20III">Pirates III <span class="soft">9</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-icons.html"><b>Icons</b></a>
+      <div class="thememeta">
+        86 items · 2020–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Icons&amp;sub=Space">Space <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Icons&amp;sub=Transformers">Transformers <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-clikits.html"><b>Clikits</b></a>
+      <div class="thememeta">
+        82 items · 2003–2006
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-belville.html"><b>Belville</b></a>
+      <div class="thememeta">
+        81 items · 1994–2008
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-classic.html"><b>Classic</b></a>
+      <div class="thememeta">
+        79 items · 2015–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-lego-exclusive.html"><b>LEGO Exclusive</b></a>
+      <div class="thememeta">
+        73 items · 2008–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-adventurers.html"><b>Adventurers</b></a>
+      <div class="thememeta">
+        70 items · 1998–2003
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Adventurers&amp;sub=Desert">Desert <span class="soft">26</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Adventurers&amp;sub=Orient%20Expedition">Orient Expedition <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Adventurers&amp;sub=Dino%20Island">Dino Island <span class="soft">17</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Adventurers&amp;sub=Jungle">Jungle <span class="soft">9</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-bricklink-designer-program.html"><b>BrickLink Designer Program</b></a>
+      <div class="thememeta">
+        68 items · 2019–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-juniors.html"><b>Juniors</b></a>
+      <div class="thememeta">
+        68 items · 2013–2018
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Cars">Cars <span class="soft">8</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Friends">Friends <span class="soft">8</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Disney%20Princess">Disney Princess <span class="soft">5</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=DC%20Comics%20Super%20Heroes">DC Comics Super Heroes <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Marvel%20Super%20Heroes">Marvel Super Heroes <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Ninjago">Ninjago <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Incredibles%202">Incredibles 2 <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Juniors&amp;sub=Jurassic%20World%3A%20Fallen%20Kingdom">Jurassic World: Fallen Kingdom <span class="soft">3</span></a>
+        
+        <span class="chip soft">+1 more</span>
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-scala.html"><b>Scala</b></a>
+      <div class="thememeta">
+        68 items · 1979–2001
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dimensions.html"><b>Dimensions</b></a>
+      <div class="thememeta">
+        67 items · 2015–2017
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-freestyle.html"><b>Freestyle</b></a>
+      <div class="thememeta">
+        67 items · 1995–1999
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-the-lego-movie.html"><b>The LEGO Movie</b></a>
+      <div class="thememeta">
+        67 items · 2014–2019
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=The%20LEGO%20Movie&amp;sub=The%20LEGO%20Movie%20II">The LEGO Movie II <span class="soft">40</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dreamzzz.html"><b>Dreamzzz</b></a>
+      <div class="thememeta">
+        66 items · 2023–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-architecture.html"><b>Architecture</b></a>
+      <div class="thememeta">
+        65 items · 2008–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Architecture&amp;sub=Skylines">Skylines <span class="soft">14</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-mindstorms.html"><b>Mindstorms</b></a>
+      <div class="thememeta">
+        61 items · 1998–2021
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Mindstorms&amp;sub=NXT">NXT <span class="soft">25</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Mindstorms&amp;sub=RCX">RCX <span class="soft">18</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Mindstorms&amp;sub=EV3">EV3 <span class="soft">12</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Mindstorms&amp;sub=Star%20Wars">Star Wars <span class="soft">2</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-first-lego-league.html"><b>FIRST LEGO League</b></a>
+      <div class="thememeta">
+        60 items · 2000–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-monkie-kid.html"><b>Monkie Kid</b></a>
+      <div class="thememeta">
+        58 items · 2020–2025
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-botanicals.html"><b>Botanicals</b></a>
+      <div class="thememeta">
+        53 items · 2021–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-studios.html"><b>Studios</b></a>
+      <div class="thememeta">
+        51 items · 2000–2002
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Studios&amp;sub=Jurassic%20Park%20III">Jurassic Park III <span class="soft">2</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-4-juniors.html"><b>4 Juniors</b></a>
+      <div class="thememeta">
+        50 items · 2001–2004
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=4%20Juniors&amp;sub=Jack%20Stone">Jack Stone <span class="soft">25</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=4%20Juniors&amp;sub=Spider-Man">Spider-Man <span class="soft">3</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-games.html"><b>Games</b></a>
+      <div class="thememeta">
+        46 items · 2009–2013
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-exo-force.html"><b>Exo-Force</b></a>
+      <div class="thememeta">
+        45 items · 2006–2008
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-elves.html"><b>Elves</b></a>
+      <div class="thememeta">
+        42 items · 2015–2018
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-the-hobbit-and-lord-of-the-rings.html"><b>The Hobbit and Lord of the Rings</b></a>
+      <div class="thememeta">
+        38 items · 2012–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=The%20Hobbit%20and%20Lord%20of%20the%20Rings&amp;sub=The%20Hobbit">The Hobbit <span class="soft">20</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=The%20Hobbit%20and%20Lord%20of%20the%20Rings&amp;sub=The%20Lord%20of%20the%20Rings">The Lord of the Rings <span class="soft">17</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-aquazone.html"><b>Aquazone</b></a>
+      <div class="thememeta">
+        35 items · 1995–2007
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Aquazone&amp;sub=Aquanauts">Aquanauts <span class="soft">8</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Aquazone&amp;sub=Aquaraiders%20II">Aquaraiders II <span class="soft">7</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Aquazone&amp;sub=Hydronauts">Hydronauts <span class="soft">7</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Aquazone&amp;sub=Stingrays">Stingrays <span class="soft">5</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Aquazone&amp;sub=Aquasharks">Aquasharks <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Aquazone&amp;sub=Aquaraiders%20I">Aquaraiders I <span class="soft">3</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-chinese-traditional-festivals.html"><b>Chinese Traditional Festivals</b></a>
+      <div class="thememeta">
+        34 items · 2018–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-power-functions.html"><b>Power Functions</b></a>
+      <div class="thememeta">
+        34 items · 2008–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Power%20Functions&amp;sub=Powered%20Up">Powered Up <span class="soft">16</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-alpha-team.html"><b>Alpha Team</b></a>
+      <div class="thememeta">
+        32 items · 2001–2004
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Alpha%20Team&amp;sub=Mission%20Deep%20Sea">Mission Deep Sea <span class="soft">17</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Alpha%20Team&amp;sub=Mission%20Deep%20Freeze">Mission Deep Freeze <span class="soft">8</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-hidden-side.html"><b>Hidden Side</b></a>
+      <div class="thememeta">
+        32 items · 2019–2020
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-value-packs.html"><b>Value Packs</b></a>
+      <div class="thememeta">
+        32 items · 1988–2024
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Value%20Packs&amp;sub=Police">Police <span class="soft">2</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Value%20Packs&amp;sub=Creator%203-in-1">Creator 3-in-1 <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-pok-mon.html"><b>Pokémon</b></a>
+      <div class="thememeta">
+        30 items · 2026–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-ninja.html"><b>Ninja</b></a>
+      <div class="thememeta">
+        29 items · 1998–2000
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Ninja&amp;sub=Classic%20Castle">Classic Castle <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-agents.html"><b>Agents</b></a>
+      <div class="thememeta">
+        28 items · 2008–2015
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Agents&amp;sub=Ultra%20Agents">Ultra Agents <span class="soft">15</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-cars.html"><b>Cars</b></a>
+      <div class="thememeta">
+        27 items · 2011–2012
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-lego-art.html"><b>LEGO Art</b></a>
+      <div class="thememeta">
+        26 items · 2020–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-sonic-the-hedgehog.html"><b>Sonic The Hedgehog</b></a>
+      <div class="thememeta">
+        25 items · 2023–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-atlantis.html"><b>Atlantis</b></a>
+      <div class="thememeta">
+        24 items · 2010–2011
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-editions.html"><b>Editions</b></a>
+      <div class="thememeta">
+        24 items · 2026–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-legoland-parks.html"><b>Legoland Parks</b></a>
+      <div class="thememeta">
+        24 items · 2002–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-vidiyo.html"><b>VIDIYO</b></a>
+      <div class="thememeta">
+        24 items · 2021–2021
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-modular-buildings.html"><b>Modular Buildings</b></a>
+      <div class="thememeta">
+        22 items · 2007–2026
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Modular%20Buildings&amp;sub=Mini">Mini <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-power-miners.html"><b>Power Miners</b></a>
+      <div class="thememeta">
+        22 items · 2009–2010
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-master-builder-academy.html"><b>Master Builder Academy</b></a>
+      <div class="thememeta">
+        21 items · 2011–2013
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-galidor.html"><b>Galidor</b></a>
+      <div class="thememeta">
+        20 items · 2002–2002
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-homemaker.html"><b>Homemaker</b></a>
+      <div class="thememeta">
+        20 items · 1971–1982
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Homemaker&amp;sub=HO%201%3A87%20Vehicles">HO 1:87 Vehicles <span class="soft">4</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Homemaker&amp;sub=Technic">Technic <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-indiana-jones.html"><b>Indiana Jones</b></a>
+      <div class="thememeta">
+        20 items · 2008–2023
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-western.html"><b>Western</b></a>
+      <div class="thememeta">
+        20 items · 1996–2002
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-xtra.html"><b>Xtra</b></a>
+      <div class="thememeta">
+        19 items · 2018–2021
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-znap.html"><b>Znap</b></a>
+      <div class="thememeta">
+        19 items · 1998–1999
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-animal-crossing.html"><b>Animal Crossing</b></a>
+      <div class="thememeta">
+        18 items · 2024–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-lego-originals.html"><b>LEGO Originals</b></a>
+      <div class="thememeta">
+        18 items · 2019–2021
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-teenage-mutant-ninja-turtles.html"><b>Teenage Mutant Ninja Turtles</b></a>
+      <div class="thememeta">
+        18 items · 2013–2014
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dinosaurs.html"><b>Dinosaurs</b></a>
+      <div class="thememeta">
+        16 items · 2001–2001
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-model-team.html"><b>Model Team</b></a>
+      <div class="thememeta">
+        16 items · 1986–2004
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-one-piece.html"><b>One Piece</b></a>
+      <div class="thememeta">
+        15 items · 2025–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-rock-raiders.html"><b>Rock Raiders</b></a>
+      <div class="thememeta">
+        15 items · 1999–2000
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-boat.html"><b>Boat</b></a>
+      <div class="thememeta">
+        14 items · 1974–1996
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-building-set-with-people.html"><b>Building Set with People</b></a>
+      <div class="thememeta">
+        14 items · 1974–1978
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Building%20Set%20with%20People&amp;sub=HO%201%3A87%20Vehicles">HO 1:87 Vehicles <span class="soft">3</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Building%20Set%20with%20People&amp;sub=Classic%20Town">Classic Town <span class="soft">1</span></a>
+        
+        <a class="chip" href="sets/index.html?theme=Building%20Set%20with%20People&amp;sub=Town%20Plan">Town Plan <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-monster-fighters.html"><b>Monster Fighters</b></a>
+      <div class="thememeta">
+        14 items · 2012–2012
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-spongebob-squarepants.html"><b>SpongeBob SquarePants</b></a>
+      <div class="thememeta">
+        14 items · 2006–2012
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-fortnite.html"><b>Fortnite</b></a>
+      <div class="thememeta">
+        13 items · 2023–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-island-xtreme-stunts.html"><b>Island Xtreme Stunts</b></a>
+      <div class="thememeta">
+        13 items · 2002–2003
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-minitalia.html"><b>Minitalia</b></a>
+      <div class="thememeta">
+        13 items · 1970–1973
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Minitalia&amp;sub=Samsonite">Samsonite <span class="soft">4</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dino-attack-dino-2010.html"><b>Dino Attack / Dino 2010</b></a>
+      <div class="thememeta">
+        12 items · 2005–2006
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-gabby-s-dollhouse.html"><b>Gabby&#39;s Dollhouse</b></a>
+      <div class="thememeta">
+        12 items · 2023–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dc-super-hero-girls.html"><b>DC Super Hero Girls</b></a>
+      <div class="thememeta">
+        11 items · 2016–2017
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-unikitty.html"><b>Unikitty!</b></a>
+      <div class="thememeta">
+        11 items · 2018–2018
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-wicked.html"><b>Wicked</b></a>
+      <div class="thememeta">
+        11 items · 2024–2025
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-avatar.html"><b>Avatar</b></a>
+      <div class="thememeta">
+        9 items · 2022–2023
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-bluey.html"><b>Bluey</b></a>
+      <div class="thememeta">
+        9 items · 2025–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-minions.html"><b>Minions</b></a>
+      <div class="thememeta">
+        9 items · 2020–2021
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-overwatch.html"><b>Overwatch</b></a>
+      <div class="thememeta">
+        9 items · 2018–2019
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-pharaoh-s-quest.html"><b>Pharaoh&#39;s Quest</b></a>
+      <div class="thememeta">
+        9 items · 2011–2011
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-quatro.html"><b>Quatro</b></a>
+      <div class="thememeta">
+        9 items · 2004–2006
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-time-cruisers.html"><b>Time Cruisers</b></a>
+      <div class="thememeta">
+        9 items · 1996–1997
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-trolls-world-tour.html"><b>Trolls: World Tour</b></a>
+      <div class="thememeta">
+        9 items · 2020–2020
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-brick-sketches.html"><b>Brick Sketches</b></a>
+      <div class="thememeta">
+        8 items · 2020–2022
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Brick%20Sketches&amp;sub=Marvel%20Super%20Heroes">Marvel Super Heroes <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-the-lone-ranger.html"><b>The Lone Ranger</b></a>
+      <div class="thememeta">
+        8 items · 2013–2013
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-vikings.html"><b>Vikings</b></a>
+      <div class="thememeta">
+        8 items · 2005–2006
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-dino.html"><b>Dino</b></a>
+      <div class="thememeta">
+        7 items · 2012–2012
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-factory.html"><b>Factory</b></a>
+      <div class="thememeta">
+        7 items · 2005–2008
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-scooby-doo.html"><b>Scooby-Doo</b></a>
+      <div class="thememeta">
+        7 items · 2015–2016
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-wednesday.html"><b>Wednesday</b></a>
+      <div class="thememeta">
+        7 items · 2024–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-angry-birds.html"><b>Angry Birds</b></a>
+      <div class="thememeta">
+        6 items · 2016–2016
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-ben-10.html"><b>Ben 10</b></a>
+      <div class="thememeta">
+        6 items · 2010–2010
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-discovery.html"><b>Discovery</b></a>
+      <div class="thememeta">
+        6 items · 2003–2003
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-hobby-sets.html"><b>Hobby Sets</b></a>
+      <div class="thememeta">
+        6 items · 1975–2003
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Hobby%20Sets&amp;sub=Basic">Basic <span class="soft">1</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-sculptures.html"><b>Sculptures</b></a>
+      <div class="thememeta">
+        6 items · 2000–2016
+      </div>
+      
+      <div class="subchips">
+        
+        <a class="chip" href="sets/index.html?theme=Sculptures&amp;sub=Mosaic">Mosaic <span class="soft">3</span></a>
+        
+        
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-despicable-me-4.html"><b>Despicable Me 4</b></a>
+      <div class="thememeta">
+        5 items · 2024–2024
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-nike.html"><b>Nike</b></a>
+      <div class="thememeta">
+        5 items · 2025–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-forma.html"><b>Forma</b></a>
+      <div class="thememeta">
+        4 items · 2019–2019
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-fusion.html"><b>Fusion</b></a>
+      <div class="thememeta">
+        4 items · 2014–2014
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-speed-racer.html"><b>Speed Racer</b></a>
+      <div class="thememeta">
+        4 items · 2008–2008
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-spybotics.html"><b>Spybotics</b></a>
+      <div class="thememeta">
+        4 items · 2002–2002
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-avatar-the-last-airbender.html"><b>Avatar: The Last Airbender</b></a>
+      <div class="thememeta">
+        2 items · 2006–2006
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-ghostbusters.html"><b>Ghostbusters</b></a>
+      <div class="thememeta">
+        2 items · 2016–2016
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-the-legend-of-zelda.html"><b>The Legend of Zelda</b></a>
+      <div class="thememeta">
+        2 items · 2024–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-the-powerpuff-girls.html"><b>The Powerpuff Girls</b></a>
+      <div class="thememeta">
+        2 items · 2018–2018
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-universe.html"><b>Universe</b></a>
+      <div class="thememeta">
+        2 items · 2010–2010
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-horizon-adventures.html"><b>Horizon Adventures</b></a>
+      <div class="thememeta">
+        1 items · 2025–2025
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-kpop-demon-hunters.html"><b>KPop Demon Hunters</b></a>
+      <div class="thememeta">
+        1 items · 2026–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-shrek.html"><b>Shrek</b></a>
+      <div class="thememeta">
+        1 items · 2026–2026
+      </div>
+      
+    </div>
+    
+    <div class="themecard">
+      <a class="themename" href="sets/theme-stranger-things.html"><b>Stranger Things</b></a>
+      <div class="thememeta">
+        1 items · 2019–2019
+      </div>
+      
+    </div>
+    
+  </div>
+</div>
+
+<div class="card">
+  <h3>By year <span class="soft">— every release year in the catalog</span></h3>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">2020s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=2020"
+         title="596 sets, 18 minifigs">
+        2020 <span class="soft">614</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2021"
+         title="651 sets, 6 minifigs">
+        2021 <span class="soft">657</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2022"
+         title="606 sets, 16 minifigs">
+        2022 <span class="soft">622</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2023"
+         title="621 sets, 30 minifigs">
+        2023 <span class="soft">651</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2024"
+         title="680 sets, 6 minifigs">
+        2024 <span class="soft">686</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2025"
+         title="762 sets, 25 minifigs">
+        2025 <span class="soft">787</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2026"
+         title="622 sets">
+        2026 <span class="soft">622</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">2010s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=2010"
+         title="332 sets, 6 minifigs">
+        2010 <span class="soft">338</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2011"
+         title="358 sets">
+        2011 <span class="soft">358</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2012"
+         title="446 sets, 1 minifigs">
+        2012 <span class="soft">447</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2013"
+         title="456 sets, 2 minifigs">
+        2013 <span class="soft">458</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2014"
+         title="650 sets">
+        2014 <span class="soft">650</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2015"
+         title="624 sets, 11 minifigs">
+        2015 <span class="soft">635</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2016"
+         title="609 sets, 3 minifigs">
+        2016 <span class="soft">612</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2017"
+         title="568 sets, 5 minifigs">
+        2017 <span class="soft">573</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2018"
+         title="566 sets, 14 minifigs">
+        2018 <span class="soft">580</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2019"
+         title="570 sets, 20 minifigs">
+        2019 <span class="soft">590</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">2000s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=2000"
+         title="317 sets">
+        2000 <span class="soft">317</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2001"
+         title="356 sets">
+        2001 <span class="soft">356</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2002"
+         title="472 sets">
+        2002 <span class="soft">472</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2003"
+         title="361 sets">
+        2003 <span class="soft">361</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2004"
+         title="348 sets">
+        2004 <span class="soft">348</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2005"
+         title="324 sets">
+        2005 <span class="soft">324</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2006"
+         title="293 sets">
+        2006 <span class="soft">293</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2007"
+         title="279 sets">
+        2007 <span class="soft">279</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2008"
+         title="302 sets">
+        2008 <span class="soft">302</span></a>
+      
+      <a class="chip" href="sets/index.html?year=2009"
+         title="330 sets">
+        2009 <span class="soft">330</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">1990s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=1990"
+         title="100 sets">
+        1990 <span class="soft">100</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1991"
+         title="134 sets">
+        1991 <span class="soft">134</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1992"
+         title="127 sets">
+        1992 <span class="soft">127</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1993"
+         title="121 sets">
+        1993 <span class="soft">121</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1994"
+         title="159 sets">
+        1994 <span class="soft">159</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1995"
+         title="189 sets">
+        1995 <span class="soft">189</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1996"
+         title="182 sets">
+        1996 <span class="soft">182</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1997"
+         title="265 sets">
+        1997 <span class="soft">265</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1998"
+         title="395 sets">
+        1998 <span class="soft">395</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1999"
+         title="336 sets">
+        1999 <span class="soft">336</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">1980s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=1980"
+         title="94 sets">
+        1980 <span class="soft">94</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1981"
+         title="64 sets">
+        1981 <span class="soft">64</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1982"
+         title="63 sets">
+        1982 <span class="soft">63</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1983"
+         title="65 sets">
+        1983 <span class="soft">65</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1984"
+         title="82 sets">
+        1984 <span class="soft">82</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1985"
+         title="148 sets">
+        1985 <span class="soft">148</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1986"
+         title="141 sets">
+        1986 <span class="soft">141</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1987"
+         title="227 sets">
+        1987 <span class="soft">227</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1988"
+         title="77 sets">
+        1988 <span class="soft">77</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1989"
+         title="120 sets">
+        1989 <span class="soft">120</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">1970s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=1970"
+         title="22 sets">
+        1970 <span class="soft">22</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1971"
+         title="40 sets">
+        1971 <span class="soft">40</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1972"
+         title="30 sets">
+        1972 <span class="soft">30</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1973"
+         title="44 sets">
+        1973 <span class="soft">44</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1974"
+         title="22 sets">
+        1974 <span class="soft">22</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1975"
+         title="26 sets">
+        1975 <span class="soft">26</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1976"
+         title="47 sets">
+        1976 <span class="soft">47</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1977"
+         title="68 sets">
+        1977 <span class="soft">68</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1978"
+         title="47 sets">
+        1978 <span class="soft">47</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1979"
+         title="53 sets">
+        1979 <span class="soft">53</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">1960s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=1960"
+         title="2 sets">
+        1960 <span class="soft">2</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1961"
+         title="9 sets">
+        1961 <span class="soft">9</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1962"
+         title="6 sets">
+        1962 <span class="soft">6</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1963"
+         title="12 sets">
+        1963 <span class="soft">12</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1964"
+         title="30 sets">
+        1964 <span class="soft">30</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1965"
+         title="13 sets">
+        1965 <span class="soft">13</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1966"
+         title="88 sets">
+        1966 <span class="soft">88</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1967"
+         title="11 sets">
+        1967 <span class="soft">11</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1968"
+         title="27 sets">
+        1968 <span class="soft">27</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1969"
+         title="56 sets">
+        1969 <span class="soft">56</span></a>
+      
+    </div>
+  </div>
+  
+  <div class="decade">
+    <div class="eyebrow" style="margin:10px 0 6px">1950s</div>
+    <div class="yearchips">
+      
+      <a class="chip" href="sets/index.html?year=1955"
+         title="31 sets">
+        1955 <span class="soft">31</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1956"
+         title="12 sets">
+        1956 <span class="soft">12</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1957"
+         title="13 sets">
+        1957 <span class="soft">13</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1958"
+         title="38 sets">
+        1958 <span class="soft">38</span></a>
+      
+      <a class="chip" href="sets/index.html?year=1959"
+         title="1 sets">
+        1959 <span class="soft">1</span></a>
+      
+    </div>
+  </div>
+  
+</div>
+
+
+</main>
+
+<footer class="note">
+  Brickonomy · self-hosted, no API keys · sources: BrickLink, eBay, BrickOwl
+  · static snapshot — run <code>python -m brickonomy.export</code> to update
+  
+</footer>
+
+<script src="static/app.js"></script>
+</body>
+</html>

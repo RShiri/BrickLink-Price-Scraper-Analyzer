@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>75192 Millennium Falcon · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-star-wars.html">Star Wars</a> › <a href="../sets/index.html?theme=Star%20Wars&amp;sub=Ultimate%20Collector%20Series">Ultimate Collector Series</a> › <a href="../sets/index.html?year=2017">2017</a>
+  › <span>75192</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/75192-1.png" alt="Millennium Falcon"
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 13,150 g</span>
       <span class="chip">₪0.29 / part</span>
       <span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=75192-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/75192-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -92,7 +102,8 @@
   <div class="tile">
     <div class="label">Forecast 2028 <span title="Trend estimate, not a guarantee">ⓘ</span></div>
     <div class="value">₪2,352</div>
-    <div class="delta">trend estimate · ±20% band</div>
+    <div class="delta">trend estimate
+      · ±16% band</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -117,12 +128,28 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="75192"
        data-retired="2020"></canvas></div>
+  
+  <div class="facts" style="margin-top:8px">
+    
+    <span class="chip">+1y (2027): <b style="color:var(--ink)">&nbsp;₪2,272</b></span>
+    
+    <span class="chip">+3y (2029): <b style="color:var(--ink)">&nbsp;₪2,434</b></span>
+    
+    <span class="chip">+5y (2031): <b style="color:var(--ink)">&nbsp;₪2,607</b></span>
+    
+    
+    <span class="chip">+5.0%/yr · default</span>
+  </div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2020).
   </div>
 </div>
@@ -151,7 +178,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -206,96 +234,238 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 8 in this set, ₪265 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/sw0879.html" title="Han Solo, Dark Brown Legs with Holster Pattern, Dark Blue Jacket, Wavy Hair"
+       data-value="78.71" data-name="han solo, dark brown legs with holster pattern, dark blue jacket, wavy hair" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0879.png" alt="Han Solo, Dark Brown Legs with Holster Pattern, Dark Blue Jacket, Wavy Hair" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0879</div>
+      <div class="figtile-name">Han Solo, Dark Brown Legs with Holster Pattern, Dark Blue Jacket, Wavy Hair</div>
+      <div class="figtile-value">₪78.71</div>
+      <div class="figtile-share">3.6% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0878.html" title="Princess Leia - Hoth Outfit, White Jacket, Smile / Breathing Mask"
+       data-value="72.61" data-name="princess leia - hoth outfit, white jacket, smile / breathing mask" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0878.png" alt="Princess Leia - Hoth Outfit, White Jacket, Smile / Breathing Mask" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0878</div>
+      <div class="figtile-name">Princess Leia - Hoth Outfit, White Jacket, Smile / Breathing Mask</div>
+      <div class="figtile-value">₪72.61</div>
+      <div class="figtile-share">3.3% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0841.html" title="Han Solo, Old"
+       data-value="45.79" data-name="han solo, old" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0841.png" alt="Han Solo, Old" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0841</div>
+      <div class="figtile-name">Han Solo, Old</div>
+      <div class="figtile-value">₪45.79</div>
+      <div class="figtile-share">2.1% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0700.html" title="C-3PO - Colorful Wires, Printed Legs"
+       data-value="15.8" data-name="c-3po - colorful wires, printed legs" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0700.png" alt="C-3PO - Colorful Wires, Printed Legs" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0700</div>
+      <div class="figtile-name">C-3PO - Colorful Wires, Printed Legs</div>
+      <div class="figtile-value">₪15.80</div>
+      <div class="figtile-share">0.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0677.html" title="Rey - Dark Tan Tied Robe"
+       data-value="14.95" data-name="rey - dark tan tied robe" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0677.png" alt="Rey - Dark Tan Tied Robe" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0677</div>
+      <div class="figtile-name">Rey - Dark Tan Tied Robe</div>
+      <div class="figtile-value">₪14.95</div>
+      <div class="figtile-share">0.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0532.html" title="Chewbacca - Medium Nougat Fur"
+       data-value="12.9" data-name="chewbacca - medium nougat fur" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0532.png" alt="Chewbacca - Medium Nougat Fur" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0532</div>
+      <div class="figtile-name">Chewbacca - Medium Nougat Fur</div>
+      <div class="figtile-value">₪12.90</div>
+      <div class="figtile-share">0.6% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0661.html" title="BB-8 (Small Photoreceptor and Small Black Circle)"
+       data-value="12.9" data-name="bb-8 (small photoreceptor and small black circle)" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0661.png" alt="BB-8 (Small Photoreceptor and Small Black Circle)" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0661</div>
+      <div class="figtile-name">BB-8 (Small Photoreceptor and Small Black Circle)</div>
+      <div class="figtile-value">₪12.90</div>
+      <div class="figtile-share">0.6% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sw0676.html" title="Finn - Medium Nougat Jacket, Black Legs"
+       data-value="11.16" data-name="finn - medium nougat jacket, black legs" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sw0676.png" alt="Finn - Medium Nougat Jacket, Black Legs" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sw0676</div>
+      <div class="figtile-name">Finn - Medium Nougat Jacket, Black Legs</div>
+      <div class="figtile-value">₪11.16</div>
+      <div class="figtile-share">0.5% of set</div>
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
+    </thead>
+    <tbody>
       
       <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0532.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0532.html"><b>sw0532</b> Chewbacca - Medium Nougat Fur</a></td>
-        <td class="num">1</td>
-        <td class="num">₪12.90</td>
-        <td class="num">0.6%</td>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0879.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0879.html"><b>sw0879</b> Han Solo, Dark Brown Legs with Holster Pattern, Dark Blue Jacket, Wavy Hair</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="78.71">₪78.71</td>
+        <td class="num" data-v="3.585174658267401">3.6%</td>
       </tr>
       
       <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0661.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0661.html"><b>sw0661</b> BB-8 (Small Photoreceptor and Small Bl</a></td>
-        <td class="num">1</td>
-        <td class="num">₪12.90</td>
-        <td class="num">0.6%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0676.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0676.html"><b>sw0676</b> Finn - Medium Nougat Jacket, Black Leg</a></td>
-        <td class="num">1</td>
-        <td class="num">₪11.18</td>
-        <td class="num">0.5%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0677.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0677.html"><b>sw0677</b> Rey - Dark Tan Tied Robe</a></td>
-        <td class="num">1</td>
-        <td class="num">₪14.95</td>
-        <td class="num">0.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0700.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0700.html"><b>sw0700</b> C-3PO - Colorful Wires, Printed Legs</a></td>
-        <td class="num">1</td>
-        <td class="num">₪15.80</td>
-        <td class="num">0.7%</td>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0878.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0878.html"><b>sw0878</b> Princess Leia - Hoth Outfit, White Jacket, Smile / Breathing Mask</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="72.61">₪72.61</td>
+        <td class="num" data-v="3.307324760980765">3.3%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0841.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/sw0841.html"><b>sw0841</b> Han Solo, Old</a></td>
-        <td class="num">1</td>
-        <td class="num">₪45.80</td>
-        <td class="num">2.1%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="45.79">₪45.79</td>
+        <td class="num" data-v="2.085696196189357">2.1%</td>
       </tr>
       
       <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0878.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0878.html"><b>sw0878</b> Princess Leia - Hoth Outfit, White Jac</a></td>
-        <td class="num">1</td>
-        <td class="num">₪72.61</td>
-        <td class="num">3.3%</td>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0700.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0700.html"><b>sw0700</b> C-3PO - Colorful Wires, Printed Legs</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="15.8">₪15.80</td>
+        <td class="num" data-v="0.7196767831358778">0.7%</td>
       </tr>
       
       <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0879.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sw0879.html"><b>sw0879</b> Han Solo, Dark Brown Legs with Holster</a></td>
-        <td class="num">1</td>
-        <td class="num">₪78.71</td>
-        <td class="num">3.6%</td>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0677.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0677.html"><b>sw0677</b> Rey - Dark Tan Tied Robe</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="14.95">₪14.95</td>
+        <td class="num" data-v="0.6809599941697071">0.7%</td>
       </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0532.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0532.html"><b>sw0532</b> Chewbacca - Medium Nougat Fur</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="12.9">₪12.90</td>
+        <td class="num" data-v="0.5875842090160015">0.6%</td>
+      </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0661.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0661.html"><b>sw0661</b> BB-8 (Small Photoreceptor and Small Black Circle)</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="12.9">₪12.90</td>
+        <td class="num" data-v="0.5875842090160015">0.6%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sw0676.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sw0676.html"><b>sw0676</b> Finn - Medium Nougat Jacket, Black Legs</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="11.16">₪11.16</td>
+        <td class="num" data-v="0.5083286645440757">0.5%</td>
+      </tr>
+      
+    </tbody>
+    
+    <tfoot>
       <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">₪265</td>
           <td class="num">12%</td></tr>
-      
-    </table>
-    </div>
+    </tfoot>
     
-    <div style="color:var(--muted);font-size:12px;margin-top:8px">
-      Figs are 12% of set value → not a part-out candidate (flag raises at 80%).
-    </div>
-    
-    
+  </table>
   </div>
+
+  
+  <div style="color:var(--muted);font-size:12px;margin-top:10px">
+    Figs are 12% of set value → not a part-out candidate (flag raises at 80%).
+  </div>
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 

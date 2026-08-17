@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sets · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -45,14 +48,22 @@
 
 
 <div class="eyebrow">Catalog</div>
+<nav class="crumbs" id="catalogCrumbs" hidden><a href="../catalog.html">Browse</a><span id="catalogCrumbTail"></span></nav>
 <h1>Sets</h1>
-<p class="sub">Every LEGO set ever released — 34,276 items.
+<p class="sub">Every LEGO set ever released — 34,282 items.
    Search by number, name or theme; sets with scanned prices open their own page.</p>
 
 <div class="searchrow">
   <input class="inp" id="catalogSearch" type="search" autocomplete="off"
          placeholder="Search the whole catalog… (e.g. 75192, Falcon, Technic)" aria-label="Search all sets">
   <select class="inp" id="catalogTheme" aria-label="Filter by theme"><option value="">All themes</option></select>
+  <select class="inp" id="catalogSub" aria-label="Filter by subtheme" hidden><option value="">All subthemes</option></select>
+  <select class="inp" id="catalogYear" aria-label="Filter by year"><option value="">All years</option></select>
+  <select class="inp" id="catalogType" aria-label="Filter by type">
+    <option value="">Sets + minifigs</option>
+    <option value="S">Sets only</option>
+    <option value="M">Minifigs only</option>
+  </select>
   <select class="inp" id="catalogSort" aria-label="Sort">
     <option value="year">Newest first</option>
     <option value="year-asc">Oldest first</option>
@@ -65,7 +76,9 @@
 <div class="card">
   <div id="catalogCount" style="color:var(--muted);font-size:12.5px;margin-bottom:8px">Loading catalog…</div>
   <div class="table-scroll">
-  <table id="catalogTable">
+  
+  <table id="catalogTable" data-theme="Bionicle" data-sub=""
+         data-year="" data-type="">
     <thead>
       <tr><th>Set</th><th>Theme</th><th class="num">Year</th><th class="num">Parts</th><th>Prices</th></tr>
     </thead>

@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>42197 Backhoe Loader · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-technic.html">Technic</a> › <a href="../sets/index.html?year=2025">2025</a>
+  › <span>42197</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/42197-1.png" alt="Backhoe Loader"
@@ -54,7 +62,7 @@
     <h1 style="font-size:26px">Backhoe Loader <span style="color:var(--muted);font-weight:400">· 42197</span></h1>
     <p class="sub" style="margin-bottom:6px">
       Released 2025
-       · Retail ₪29.97
+       · Retail ₪29.47
     </p>
     <div class="facts">
       <span class="chip">🧱 104 parts</span>
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 169 g</span>
       
       <span class="chip"><span class="dot" style="background:var(--s3)"></span>Available</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=42197-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/42197-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -117,12 +127,16 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="42197"
        data-retired="2028"></canvas></div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2028).
   </div>
 </div>
@@ -135,7 +149,7 @@
     <div class="vsbars">
       <div class="vsrow"><span>Retail</span>
         <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
-        <span class="num">₪29.97</span></div>
+        <span class="num">₪29.47</span></div>
       <div class="vsrow"><span>Value new</span>
         <div class="track"><div class="fill" style="width:0.0%"></div></div>
         <span class="num">—</span></div>
@@ -152,7 +166,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -207,18 +222,21 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
-    
-    <div style="color:var(--muted)">No minifig inventory scanned yet — run a BrickLink scan for this set.</div>
-    
-  </div>
 </div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 0 in this set</span></h3>
+  
+  <div style="color:var(--muted)">No minifig inventory scanned yet — run a BrickLink scan for this set.</div>
+  
+</div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 
@@ -231,14 +249,14 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/42206-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>42206</b> Oracle Red Bull Racing RB20 F1 Car</div>
       <div class="relmeta">2025 · ₪595
-        · <span class="delta down">▼ 17%</span></div>
+        · <span class="delta down">▼ 16%</span></div>
     </a>
     
     <a class="relcard" href="../sets/42171.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/42171-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>42171</b> Mercedes-AMG F1 W14 E Performance</div>
       <div class="relmeta">2024 · ₪525
-        · <span class="delta down">▼ 11%</span></div>
+        · <span class="delta down">▼ 10%</span></div>
     </a>
     
   </div>

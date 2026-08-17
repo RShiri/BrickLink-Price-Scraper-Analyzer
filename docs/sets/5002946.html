@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>5002946 Silver Centurion · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-super-heroes-marvel.html">Super Heroes Marvel</a> › <a href="../sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Avengers">Avengers</a> › <a href="../sets/index.html?year=2016">2016</a>
+  › <span>5002946</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/5002946-1.png" alt="Silver Centurion"
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 8 g</span>
       <span class="chip">₪23.53 / part</span>
       <span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=5002946-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/5002946-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -91,8 +101,9 @@
   </div>
   <div class="tile">
     <div class="label">Forecast 2028 <span title="Trend estimate, not a guarantee">ⓘ</span></div>
-    <div class="value">₪302</div>
-    <div class="delta">trend estimate · ±20% band</div>
+    <div class="value">₪294</div>
+    <div class="delta">trend estimate · theme comparables
+      · ±16% band</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -117,12 +128,28 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="5002946"
        data-retired="2019"></canvas></div>
+  
+  <div class="facts" style="margin-top:8px">
+    
+    <span class="chip">+1y (2027): <b style="color:var(--ink)">&nbsp;₪288</b></span>
+    
+    <span class="chip">+3y (2029): <b style="color:var(--ink)">&nbsp;₪300</b></span>
+    
+    <span class="chip">+5y (2031): <b style="color:var(--ink)">&nbsp;₪313</b></span>
+    
+    
+    <span class="chip">+3.0%/yr · theme comparables</span>
+  </div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2019).
   </div>
 </div>
@@ -142,9 +169,9 @@
       
       <div class="tile" style="background:transparent;border:0;padding:0">
         <div class="label">Super Heroes Marvel average</div>
-        <div class="value" style="font-size:22px">₪1.07</div>
+        <div class="value" style="font-size:22px">₪2.13</div>
         <div class="delta down">
-          2094% vs theme
+          1007% vs theme
         </div>
       </div>
       
@@ -159,7 +186,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -214,41 +242,85 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 1 in this set, ₪325 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/sh0232.html" title="Silver Centurion (Iron Man - Mark 33 Armor)"
+       data-value="324.77" data-name="silver centurion (iron man - mark 33 armor)" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0232.png" alt="Silver Centurion (Iron Man - Mark 33 Armor)" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0232</div>
+      <div class="figtile-name">Silver Centurion (Iron Man - Mark 33 Armor)</div>
+      <div class="figtile-value">₪325</div>
+      <div class="figtile-share">115.0% of set</div>
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
+    </thead>
+    <tbody>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0232.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0232.html"><b>sh0232</b> Silver Centurion (Iron Man - Mark 33 A</a></td>
-        <td class="num">1</td>
-        <td class="num">₪325</td>
-        <td class="num">115.0%</td>
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0232.html"><b>sh0232</b> Silver Centurion (Iron Man - Mark 33 Armor)</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="324.77">₪325</td>
+        <td class="num" data-v="115.04427913567126">115.0%</td>
       </tr>
       
-      
+    </tbody>
+    
+    <tfoot>
       <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">₪325</td>
           <td class="num">115%</td></tr>
-      
-    </table>
-    </div>
+    </tfoot>
     
-    <div style="color:var(--muted);font-size:12px;margin-top:8px">
-      Figs exceed 80% of set value → <b>strong part-out candidate</b>.
-      
-    </div>
-    
+  </table>
+  </div>
+
+  
+  <div style="color:var(--muted);font-size:12px;margin-top:10px">
+    Figs exceed 80% of set value → <b>strong part-out candidate</b>.
     
   </div>
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 
@@ -275,7 +347,7 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76029-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76029</b> Iron Man vs. Ultron</div>
       <div class="relmeta">2015 · ₪104
-        · <span class="delta up">▲ 9%</span></div>
+        · <span class="delta up">▲ 10%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76105.html">
@@ -296,7 +368,7 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76104-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76104</b> The Hulkbuster Smash-Up</div>
       <div class="relmeta">2018 · ₪159
-        · <span class="delta up">▲ 7%</span></div>
+        · <span class="delta up">▲ 8%</span></div>
     </a>
     
   </div>

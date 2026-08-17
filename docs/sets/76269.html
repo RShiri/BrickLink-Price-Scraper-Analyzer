@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>76269 Avengers Tower · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-super-heroes-marvel.html">Super Heroes Marvel</a> › <a href="../sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=Avengers">Avengers</a> › <a href="../sets/index.html?year=2023">2023</a>
+  › <span>76269</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/76269-1.png" alt="Avengers Tower"
@@ -54,7 +62,7 @@
     <h1 style="font-size:26px">Avengers Tower <span style="color:var(--muted);font-weight:400">· 76269</span></h1>
     <p class="sub" style="margin-bottom:6px">
       Released 2023
-       · Retail ₪1,500
+       · Retail ₪1,475
     </p>
     <div class="facts">
       <span class="chip">🧱 5,202 parts</span>
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 7,002 g</span>
       <span class="chip">₪0.25 / part</span>
       <span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=76269-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/76269-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -80,8 +90,8 @@
     <div class="label">Value — new / sealed</div>
     <div class="value">₪1,315</div>
     <div class="delta">
-      <span class="delta down">▼ 12%</span> vs retail
-       · -4.3%/yr
+      <span class="delta down">▼ 11%</span> vs retail
+       · -3.7%/yr
     </div>
   </div>
   <div class="tile">
@@ -91,8 +101,9 @@
   </div>
   <div class="tile">
     <div class="label">Forecast 2028 <span title="Trend estimate, not a guarantee">ⓘ</span></div>
-    <div class="value">₪1,152</div>
-    <div class="delta">trend estimate · ±20% band</div>
+    <div class="value">₪1,172</div>
+    <div class="delta">trend estimate · vs retail
+      · ±16% band</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -117,12 +128,28 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="76269"
        data-retired="2026"></canvas></div>
+  
+  <div class="facts" style="margin-top:8px">
+    
+    <span class="chip">+1y (2027): <b style="color:var(--ink)">&nbsp;₪1,242</b></span>
+    
+    <span class="chip">+3y (2029): <b style="color:var(--ink)">&nbsp;₪1,141</b></span>
+    
+    <span class="chip">+5y (2031): <b style="color:var(--ink)">&nbsp;₪1,082</b></span>
+    
+    
+    <span class="chip">-3.7%/yr · vs retail</span>
+  </div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2026).
   </div>
 </div>
@@ -135,18 +162,18 @@
     <div class="vsbars">
       <div class="vsrow"><span>Retail</span>
         <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
-        <span class="num">₪1,500</span></div>
+        <span class="num">₪1,475</span></div>
       <div class="vsrow"><span>Value new</span>
-        <div class="track"><div class="fill" style="width:87.7%"></div></div>
+        <div class="track"><div class="fill" style="width:89.2%"></div></div>
         <span class="num">₪1,315</span></div>
       <div class="vsrow"><span>Value used</span>
-        <div class="track"><div class="fill used" style="width:79.2%"></div></div>
+        <div class="track"><div class="fill used" style="width:80.5%"></div></div>
         <span class="num">₪1,188</span></div>
     </div>
     
     <div style="color:var(--ink-2);font-size:12.5px;margin-top:10px">
-      A buyer at retail is <span class="delta down">▼ 12%</span> today,
-      compounding at -4.3% a year.
+      A buyer at retail is <span class="delta down">▼ 11%</span> today,
+      compounding at -3.7% a year.
     </div>
     
   </div>
@@ -163,9 +190,9 @@
       
       <div class="tile" style="background:transparent;border:0;padding:0">
         <div class="label">Super Heroes Marvel average</div>
-        <div class="value" style="font-size:22px">₪1.07</div>
+        <div class="value" style="font-size:22px">₪2.13</div>
         <div class="delta up">
-          −76% vs theme
+          −88% vs theme
         </div>
       </div>
       
@@ -180,7 +207,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -235,264 +263,700 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 29 in this set, ₪906 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/sh0916.html" title="Vision - Dark Turquoise"
+       data-value="158.74" data-name="vision - dark turquoise" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0916.png" alt="Vision - Dark Turquoise" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0916</div>
+      <div class="figtile-name">Vision - Dark Turquoise</div>
+      <div class="figtile-value">₪159</div>
+      <div class="figtile-share">12.1% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0923.html" title="Iron Man - Mark 6 Armor, Large Helmet Visor, Battle Damage"
+       data-value="101.81" data-name="iron man - mark 6 armor, large helmet visor, battle damage" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0923.png" alt="Iron Man - Mark 6 Armor, Large Helmet Visor, Battle Damage" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0923</div>
+      <div class="figtile-name">Iron Man - Mark 6 Armor, Large Helmet Visor, Battle Damage</div>
+      <div class="figtile-value">₪102</div>
+      <div class="figtile-share">7.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0932.html" title="Hulk - Giant, Dark Bluish Gray Pants, Smile"
+       data-value="83.4" data-name="hulk - giant, dark bluish gray pants, smile" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0932.png" alt="Hulk - Giant, Dark Bluish Gray Pants, Smile" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0932</div>
+      <div class="figtile-name">Hulk - Giant, Dark Bluish Gray Pants, Smile</div>
+      <div class="figtile-value">₪83.40</div>
+      <div class="figtile-share">6.3% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0927.html" title="The Wasp (Hope van Dyne) - Trans-Clear Wings with Hexagons"
+       data-value="69.91" data-name="the wasp (hope van dyne) - trans-clear wings with hexagons" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0927.png" alt="The Wasp (Hope van Dyne) - Trans-Clear Wings with Hexagons" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0927</div>
+      <div class="figtile-name">The Wasp (Hope van Dyne) - Trans-Clear Wings with Hexagons</div>
+      <div class="figtile-value">₪69.91</div>
+      <div class="figtile-share">5.3% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0925.html" title="Hawkeye - Black and Dark Red Suit, Dark Tan Hair, Quiver, Silver Zipper"
+       data-value="52.49" data-name="hawkeye - black and dark red suit, dark tan hair, quiver, silver zipper" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0925.png" alt="Hawkeye - Black and Dark Red Suit, Dark Tan Hair, Quiver, Silver Zipper" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0925</div>
+      <div class="figtile-name">Hawkeye - Black and Dark Red Suit, Dark Tan Hair, Quiver, Silver Zipper</div>
+      <div class="figtile-value">₪52.49</div>
+      <div class="figtile-share">4.0% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0924.html" title="Ultron MK1 - Dark Blue Head"
+       data-value="48.27" data-name="ultron mk1 - dark blue head" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0924.png" alt="Ultron MK1 - Dark Blue Head" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0924</div>
+      <div class="figtile-name">Ultron MK1 - Dark Blue Head</div>
+      <div class="figtile-value">₪48.27</div>
+      <div class="figtile-share">3.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0931.html" title="Kevin Feige"
+       data-value="31.86" data-name="kevin feige" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0931.png" alt="Kevin Feige" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0931</div>
+      <div class="figtile-name">Kevin Feige</div>
+      <div class="figtile-value">₪31.86</div>
+      <div class="figtile-share">2.4% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0917.html" title="SHIELD Agent - Female, Tactical Vest, Black Goggles, Medium Brown Head"
+       data-value="25.33" data-name="shield agent - female, tactical vest, black goggles, medium brown head" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0917.png" alt="SHIELD Agent - Female, Tactical Vest, Black Goggles, Medium Brown Head" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0917</div>
+      <div class="figtile-name">SHIELD Agent - Female, Tactical Vest, Black Goggles, Medium Brown Head</div>
+      <div class="figtile-value">₪25.33</div>
+      <div class="figtile-share">1.9% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0919.html" title="SHIELD Agent - Tony Stark, Tactical Vest, Black Helmet and Goggles"
+       data-value="25.12" data-name="shield agent - tony stark, tactical vest, black helmet and goggles" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0919.png" alt="SHIELD Agent - Tony Stark, Tactical Vest, Black Helmet and Goggles" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0919</div>
+      <div class="figtile-name">SHIELD Agent - Tony Stark, Tactical Vest, Black Helmet and Goggles</div>
+      <div class="figtile-value">₪25.12</div>
+      <div class="figtile-share">1.9% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0920.html" title="Alexander Pierce"
+       data-value="24.54" data-name="alexander pierce" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0920.png" alt="Alexander Pierce" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0920</div>
+      <div class="figtile-name">Alexander Pierce</div>
+      <div class="figtile-value">₪24.54</div>
+      <div class="figtile-share">1.9% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0918.html" title="SHIELD Agent - Male, Tactical Vest, Black Goggles, Reddish Brown Head"
+       data-value="23.09" data-name="shield agent - male, tactical vest, black goggles, reddish brown head" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0918.png" alt="SHIELD Agent - Male, Tactical Vest, Black Goggles, Reddish Brown Head" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0918</div>
+      <div class="figtile-name">SHIELD Agent - Male, Tactical Vest, Black Goggles, Reddish Brown Head</div>
+      <div class="figtile-value">₪23.09</div>
+      <div class="figtile-share">1.8% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0819.html" title="War Machine - Pearl Dark Gray and Silver Armor with Backpack"
+       data-value="23.0" data-name="war machine - pearl dark gray and silver armor with backpack" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0819.png" alt="War Machine - Pearl Dark Gray and Silver Armor with Backpack" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0819</div>
+      <div class="figtile-name">War Machine - Pearl Dark Gray and Silver Armor with Backpack</div>
+      <div class="figtile-value">₪23.00</div>
+      <div class="figtile-share">1.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0860.html" title="Loki - Pearl Dark Gray Suit, Cloth Cape"
+       data-value="22.39" data-name="loki - pearl dark gray suit, cloth cape" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0860.png" alt="Loki - Pearl Dark Gray Suit, Cloth Cape" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0860</div>
+      <div class="figtile-name">Loki - Pearl Dark Gray Suit, Cloth Cape</div>
+      <div class="figtile-value">₪22.39</div>
+      <div class="figtile-share">1.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0853.html" title="Iron Man - Mark 7 Armor, Large Helmet Visor"
+       data-value="22.01" data-name="iron man - mark 7 armor, large helmet visor" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0853.png" alt="Iron Man - Mark 7 Armor, Large Helmet Visor" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0853</div>
+      <div class="figtile-name">Iron Man - Mark 7 Armor, Large Helmet Visor</div>
+      <div class="figtile-value">₪22.01</div>
+      <div class="figtile-share">1.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0930.html" title="Dr. Erik Selvig"
+       data-value="20.08" data-name="dr. erik selvig" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0930.png" alt="Dr. Erik Selvig" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0930</div>
+      <div class="figtile-name">Dr. Erik Selvig</div>
+      <div class="figtile-value">₪20.08</div>
+      <div class="figtile-share">1.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0921.html" title="Dr. Helen Cho"
+       data-value="20.07" data-name="dr. helen cho" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0921.png" alt="Dr. Helen Cho" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0921</div>
+      <div class="figtile-name">Dr. Helen Cho</div>
+      <div class="figtile-value">₪20.07</div>
+      <div class="figtile-share">1.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0915.html" title="Thor - Spongy Cape with Single Hole, Black Legs, Bushy Hair"
+       data-value="19.63" data-name="thor - spongy cape with single hole, black legs, bushy hair" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0915.png" alt="Thor - Spongy Cape with Single Hole, Black Legs, Bushy Hair" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0915</div>
+      <div class="figtile-name">Thor - Spongy Cape with Single Hole, Black Legs, Bushy Hair</div>
+      <div class="figtile-value">₪19.63</div>
+      <div class="figtile-share">1.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0897.html" title="The Scarlet Witch (Wanda Maximoff) - Plain Legs, Medium Nougat Hair, Dark Red Cloth Skirt"
+       data-value="18.2" data-name="the scarlet witch (wanda maximoff) - plain legs, medium nougat hair, dark red cloth skirt" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0897.png" alt="The Scarlet Witch (Wanda Maximoff) - Plain Legs, Medium Nougat Hair, Dark Red Cloth Skirt" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0897</div>
+      <div class="figtile-name">The Scarlet Witch (Wanda Maximoff) - Plain Legs, Medium Nougat Hair, Dark Red Cloth Skirt</div>
+      <div class="figtile-value">₪18.20</div>
+      <div class="figtile-share">1.4% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0929.html" title="Falcon - Dark Bluish Gray and Black Suit, Printed Legs"
+       data-value="17.74" data-name="falcon - dark bluish gray and black suit, printed legs" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0929.png" alt="Falcon - Dark Bluish Gray and Black Suit, Printed Legs" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0929</div>
+      <div class="figtile-name">Falcon - Dark Bluish Gray and Black Suit, Printed Legs</div>
+      <div class="figtile-value">₪17.74</div>
+      <div class="figtile-share">1.3% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0922.html" title="Black Widow - Black Jumpsuit, Dark Orange Short Hair, Printed Legs, Printed Arms"
+       data-value="14.79" data-name="black widow - black jumpsuit, dark orange short hair, printed legs, printed arms" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0922.png" alt="Black Widow - Black Jumpsuit, Dark Orange Short Hair, Printed Legs, Printed Arms" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0922</div>
+      <div class="figtile-name">Black Widow - Black Jumpsuit, Dark Orange Short Hair, Printed Legs, Printed Arms</div>
+      <div class="figtile-value">₪14.79</div>
+      <div class="figtile-share">1.1% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0928.html" title="Tony Stark - Black Shirt with Gold Helmet, Pin Holder on Back"
+       data-value="14.62" data-name="tony stark - black shirt with gold helmet, pin holder on back" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0928.png" alt="Tony Stark - Black Shirt with Gold Helmet, Pin Holder on Back" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0928</div>
+      <div class="figtile-name">Tony Stark - Black Shirt with Gold Helmet, Pin Holder on Back</div>
+      <div class="figtile-value">₪14.62</div>
+      <div class="figtile-share">1.1% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0852.html" title="Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Helmet"
+       data-value="13.13" data-name="captain america - dark blue suit with dark blue belt, dark red hands, helmet" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0852.png" alt="Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Helmet" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0852</div>
+      <div class="figtile-name">Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Helmet</div>
+      <div class="figtile-value">₪13.13</div>
+      <div class="figtile-share">1.0% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0926.html" title="Pepper Potts - Black Suit, Dark Orange Hair over Shoulder"
+       data-value="11.53" data-name="pepper potts - black suit, dark orange hair over shoulder" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0926.png" alt="Pepper Potts - Black Suit, Dark Orange Hair over Shoulder" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0926</div>
+      <div class="figtile-name">Pepper Potts - Black Suit, Dark Orange Hair over Shoulder</div>
+      <div class="figtile-value">₪11.53</div>
+      <div class="figtile-share">0.9% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0585b.html" title="Nick Fury - Gray Sweater and Black Trench Coat, No Shirt Tail"
+       data-value="9.9" data-name="nick fury - gray sweater and black trench coat, no shirt tail" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0585b.png" alt="Nick Fury - Gray Sweater and Black Trench Coat, No Shirt Tail" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0585b</div>
+      <div class="figtile-name">Nick Fury - Gray Sweater and Black Trench Coat, No Shirt Tail</div>
+      <div class="figtile-value">₪9.90</div>
+      <div class="figtile-share">0.8% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0908.html" title="Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Hair"
+       data-value="9.82" data-name="captain america - dark blue suit with dark blue belt, dark red hands, hair" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0908.png" alt="Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Hair" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0908</div>
+      <div class="figtile-name">Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Hair</div>
+      <div class="figtile-value">₪9.82</div>
+      <div class="figtile-share">0.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0826.html" title="Wong - Dark Red Robe, Dark Blue Legs"
+       data-value="7.81" data-name="wong - dark red robe, dark blue legs" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0826.png" alt="Wong - Dark Red Robe, Dark Blue Legs" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0826</div>
+      <div class="figtile-name">Wong - Dark Red Robe, Dark Blue Legs</div>
+      <div class="figtile-value">₪7.81</div>
+      <div class="figtile-share">0.6% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0933.html" title="Dum-E - Black Mechanical Arm"
+       data-value="7.18" data-name="dum-e - black mechanical arm" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0933.png" alt="Dum-E - Black Mechanical Arm" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0933</div>
+      <div class="figtile-name">Dum-E - Black Mechanical Arm</div>
+      <div class="figtile-value">₪7.18</div>
+      <div class="figtile-share">0.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh0730.html" title="Chitauri - Dark Bluish Gray"
+       data-value="6.7" data-name="chitauri - dark bluish gray" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0730.png" alt="Chitauri - Dark Bluish Gray" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0730</div>
+      <div class="figtile-name">Chitauri - Dark Bluish Gray</div>
+      <div class="figtile-value">₪6.70</div>
+      <div class="figtile-share">0.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/90398pb044.html" title="Ant-Man (Scott Lang) Statuette / Trophy - Upgraded Suit (6353238)"
+       data-value="3.22" data-name="ant-man (scott lang) statuette / trophy - upgraded suit (6353238)" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/90398pb044.png" alt="Ant-Man (Scott Lang) Statuette / Trophy - Upgraded Suit (6353238)" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">90398pb044</div>
+      <div class="figtile-name">Ant-Man (Scott Lang) Statuette / Trophy - Upgraded Suit (6353238)</div>
+      <div class="figtile-value">₪3.22</div>
+      <div class="figtile-share">0.2% of set</div>
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/90398pb044.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/90398pb044.html"><b>90398pb044</b> Ant-Man (Scott Lang) Statuette / Troph</a></td>
-        <td class="num">1</td>
-        <td class="num">₪3.23</td>
-        <td class="num">0.2%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0585b.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0585b.html"><b>sh0585b</b> Nick Fury - Gray Sweater and Black Tre</a></td>
-        <td class="num">1</td>
-        <td class="num">₪9.90</td>
-        <td class="num">0.8%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0730.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0730.html"><b>sh0730</b> Chitauri - Dark Bluish Gray</a></td>
-        <td class="num">1</td>
-        <td class="num">₪6.70</td>
-        <td class="num">0.5%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0819.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0819.html"><b>sh0819</b> War Machine - Pearl Dark Gray and Silv</a></td>
-        <td class="num">1</td>
-        <td class="num">₪23.01</td>
-        <td class="num">1.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0826.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0826.html"><b>sh0826</b> Wong - Dark Red Robe, Dark Blue Legs</a></td>
-        <td class="num">1</td>
-        <td class="num">₪7.81</td>
-        <td class="num">0.6%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0852.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0852.html"><b>sh0852</b> Captain America - Dark Blue Suit with </a></td>
-        <td class="num">1</td>
-        <td class="num">₪13.14</td>
-        <td class="num">1.0%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0853.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0853.html"><b>sh0853</b> Iron Man - Mark 7 Armor, Large Helmet </a></td>
-        <td class="num">1</td>
-        <td class="num">₪22.02</td>
-        <td class="num">1.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0860.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0860.html"><b>sh0860</b> Loki - Pearl Dark Gray Suit, Cloth Cap</a></td>
-        <td class="num">1</td>
-        <td class="num">₪22.42</td>
-        <td class="num">1.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0897.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0897.html"><b>sh0897</b> The Scarlet Witch (Wanda Maximoff) - P</a></td>
-        <td class="num">1</td>
-        <td class="num">₪18.22</td>
-        <td class="num">1.4%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0908.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0908.html"><b>sh0908</b> Captain America - Dark Blue Suit with </a></td>
-        <td class="num">1</td>
-        <td class="num">₪9.82</td>
-        <td class="num">0.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0915.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0915.html"><b>sh0915</b> Thor - Spongy Cape with Single Hole, B</a></td>
-        <td class="num">1</td>
-        <td class="num">₪19.76</td>
-        <td class="num">1.5%</td>
-      </tr>
+    </thead>
+    <tbody>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0916.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/sh0916.html"><b>sh0916</b> Vision - Dark Turquoise</a></td>
-        <td class="num">1</td>
-        <td class="num">₪159</td>
-        <td class="num">12.1%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0917.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0917.html"><b>sh0917</b> SHIELD Agent - Female, Tactical Vest, </a></td>
-        <td class="num">1</td>
-        <td class="num">₪25.33</td>
-        <td class="num">1.9%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0918.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0918.html"><b>sh0918</b> SHIELD Agent - Male, Tactical Vest, Bl</a></td>
-        <td class="num">1</td>
-        <td class="num">₪23.17</td>
-        <td class="num">1.8%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0919.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0919.html"><b>sh0919</b> SHIELD Agent - Tony Stark, Tactical Ve</a></td>
-        <td class="num">1</td>
-        <td class="num">₪25.18</td>
-        <td class="num">1.9%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0920.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0920.html"><b>sh0920</b> Alexander Pierce</a></td>
-        <td class="num">1</td>
-        <td class="num">₪24.56</td>
-        <td class="num">1.9%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0921.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0921.html"><b>sh0921</b> Dr. Helen Cho</a></td>
-        <td class="num">1</td>
-        <td class="num">₪20.07</td>
-        <td class="num">1.5%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0922.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0922.html"><b>sh0922</b> Black Widow - Black Jumpsuit, Dark Ora</a></td>
-        <td class="num">1</td>
-        <td class="num">₪14.79</td>
-        <td class="num">1.1%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="158.74">₪159</td>
+        <td class="num" data-v="12.06772033054333">12.1%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0923.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0923.html"><b>sh0923</b> Iron Man - Mark 6 Armor, Large Helmet </a></td>
-        <td class="num">1</td>
-        <td class="num">₪102</td>
-        <td class="num">7.7%</td>
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0923.html"><b>sh0923</b> Iron Man - Mark 6 Armor, Large Helmet Visor, Battle Damage</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="101.81">₪102</td>
+        <td class="num" data-v="7.739792156057806">7.7%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0932.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0932.html"><b>sh0932</b> Hulk - Giant, Dark Bluish Gray Pants, Smile</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="83.4">₪83.40</td>
+        <td class="num" data-v="6.3402285219057175">6.3%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0927.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0927.html"><b>sh0927</b> The Wasp (Hope van Dyne) - Trans-Clear Wings with Hexagons</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="69.91">₪69.91</td>
+        <td class="num" data-v="5.314692757391231">5.3%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0925.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0925.html"><b>sh0925</b> Hawkeye - Black and Dark Red Suit, Dark Tan Hair, Quiver, Silver Zipper</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="52.49">₪52.49</td>
+        <td class="num" data-v="3.990390828715001">4.0%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0924.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/sh0924.html"><b>sh0924</b> Ultron MK1 - Dark Blue Head</a></td>
-        <td class="num">1</td>
-        <td class="num">₪48.33</td>
-        <td class="num">3.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0925.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0925.html"><b>sh0925</b> Hawkeye - Black and Dark Red Suit, Dar</a></td>
-        <td class="num">1</td>
-        <td class="num">₪52.49</td>
-        <td class="num">4.0%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0926.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0926.html"><b>sh0926</b> Pepper Potts - Black Suit, Dark Orange</a></td>
-        <td class="num">1</td>
-        <td class="num">₪11.57</td>
-        <td class="num">0.9%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0927.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0927.html"><b>sh0927</b> The Wasp (Hope van Dyne) - Trans-Clear</a></td>
-        <td class="num">1</td>
-        <td class="num">₪69.91</td>
-        <td class="num">5.3%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0928.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0928.html"><b>sh0928</b> Tony Stark - Black Shirt with Gold Hel</a></td>
-        <td class="num">1</td>
-        <td class="num">₪14.62</td>
-        <td class="num">1.1%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0929.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0929.html"><b>sh0929</b> Falcon - Dark Bluish Gray and Black Su</a></td>
-        <td class="num">1</td>
-        <td class="num">₪17.74</td>
-        <td class="num">1.3%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0930.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0930.html"><b>sh0930</b> Dr. Erik Selvig</a></td>
-        <td class="num">1</td>
-        <td class="num">₪20.13</td>
-        <td class="num">1.5%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="48.27">₪48.27</td>
+        <td class="num" data-v="3.669578306383561">3.7%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0931.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/sh0931.html"><b>sh0931</b> Kevin Feige</a></td>
-        <td class="num">1</td>
-        <td class="num">₪31.90</td>
-        <td class="num">2.4%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="31.86">₪31.86</td>
+        <td class="num" data-v="2.4220585216776516">2.4%</td>
       </tr>
       
       <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0932.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0932.html"><b>sh0932</b> Hulk - Giant, Dark Bluish Gray Pants, </a></td>
-        <td class="num">1</td>
-        <td class="num">₪83.40</td>
-        <td class="num">6.3%</td>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0917.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0917.html"><b>sh0917</b> SHIELD Agent - Female, Tactical Vest, Black Goggles, Medium Brown Head</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="25.33">₪25.33</td>
+        <td class="num" data-v="1.925635353235873">1.9%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0919.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0919.html"><b>sh0919</b> SHIELD Agent - Tony Stark, Tactical Vest, Black Helmet and Goggles</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="25.12">₪25.12</td>
+        <td class="num" data-v="1.9096707490440241">1.9%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0920.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0920.html"><b>sh0920</b> Alexander Pierce</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="24.54">₪24.54</td>
+        <td class="num" data-v="1.8655780327046316">1.9%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0918.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0918.html"><b>sh0918</b> SHIELD Agent - Male, Tactical Vest, Black Goggles, Reddish Brown Head</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="23.09">₪23.09</td>
+        <td class="num" data-v="1.755346241856151">1.8%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0819.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0819.html"><b>sh0819</b> War Machine - Pearl Dark Gray and Silver Armor with Backpack</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="23.0">₪23.00</td>
+        <td class="num" data-v="1.748504268631073">1.7%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0860.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0860.html"><b>sh0860</b> Loki - Pearl Dark Gray Suit, Cloth Cape</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="22.39">₪22.39</td>
+        <td class="num" data-v="1.7021308945499882">1.7%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0853.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0853.html"><b>sh0853</b> Iron Man - Mark 7 Armor, Large Helmet Visor</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="22.01">₪22.01</td>
+        <td class="num" data-v="1.673242563155214">1.7%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0930.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0930.html"><b>sh0930</b> Dr. Erik Selvig</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="20.08">₪20.08</td>
+        <td class="num" data-v="1.5265202484396496">1.5%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0921.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0921.html"><b>sh0921</b> Dr. Helen Cho</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="20.07">₪20.07</td>
+        <td class="num" data-v="1.5257600291924192">1.5%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0915.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0915.html"><b>sh0915</b> Thor - Spongy Cape with Single Hole, Black Legs, Bushy Hair</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="19.63">₪19.63</td>
+        <td class="num" data-v="1.4923103823142592">1.5%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0897.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0897.html"><b>sh0897</b> The Scarlet Witch (Wanda Maximoff) - Plain Legs, Medium Nougat Hair, Dark Red Cloth Skirt</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="18.2">₪18.20</td>
+        <td class="num" data-v="1.3835990299602405">1.4%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0929.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0929.html"><b>sh0929</b> Falcon - Dark Bluish Gray and Black Suit, Printed Legs</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="17.74">₪17.74</td>
+        <td class="num" data-v="1.348628944587619">1.3%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0922.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0922.html"><b>sh0922</b> Black Widow - Black Jumpsuit, Dark Orange Short Hair, Printed Legs, Printed Arms</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="14.79">₪14.79</td>
+        <td class="num" data-v="1.124364266654503">1.1%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0928.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0928.html"><b>sh0928</b> Tony Stark - Black Shirt with Gold Helmet, Pin Holder on Back</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="14.62">₪14.62</td>
+        <td class="num" data-v="1.1114405394515776">1.1%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0852.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0852.html"><b>sh0852</b> Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Helmet</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="13.13">₪13.13</td>
+        <td class="num" data-v="0.9981678716141735">1.0%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0926.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0926.html"><b>sh0926</b> Pepper Potts - Black Suit, Dark Orange Hair over Shoulder</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="11.53">₪11.53</td>
+        <td class="num" data-v="0.8765327920572292">0.9%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0585b.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0585b.html"><b>sh0585b</b> Nick Fury - Gray Sweater and Black Trench Coat, No Shirt Tail</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="9.9">₪9.90</td>
+        <td class="num" data-v="0.7526170547585923">0.8%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0908.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0908.html"><b>sh0908</b> Captain America - Dark Blue Suit with Dark Blue Belt, Dark Red Hands, Hair</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="9.82">₪9.82</td>
+        <td class="num" data-v="0.7465353007807451">0.7%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0826.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0826.html"><b>sh0826</b> Wong - Dark Red Robe, Dark Blue Legs</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="7.81">₪7.81</td>
+        <td class="num" data-v="0.5937312320873339">0.6%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0933.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/sh0933.html"><b>sh0933</b> Dum-E - Black Mechanical Arm</a></td>
-        <td class="num">1</td>
-        <td class="num">₪7.18</td>
-        <td class="num">0.5%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="7.18">₪7.18</td>
+        <td class="num" data-v="0.5458374195117872">0.5%</td>
       </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0730.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0730.html"><b>sh0730</b> Chitauri - Dark Bluish Gray</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="6.7">₪6.70</td>
+        <td class="num" data-v="0.5093468956447039">0.5%</td>
+      </tr>
       
-      <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">₪907</td>
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/90398pb044.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/90398pb044.html"><b>90398pb044</b> Ant-Man (Scott Lang) Statuette / Trophy - Upgraded Suit (6353238)</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="3.22">₪3.22</td>
+        <td class="num" data-v="0.24479059760835026">0.2%</td>
+      </tr>
+      
+    </tbody>
+    
+    <tfoot>
+      <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">₪906</td>
           <td class="num">69%</td></tr>
-      
-    </table>
-    </div>
+    </tfoot>
     
-    <div style="color:var(--muted);font-size:12px;margin-top:8px">
-      Figs are 69% of set value → not a part-out candidate (flag raises at 80%).
-    </div>
-    
-    
+  </table>
   </div>
+
+  
+  <div style="color:var(--muted);font-size:12px;margin-top:10px">
+    Figs are 69% of set value → not a part-out candidate (flag raises at 80%).
+  </div>
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 
@@ -505,14 +969,14 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76255-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76255</b> The New Guardians&#39; Ship</div>
       <div class="relmeta">2023 · ₪228
-        · <span class="delta down">▼ 9%</span></div>
+        · <span class="delta down">▼ 8%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76247.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76247-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76247</b> The Hulkbuster: The Battle of Waka</div>
       <div class="relmeta">2023 · ₪147
-        · <span class="delta down">▼ 1%</span></div>
+        · <span class="delta down">▼ 0%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76263.html">
@@ -533,14 +997,14 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76218-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76218</b> Sanctum Sanctorum</div>
       <div class="relmeta">2022 · ₪891
-        · <span class="delta up">▲ 4%</span></div>
+        · <span class="delta up">▲ 5%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76209.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76209-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76209</b> Thor&#39;s Hammer</div>
       <div class="relmeta">2022 · ₪565
-        · <span class="delta up">▲ 17%</span></div>
+        · <span class="delta up">▲ 18%</span></div>
     </a>
     
   </div>

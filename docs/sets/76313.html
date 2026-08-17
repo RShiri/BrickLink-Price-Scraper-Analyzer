@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>76313 MARVEL Logo · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-super-heroes-marvel.html">Super Heroes Marvel</a> › <a href="../sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=The%20Infinity%20Saga">The Infinity Saga</a> › <a href="../sets/index.html?year=2025">2025</a>
+  › <span>76313</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/76313-1.png" alt="MARVEL Logo"
@@ -54,7 +62,7 @@
     <h1 style="font-size:26px">MARVEL Logo <span style="color:var(--muted);font-weight:400">· 76313</span></h1>
     <p class="sub" style="margin-bottom:6px">
       Released 2025
-       · Retail ₪300
+       · Retail ₪295
     </p>
     <div class="facts">
       <span class="chip">🧱 931 parts</span>
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 1,324 g</span>
       <span class="chip">₪0.23 / part</span>
       <span class="chip"><span class="dot" style="background:var(--s3)"></span>Available</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=76313-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/76313-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -80,8 +90,8 @@
     <div class="label">Value — new / sealed</div>
     <div class="value">₪215</div>
     <div class="delta">
-      <span class="delta down">▼ 28%</span> vs retail
-       · -28.3%/yr
+      <span class="delta down">▼ 27%</span> vs retail
+       · -27.1%/yr
     </div>
   </div>
   <div class="tile">
@@ -91,8 +101,9 @@
   </div>
   <div class="tile">
     <div class="label">Forecast 2028 <span title="Trend estimate, not a guarantee">ⓘ</span></div>
-    <div class="value">₪214</div>
-    <div class="delta">trend estimate · ±20% band</div>
+    <div class="value">₪295</div>
+    <div class="delta">trend estimate · theme comparables
+      · ±16% band</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -117,12 +128,30 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="76313"
        data-retired="2028"></canvas></div>
+  
+  <div class="facts" style="margin-top:8px">
+    
+    <span class="chip">+1y (2027): <b style="color:var(--ink)">&nbsp;₪255</b></span>
+    
+    <span class="chip">+3y (2029): <b style="color:var(--ink)">&nbsp;₪339</b></span>
+    
+    <span class="chip">+5y (2031): <b style="color:var(--ink)">&nbsp;₪361</b></span>
+    
+    
+    <span class="chip">est. at retirement (2028): <b style="color:var(--ink)">&nbsp;₪295</b></span>
+    
+    <span class="chip">+3.0%/yr · theme comparables</span>
+  </div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2028).
   </div>
 </div>
@@ -135,18 +164,18 @@
     <div class="vsbars">
       <div class="vsrow"><span>Retail</span>
         <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
-        <span class="num">₪300</span></div>
+        <span class="num">₪295</span></div>
       <div class="vsrow"><span>Value new</span>
-        <div class="track"><div class="fill" style="width:71.7%"></div></div>
+        <div class="track"><div class="fill" style="width:72.9%"></div></div>
         <span class="num">₪215</span></div>
       <div class="vsrow"><span>Value used</span>
-        <div class="track"><div class="fill used" style="width:31.4%"></div></div>
+        <div class="track"><div class="fill used" style="width:31.9%"></div></div>
         <span class="num">₪94.21</span></div>
     </div>
     
     <div style="color:var(--ink-2);font-size:12.5px;margin-top:10px">
-      A buyer at retail is <span class="delta down">▼ 28%</span> today,
-      compounding at -28.3% a year.
+      A buyer at retail is <span class="delta down">▼ 27%</span> today,
+      compounding at -27.1% a year.
     </div>
     
   </div>
@@ -163,9 +192,9 @@
       
       <div class="tile" style="background:transparent;border:0;padding:0">
         <div class="label">Super Heroes Marvel average</div>
-        <div class="value" style="font-size:22px">₪1.07</div>
+        <div class="value" style="font-size:22px">₪2.13</div>
         <div class="delta up">
-          −78% vs theme
+          −89% vs theme
         </div>
       </div>
       
@@ -180,7 +209,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -235,72 +265,172 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 5 in this set, ₪150 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/sh1011.html" title="Captain America - Dark Blue Suit with Strap"
+       data-value="44.96" data-name="captain america - dark blue suit with strap" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh1011.png" alt="Captain America - Dark Blue Suit with Strap" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh1011</div>
+      <div class="figtile-name">Captain America - Dark Blue Suit with Strap</div>
+      <div class="figtile-value">₪44.96</div>
+      <div class="figtile-share">20.9% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh1015.html" title="Iron Man - Mark 6 Armor, Large Helmet Visor, Light Nougat Head"
+       data-value="37.84" data-name="iron man - mark 6 armor, large helmet visor, light nougat head" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh1015.png" alt="Iron Man - Mark 6 Armor, Large Helmet Visor, Light Nougat Head" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh1015</div>
+      <div class="figtile-name">Iron Man - Mark 6 Armor, Large Helmet Visor, Light Nougat Head</div>
+      <div class="figtile-value">₪37.84</div>
+      <div class="figtile-share">17.6% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh1013.html" title="Hulk - Minifigure, Dark Bluish Gray Legs"
+       data-value="29.49" data-name="hulk - minifigure, dark bluish gray legs" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh1013.png" alt="Hulk - Minifigure, Dark Bluish Gray Legs" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh1013</div>
+      <div class="figtile-name">Hulk - Minifigure, Dark Bluish Gray Legs</div>
+      <div class="figtile-value">₪29.49</div>
+      <div class="figtile-share">13.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh1014.html" title="Thor - Spongy Cape with Single Hole, Black Legs, Dark Tan Tousled Hair"
+       data-value="22.99" data-name="thor - spongy cape with single hole, black legs, dark tan tousled hair" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh1014.png" alt="Thor - Spongy Cape with Single Hole, Black Legs, Dark Tan Tousled Hair" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh1014</div>
+      <div class="figtile-name">Thor - Spongy Cape with Single Hole, Black Legs, Dark Tan Tousled Hair</div>
+      <div class="figtile-value">₪22.99</div>
+      <div class="figtile-share">10.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/sh1012.html" title="Black Widow - Black Jumpsuit, Dark Orange Mid-Length Hair, Printed Legs, Black Hands, Dark Brown Eyebrows"
+       data-value="14.67" data-name="black widow - black jumpsuit, dark orange mid-length hair, printed legs, black hands, dark brown eyebrows" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh1012.png" alt="Black Widow - Black Jumpsuit, Dark Orange Mid-Length Hair, Printed Legs, Black Hands, Dark Brown Eyebrows" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh1012</div>
+      <div class="figtile-name">Black Widow - Black Jumpsuit, Dark Orange Mid-Length Hair, Printed Legs, Black Hands, Dark Brown Eyebrows</div>
+      <div class="figtile-value">₪14.67</div>
+      <div class="figtile-share">6.8% of set</div>
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
+    </thead>
+    <tbody>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1011.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh1011.html"><b>sh1011</b> Captain America - Dark Blue Suit with </a></td>
-        <td class="num">1</td>
-        <td class="num">₪44.96</td>
-        <td class="num">20.9%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1012.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh1012.html"><b>sh1012</b> Black Widow - Black Jumpsuit, Dark Ora</a></td>
-        <td class="num">1</td>
-        <td class="num">₪14.67</td>
-        <td class="num">6.8%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1013.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh1013.html"><b>sh1013</b> Hulk - Minifigure, Dark Bluish Gray Le</a></td>
-        <td class="num">1</td>
-        <td class="num">₪29.49</td>
-        <td class="num">13.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1014.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh1014.html"><b>sh1014</b> Thor - Spongy Cape with Single Hole, B</a></td>
-        <td class="num">1</td>
-        <td class="num">₪22.99</td>
-        <td class="num">10.7%</td>
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh1011.html"><b>sh1011</b> Captain America - Dark Blue Suit with Strap</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="44.96">₪44.96</td>
+        <td class="num" data-v="20.899962811454074">20.9%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1015.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh1015.html"><b>sh1015</b> Iron Man - Mark 6 Armor, Large Helmet </a></td>
-        <td class="num">1</td>
-        <td class="num">₪37.89</td>
-        <td class="num">17.6%</td>
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh1015.html"><b>sh1015</b> Iron Man - Mark 6 Armor, Large Helmet Visor, Light Nougat Head</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="37.84">₪37.84</td>
+        <td class="num" data-v="17.590182223875047">17.6%</td>
       </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1013.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh1013.html"><b>sh1013</b> Hulk - Minifigure, Dark Bluish Gray Legs</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="29.49">₪29.49</td>
+        <td class="num" data-v="13.70862774265526">13.7%</td>
+      </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1014.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh1014.html"><b>sh1014</b> Thor - Spongy Cape with Single Hole, Black Legs, Dark Tan Tousled Hair</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="22.99">₪22.99</td>
+        <td class="num" data-v="10.687058386017107">10.7%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh1012.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh1012.html"><b>sh1012</b> Black Widow - Black Jumpsuit, Dark Orange Mid-Length Hair, Printed Legs, Black Hands, Dark Brown Eyebrows</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="14.67">₪14.67</td>
+        <td class="num" data-v="6.819449609520268">6.8%</td>
+      </tr>
+      
+    </tbody>
+    
+    <tfoot>
       <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">₪150</td>
           <td class="num">70%</td></tr>
-      
-    </table>
-    </div>
+    </tfoot>
     
-    <div style="color:var(--muted);font-size:12px;margin-top:8px">
-      Figs are 70% of set value → not a part-out candidate (flag raises at 80%).
-    </div>
-    
-    
+  </table>
   </div>
+
+  
+  <div style="color:var(--muted);font-size:12px;margin-top:10px">
+    Figs are 70% of set value → not a part-out candidate (flag raises at 80%).
+  </div>
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 
@@ -313,42 +443,42 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76316-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76316</b> Fantastic Four vs. Galactus Constr</div>
       <div class="relmeta">2025 · ₪143
-        · <span class="delta down">▼ 21%</span></div>
+        · <span class="delta down">▼ 19%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76327.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76327-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76327</b> Iron Man MK4 Bust</div>
       <div class="relmeta">2025 · ₪136
-        · <span class="delta down">▼ 24%</span></div>
+        · <span class="delta down">▼ 23%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76315.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76315-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76315</b> Iron Man&#39;s Laboratory: Hall of Arm</div>
       <div class="relmeta">2025 · ₪63.50
-        · <span class="delta down">▼ 62%</span></div>
+        · <span class="delta down">▼ 61%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76320.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76320-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76320</b> Iron Man &amp; War Machine vs. Hammer </div>
       <div class="relmeta">2025 · ₪50.12
-        · <span class="delta down">▼ 27%</span></div>
+        · <span class="delta down">▼ 26%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76307.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76307-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76307</b> Iron Man Mech vs. Ultron</div>
       <div class="relmeta">2025 · ₪45.94
-        · <span class="delta up">▲ 2%</span></div>
+        · <span class="delta up">▲ 4%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76290.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76290-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76290</b> The Avengers vs. The Leviathan</div>
       <div class="relmeta">2024 · ₪111
-        · <span class="delta down">▼ 14%</span></div>
+        · <span class="delta down">▼ 13%</span></div>
     </a>
     
   </div>

@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>21322 Pirates of Barracuda Bay · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-lego-ideas-and-cuusoo.html">LEGO Ideas and CUUSOO</a> › <a href="../sets/index.html?year=2020">2020</a>
+  › <span>21322</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/21322-1.png" alt="Pirates of Barracuda Bay"
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 4,510 g</span>
       <span class="chip">₪0.46 / part</span>
       <span class="chip"><span class="dot" style="background:var(--s2)"></span>Retired</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=21322-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/21322-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -92,7 +102,8 @@
   <div class="tile">
     <div class="label">Forecast 2028 <span title="Trend estimate, not a guarantee">ⓘ</span></div>
     <div class="value">₪1,243</div>
-    <div class="delta">trend estimate · ±20% band</div>
+    <div class="delta">trend estimate
+      · ±16% band</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -117,12 +128,28 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="21322"
        data-retired="2023"></canvas></div>
+  
+  <div class="facts" style="margin-top:8px">
+    
+    <span class="chip">+1y (2027): <b style="color:var(--ink)">&nbsp;₪1,201</b></span>
+    
+    <span class="chip">+3y (2029): <b style="color:var(--ink)">&nbsp;₪1,286</b></span>
+    
+    <span class="chip">+5y (2031): <b style="color:var(--ink)">&nbsp;₪1,378</b></span>
+    
+    
+    <span class="chip">+5.0%/yr · default</span>
+  </div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2023).
   </div>
 </div>
@@ -151,7 +178,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -206,112 +234,282 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 10 in this set, ₪149 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/idea065.html" title="Captain Redbeard (LEGO Ideas)"
+       data-value="33.99" data-name="captain redbeard (lego ideas)" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea065.png" alt="Captain Redbeard (LEGO Ideas)" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea065</div>
+      <div class="figtile-name">Captain Redbeard (LEGO Ideas)</div>
+      <div class="figtile-value">₪33.99</div>
+      <div class="figtile-share">2.9% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea070.html" title="Robin Loot"
+       data-value="20.1" data-name="robin loot" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea070.png" alt="Robin Loot" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea070</div>
+      <div class="figtile-name">Robin Loot</div>
+      <div class="figtile-value">₪20.10</div>
+      <div class="figtile-share">1.7% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea072.html" title="Tattooga"
+       data-value="17.37" data-name="tattooga" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea072.png" alt="Tattooga" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea072</div>
+      <div class="figtile-name">Tattooga</div>
+      <div class="figtile-value">₪17.37</div>
+      <div class="figtile-share">1.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea067.html" title="Lady Anchor"
+       data-value="14.76" data-name="lady anchor" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea067.png" alt="Lady Anchor" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea067</div>
+      <div class="figtile-name">Lady Anchor</div>
+      <div class="figtile-value">₪14.76</div>
+      <div class="figtile-share">1.3% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea066.html" title="Quartermaster Riggings"
+       data-value="13.65" data-name="quartermaster riggings" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea066.png" alt="Quartermaster Riggings" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea066</div>
+      <div class="figtile-name">Quartermaster Riggings</div>
+      <div class="figtile-value">₪13.65</div>
+      <div class="figtile-share">1.2% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea069.html" title="Port"
+       data-value="13.31" data-name="port" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea069.png" alt="Port" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea069</div>
+      <div class="figtile-name">Port</div>
+      <div class="figtile-value">₪13.31</div>
+      <div class="figtile-share">1.1% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea068.html" title="Starboard"
+       data-value="13.08" data-name="starboard" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea068.png" alt="Starboard" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea068</div>
+      <div class="figtile-name">Starboard</div>
+      <div class="figtile-value">₪13.08</div>
+      <div class="figtile-share">1.1% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/idea071.html" title="Jack &#39;Dark Shark&#39; Doubloons"
+       data-value="11.17" data-name="jack &#39;dark shark&#39; doubloons" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/idea071.png" alt="Jack &#39;Dark Shark&#39; Doubloons" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">idea071</div>
+      <div class="figtile-name">Jack &#39;Dark Shark&#39; Doubloons</div>
+      <div class="figtile-value">₪11.17</div>
+      <div class="figtile-share">1.0% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/gen141.html" title="Skeleton - Standard Skull, Bent Arms Horizontal Grip, Black Shako Hat, Single Leg"
+       data-value="6.2" data-name="skeleton - standard skull, bent arms horizontal grip, black shako hat, single leg" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/gen141.png" alt="Skeleton - Standard Skull, Bent Arms Horizontal Grip, Black Shako Hat, Single Leg" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">gen141</div>
+      <div class="figtile-name">Skeleton - Standard Skull, Bent Arms Horizontal Grip, Black Shako Hat, Single Leg</div>
+      <div class="figtile-value">₪6.20</div>
+      <div class="figtile-share">0.5% of set</div>
+    </a>
+    
+    
+    <a class="figtile" href="../sets/gen047.html" title="Skeleton - Standard Skull, Bent Arms Vertical Grip"
+       data-value="5.58" data-name="skeleton - standard skull, bent arms vertical grip" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/gen047.png" alt="Skeleton - Standard Skull, Bent Arms Vertical Grip" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">gen047</div>
+      <div class="figtile-name">Skeleton - Standard Skull, Bent Arms Vertical Grip</div>
+      <div class="figtile-value">₪5.58</div>
+      <div class="figtile-share">0.5% of set</div>
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/gen047.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/gen047.html"><b>gen047</b> Skeleton - Standard Skull, Bent Arms V</a></td>
-        <td class="num">1</td>
-        <td class="num">₪5.58</td>
-        <td class="num">0.5%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/gen141.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/gen141.html"><b>gen141</b> Skeleton - Standard Skull, Bent Arms H</a></td>
-        <td class="num">1</td>
-        <td class="num">₪6.20</td>
-        <td class="num">0.5%</td>
-      </tr>
+    </thead>
+    <tbody>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea065.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/idea065.html"><b>idea065</b> Captain Redbeard (LEGO Ideas)</a></td>
-        <td class="num">1</td>
-        <td class="num">₪33.99</td>
-        <td class="num">2.9%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea066.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/idea066.html"><b>idea066</b> Quartermaster Riggings</a></td>
-        <td class="num">1</td>
-        <td class="num">₪13.65</td>
-        <td class="num">1.2%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea067.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/idea067.html"><b>idea067</b> Lady Anchor</a></td>
-        <td class="num">1</td>
-        <td class="num">₪14.76</td>
-        <td class="num">1.3%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea068.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/idea068.html"><b>idea068</b> Starboard</a></td>
-        <td class="num">1</td>
-        <td class="num">₪13.08</td>
-        <td class="num">1.1%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea069.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/idea069.html"><b>idea069</b> Port</a></td>
-        <td class="num">1</td>
-        <td class="num">₪13.31</td>
-        <td class="num">1.1%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="33.99">₪33.99</td>
+        <td class="num" data-v="2.930121894450096">2.9%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea070.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/idea070.html"><b>idea070</b> Robin Loot</a></td>
-        <td class="num">1</td>
-        <td class="num">₪20.10</td>
-        <td class="num">1.7%</td>
-      </tr>
-      
-      <tr>
-        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea071.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/idea071.html"><b>idea071</b> Jack &#39;Dark Shark&#39; Doubloons</a></td>
-        <td class="num">1</td>
-        <td class="num">₪11.17</td>
-        <td class="num">1.0%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="20.1">₪20.10</td>
+        <td class="num" data-v="1.7327287460561027">1.7%</td>
       </tr>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea072.png" alt="" loading="lazy"
        onerror="this.style.visibility='hidden'"><a href="../sets/idea072.html"><b>idea072</b> Tattooga</a></td>
-        <td class="num">1</td>
-        <td class="num">₪17.47</td>
-        <td class="num">1.5%</td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="17.37">₪17.37</td>
+        <td class="num" data-v="1.4973879760693782">1.5%</td>
       </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea067.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/idea067.html"><b>idea067</b> Lady Anchor</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="14.76">₪14.76</td>
+        <td class="num" data-v="1.2723918553128395">1.3%</td>
+      </tr>
       
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea066.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/idea066.html"><b>idea066</b> Quartermaster Riggings</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="13.65">₪13.65</td>
+        <td class="num" data-v="1.176703849933622">1.2%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea069.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/idea069.html"><b>idea069</b> Port</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="13.31">₪13.31</td>
+        <td class="num" data-v="1.1473940104480957">1.1%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea068.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/idea068.html"><b>idea068</b> Starboard</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="13.08">₪13.08</td>
+        <td class="num" data-v="1.1275667660902398">1.1%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/idea071.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/idea071.html"><b>idea071</b> Jack &#39;Dark Shark&#39; Doubloons</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="11.17">₪11.17</td>
+        <td class="num" data-v="0.9629144325097844">1.0%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/gen141.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/gen141.html"><b>gen141</b> Skeleton - Standard Skull, Bent Arms Horizontal Grip, Black Shako Hat, Single Leg</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="6.2">₪6.20</td>
+        <td class="num" data-v="0.5344735435595939">0.5%</td>
+      </tr>
+      
+      <tr>
+        <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/gen047.png" alt="" loading="lazy"
+       onerror="this.style.visibility='hidden'"><a href="../sets/gen047.html"><b>gen047</b> Skeleton - Standard Skull, Bent Arms Vertical Grip</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="5.58">₪5.58</td>
+        <td class="num" data-v="0.4810261892036345">0.5%</td>
+      </tr>
+      
+    </tbody>
+    
+    <tfoot>
       <tr class="total"><td>Figs total</td><td class="num"></td><td class="num">₪149</td>
           <td class="num">13%</td></tr>
-      
-    </table>
-    </div>
+    </tfoot>
     
-    <div style="color:var(--muted);font-size:12px;margin-top:8px">
-      Figs are 13% of set value → not a part-out candidate (flag raises at 80%).
-    </div>
-    
-    
+  </table>
   </div>
+
+  
+  <div style="color:var(--muted);font-size:12px;margin-top:10px">
+    Figs are 13% of set value → not a part-out candidate (flag raises at 80%).
+  </div>
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 

@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>10338 Bumblebee · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-icons.html">Icons</a> › <a href="../sets/index.html?theme=Icons&amp;sub=Transformers">Transformers</a> › <a href="../sets/index.html?year=2024">2024</a>
+  › <span>10338</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/10338-1.png" alt="Bumblebee"
@@ -54,7 +62,7 @@
     <h1 style="font-size:26px">Bumblebee <span style="color:var(--muted);font-weight:400">· 10338</span></h1>
     <p class="sub" style="margin-bottom:6px">
       Released 2024
-       · Retail ₪270
+       · Retail ₪265
     </p>
     <div class="facts">
       <span class="chip">🧱 950 parts</span>
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 1,080 g</span>
       <span class="chip">₪0.23 / part</span>
       <span class="chip"><span class="dot" style="background:var(--warn)"></span>EOL watch</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=10338-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/10338-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -80,19 +90,20 @@
     <div class="label">Value — new / sealed</div>
     <div class="value">₪217</div>
     <div class="delta">
-      <span class="delta down">▼ 20%</span> vs retail
-       · -10.3%/yr
+      <span class="delta down">▼ 18%</span> vs retail
+       · -9.6%/yr
     </div>
   </div>
   <div class="tile">
     <div class="label">Value — used</div>
-    <div class="value">₪183</div>
+    <div class="value">₪181</div>
     <div class="delta"><span class="chip">◑ MEDIUM</span></div>
   </div>
   <div class="tile">
     <div class="label">Forecast 2028 <span title="Trend estimate, not a guarantee">ⓘ</span></div>
-    <div class="value">₪193</div>
-    <div class="delta">trend estimate · ±20% band</div>
+    <div class="value">₪250</div>
+    <div class="delta">trend estimate · vs retail
+      · ±16% band</div>
   </div>
   <div class="tile">
     <div class="label">Buy target</div>
@@ -117,12 +128,30 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="10338"
        data-retired="2027"></canvas></div>
+  
+  <div class="facts" style="margin-top:8px">
+    
+    <span class="chip">+1y (2027): <b style="color:var(--ink)">&nbsp;₪265</b></span>
+    
+    <span class="chip">+3y (2029): <b style="color:var(--ink)">&nbsp;₪214</b></span>
+    
+    <span class="chip">+5y (2031): <b style="color:var(--ink)">&nbsp;₪187</b></span>
+    
+    
+    <span class="chip">est. at retirement (2027): <b style="color:var(--ink)">&nbsp;₪265</b></span>
+    
+    <span class="chip">-9.6%/yr · vs retail</span>
+  </div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2027).
   </div>
 </div>
@@ -135,18 +164,18 @@
     <div class="vsbars">
       <div class="vsrow"><span>Retail</span>
         <div class="track"><div class="fill retail" style="width:100.0%"></div></div>
-        <span class="num">₪270</span></div>
+        <span class="num">₪265</span></div>
       <div class="vsrow"><span>Value new</span>
-        <div class="track"><div class="fill" style="width:80.4%"></div></div>
+        <div class="track"><div class="fill" style="width:81.8%"></div></div>
         <span class="num">₪217</span></div>
       <div class="vsrow"><span>Value used</span>
-        <div class="track"><div class="fill used" style="width:67.8%"></div></div>
-        <span class="num">₪183</span></div>
+        <div class="track"><div class="fill used" style="width:68.3%"></div></div>
+        <span class="num">₪181</span></div>
     </div>
     
     <div style="color:var(--ink-2);font-size:12.5px;margin-top:10px">
-      A buyer at retail is <span class="delta down">▼ 20%</span> today,
-      compounding at -10.3% a year.
+      A buyer at retail is <span class="delta down">▼ 18%</span> today,
+      compounding at -9.6% a year.
     </div>
     
   </div>
@@ -180,7 +209,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -193,7 +223,7 @@
         <td style="white-space:nowrap"><span class="dot" style="background:var(--s2)"></span>
             BrickLink</td>
         <td class="num">₪217</td>
-        <td class="num">₪183</td>
+        <td class="num">₪181</td>
         <td class="num">12</td>
         <td class="num">52</td>
         <td>ILS</td>
@@ -235,18 +265,21 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
-    
-    <div style="color:var(--muted)">No minifig inventory scanned yet — run a BrickLink scan for this set.</div>
-    
-  </div>
 </div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 0 in this set</span></h3>
+  
+  <div style="color:var(--muted)">No minifig inventory scanned yet — run a BrickLink scan for this set.</div>
+  
+</div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 

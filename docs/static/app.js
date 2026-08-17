@@ -27,6 +27,8 @@
     bricklink: { color: css("--s2") || "#d95926", width: 1.5, label: "BrickLink" },
     ebay:      { color: css("--s3") || "#199e70", width: 1.5, label: "eBay" },
     brickowl:  { color: css("--s4") || "#c98500", width: 1.5, label: "BrickOwl" },
+    // Imported BrickEconomy valuations (CSV export columns), not scraped.
+    brickeconomy: { color: "#b06fd4", width: 1.5, label: "BrickEconomy" },
   };
 
   // ── set detail: history + forecast ─────────────────────────────────────
@@ -245,11 +247,16 @@
       catalogPromise = fetch(apiURL("/api/index"))
         .then((r) => r.json())
         .then((d) => {
-          // Compact wire format: rows of [id, name, themeIndex, year, parts, type, priced]
+          // Compact wire format: rows of
+          // [id, name, themeIndex, year, parts, type, priced, subIndex].
+          // The 8th column is missing from pre-subtheme exports — the
+          // undefined guard keeps old index.json files working.
           const themes = d.themes || [];
+          const subs = d.subs || [];
           return (d.rows || []).map((r) => ({
             id: r[0], name: r[1], theme: r[2] >= 0 ? themes[r[2]] : "",
             year: r[3] || null, parts: r[4] || null, type: r[5], p: r[6],
+            sub: r[7] >= 0 ? subs[r[7]] : "",
           }));
         })
         .catch(() => []);
@@ -273,10 +280,15 @@
   if (catalogTable) {
     const qEl = document.getElementById("catalogSearch");
     const themeEl = document.getElementById("catalogTheme");
+    const subEl = document.getElementById("catalogSub");
+    const yearEl = document.getElementById("catalogYear");
+    const typeEl = document.getElementById("catalogType");
     const sortEl = document.getElementById("catalogSort");
     const pricedEl = document.getElementById("catalogPriced");
     const countEl = document.getElementById("catalogCount");
     const moreBtn = document.getElementById("catalogMore");
+    const crumbsEl = document.getElementById("catalogCrumbs");
+    const crumbTail = document.getElementById("catalogCrumbTail");
     const body = catalogTable.querySelector("tbody");
     const PAGE = 100;
     let all = [], shown = 0, matches = [];
@@ -309,17 +321,50 @@
       moreBtn.hidden = shown >= matches.length;
     };
 
+    // The subtheme list depends on the picked theme; rebuilt on theme change.
+    const fillSubs = () => {
+      if (!subEl) return;
+      const theme = themeEl.value;
+      const keep = subEl.value;
+      const subs = theme
+        ? [...new Set(all.filter((i) => i.theme === theme && i.sub)
+                         .map((i) => i.sub))].sort()
+        : [];
+      subEl.innerHTML = '<option value="">All subthemes</option>' +
+        subs.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+      subEl.hidden = subs.length === 0;
+      if (subs.includes(keep)) subEl.value = keep;
+    };
+
+    const drawCrumbs = () => {
+      if (!crumbsEl) return;
+      const bits = [];
+      if (themeEl.value) bits.push(esc(themeEl.value));
+      if (subEl && subEl.value) bits.push(esc(subEl.value));
+      if (yearEl && yearEl.value) bits.push(esc(yearEl.value));
+      if (typeEl && typeEl.value) bits.push(typeEl.value === "M" ? "Minifigs" : "Sets");
+      crumbsEl.hidden = bits.length === 0;
+      crumbTail.innerHTML = bits.map((b) => ` › <span>${b}</span>`).join("");
+    };
+
     const apply = () => {
       const q = qEl.value.trim().toLowerCase();
       const theme = themeEl.value;
+      const sub = subEl ? subEl.value : "";
+      const year = yearEl ? +yearEl.value : 0;
+      const type = typeEl ? typeEl.value : "";
       const pricedOnly = pricedEl.checked;
       matches = all.filter((i) => {
         if (pricedOnly && !i.p) return false;
         if (theme && i.theme !== theme) return false;
+        if (sub && i.sub !== sub) return false;
+        if (year && i.year !== year) return false;
+        if (type && i.type !== type) return false;
         if (!q) return true;
         return i.id.toLowerCase().includes(q) || (i.name || "").toLowerCase().includes(q);
       });
       matches.sort(sorters[sortEl.value] || sorters.year);
+      drawCrumbs();
       draw(false);
     };
 
@@ -328,15 +373,40 @@
       const themes = [...new Set(items.map((i) => i.theme).filter(Boolean))].sort();
       themeEl.insertAdjacentHTML("beforeend",
         themes.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join(""));
-      // Deep-link support: /sets?q=falcon keeps working in the static build.
+      if (yearEl) {
+        // Years newest-first, grouped by decade for scanability.
+        const years = [...new Set(items.map((i) => i.year).filter(Boolean))]
+          .sort((a, b) => b - a);
+        let html = "", decade = null;
+        years.forEach((y) => {
+          const d = Math.floor(y / 10) * 10;
+          if (d !== decade) {
+            if (decade !== null) html += "</optgroup>";
+            html += `<optgroup label="${d}s">`;
+            decade = d;
+          }
+          html += `<option value="${y}">${y}</option>`;
+        });
+        if (decade !== null) html += "</optgroup>";
+        yearEl.insertAdjacentHTML("beforeend", html);
+      }
+      // Initial filters: query params (deep links like sets/index.html?year=
+      // written by static_url) win; the data attributes the exporter bakes
+      // into per-theme pages are the fallback.
       const params = new URLSearchParams(location.search);
+      const init = (key) => params.get(key) || catalogTable.dataset[key] || "";
       if (params.get("q")) qEl.value = params.get("q");
-      if (params.get("theme")) themeEl.value = params.get("theme");
+      if (init("theme")) themeEl.value = init("theme");
+      fillSubs();
+      if (subEl && init("sub")) subEl.value = init("sub");
+      if (yearEl && init("year")) yearEl.value = init("year");
+      if (typeEl && init("type")) typeEl.value = init("type");
       apply();
     });
 
-    [qEl, themeEl, sortEl, pricedEl].forEach((el) =>
-      el.addEventListener("input", apply));
+    themeEl.addEventListener("input", fillSubs);
+    [qEl, themeEl, subEl, yearEl, typeEl, sortEl, pricedEl].forEach((el) =>
+      el && el.addEventListener("input", apply));
     moreBtn.addEventListener("click", () => draw(true));
   }
 
@@ -396,6 +466,138 @@
       });
     });
   });
+
+  // ── sortable tables ────────────────────────────────────────────────────
+  // Any <table data-sortable> gets click-to-sort headers. Numeric cells carry
+  // data-v="<raw number>" so sorting is never fooled by "₪3.23", "▲ 8%" or
+  // "—"; anything else compares as text. Missing values sink to the bottom in
+  // both directions, which is what you want when half a column is unscanned.
+  const cellValue = (row, idx) => {
+    const td = row.children[idx];
+    if (!td) return null;
+    if (td.hasAttribute("data-v")) {
+      const raw = td.getAttribute("data-v");
+      if (raw === "" || raw === null) return null;
+      const n = parseFloat(raw);
+      return Number.isNaN(n) ? raw.toLowerCase() : n;
+    }
+    const text = td.textContent.trim();
+    if (!text || text === "—") return null;
+    return text.toLowerCase();
+  };
+
+  const compare = (a, b) => {
+    if (a === null && b === null) return 0;
+    if (a === null) return 1;            // blanks last, always
+    if (b === null) return -1;
+    if (typeof a === "number" && typeof b === "number") return a - b;
+    return String(a).localeCompare(String(b), undefined, { numeric: true });
+  };
+
+  window.brickonomySortRows = (rows, idx, dir) =>
+    rows.sort((r1, r2) => {
+      const c = compare(cellValue(r1, idx), cellValue(r2, idx));
+      // Blanks stay last even when the direction flips.
+      if (cellValue(r1, idx) === null || cellValue(r2, idx) === null) return c;
+      return dir === "desc" ? -c : c;
+    });
+
+  document.querySelectorAll("table[data-sortable]").forEach((table) => {
+    const head = table.tHead ? table.tHead.rows[0] : table.rows[0];
+    const body = table.tBodies[0];
+    if (!head || !body) return;
+
+    [...head.cells].forEach((th, idx) => {
+      if (th.dataset.nosort !== undefined) return;
+      th.tabIndex = 0;
+      th.dataset.sort = "";
+      const run = () => {
+        // First click on a numeric column sorts high→low; text sorts A→Z.
+        const wasNumeric = body.rows[0] &&
+          body.rows[0].children[idx] &&
+          body.rows[0].children[idx].hasAttribute("data-v");
+        const current = th.dataset.sort;
+        const dir = current === "asc" ? "desc" : current === "desc" ? "asc"
+                                                                   : (wasNumeric ? "desc" : "asc");
+        [...head.cells].forEach((o) => { o.dataset.sort = ""; });
+        th.dataset.sort = dir;
+        window.brickonomySortRows([...body.rows], idx, dir)
+          .forEach((tr) => body.appendChild(tr));
+      };
+      th.addEventListener("click", run);
+      th.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); }
+      });
+    });
+  });
+
+  // ── minifig breakdown: sort the tiles, and swap grid ⇄ table ───────────
+  const figGrid = document.getElementById("figGrid");
+  if (figGrid) {
+    const figSort = document.getElementById("figSort");
+    const figTable = document.getElementById("figTable");
+    const viewBox = document.getElementById("figView");
+
+    const sorters = {
+      "value-desc": (a, b) => (+b.dataset.value) - (+a.dataset.value),
+      "value-asc": (a, b) => (+a.dataset.value) - (+b.dataset.value),
+      "name-asc": (a, b) => a.dataset.name.localeCompare(b.dataset.name),
+      "qty-desc": (a, b) => (+b.dataset.qty) - (+a.dataset.qty),
+    };
+    const applySort = () => {
+      const fn = sorters[figSort.value] || sorters["value-desc"];
+      [...figGrid.children].sort(fn).forEach((el) => figGrid.appendChild(el));
+      localStorage.setItem("figSort", figSort.value);
+    };
+    const saved = localStorage.getItem("figSort");
+    if (saved && sorters[saved]) figSort.value = saved;
+    figSort.addEventListener("change", applySort);
+    applySort();
+
+    const setView = (view) => {
+      figGrid.hidden = view !== "grid";
+      figTable.hidden = view !== "table";
+      viewBox.querySelectorAll("[data-view]").forEach((b) =>
+        b.classList.toggle("on", b.dataset.view === view));
+      localStorage.setItem("figView", view);
+    };
+    viewBox.querySelectorAll("[data-view]").forEach((b) =>
+      b.addEventListener("click", () => setView(b.dataset.view)));
+    setView(localStorage.getItem("figView") === "table" ? "table" : "grid");
+  }
+
+  // ── auto-scan banner: wait for this item's scan, then show the prices ──
+  const autoScan = document.getElementById("autoScan");
+  if (autoScan) {
+    const id = autoScan.dataset.item;
+    const text = document.getElementById("autoScanText");
+    let seen = false;                    // became visible in the job state
+    const poll = () => {
+      // Absolute path is safe: the banner only renders on the live server,
+      // never in the static export.
+      fetch("/api/refresh/status")
+        .then((r) => r.json())
+        .then((s) => {
+          const queued = (s.queue || []).indexOf(id);
+          const active = s.current_item === id;
+          if (active || queued >= 0) {
+            seen = true;
+            if (text) {
+              text.textContent = active
+                ? "Fetching prices from BrickLink, eBay and BrickOwl…"
+                : `Queued for a refresh, ${queued} ahead.`;
+            }
+            setTimeout(poll, 3000);
+          } else if (seen || !s.running) {
+            window.location.reload();    // our scan finished — show the result
+          } else {
+            setTimeout(poll, 3000);
+          }
+        })
+        .catch(() => setTimeout(poll, 6000));
+    };
+    setTimeout(poll, 2500);
+  }
 
   // ── refresh page: live progress polling ────────────────────────────────
   const scanStatus = document.getElementById("scanStatus");

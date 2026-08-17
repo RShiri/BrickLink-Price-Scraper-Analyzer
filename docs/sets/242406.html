@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>242406 Iron Man · Brickonomy</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f8cff'/%3E%3Crect x='7' y='13' width='18' height='11' rx='2' fill='%23e8edfb'/%3E%3Crect x='10' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3Crect x='17' y='9' width='5' height='5' rx='1.5' fill='%23e8edfb'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="../static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -24,6 +26,7 @@
   <nav class="tabs">
     
     <a href="../index.html" class="">Dashboard</a>
+    <a href="../catalog.html" class="">Browse</a>
     <a href="../sets/index.html" class="active">Sets</a>
     <a href="../themes.html" class="">Themes</a>
     <a href="../deals.html" class="">Deals</a>
@@ -44,6 +47,11 @@
 <main>
 
 
+
+
+<nav class="crumbs"><a href="../catalog.html">Browse</a> › <a href="../sets/theme-super-heroes-marvel.html">Super Heroes Marvel</a> › <a href="../sets/index.html?theme=Super%20Heroes%20Marvel&amp;sub=The%20Infinity%20Saga">The Infinity Saga</a> › <a href="../sets/index.html?year=2024">2024</a>
+  › <span>242406</span></nav>
+
 <div class="sethead">
   <figure class="setimg" style="margin:0">
     <img src="https://img.bricklink.com/ItemImage/SN/0/242406-1.png" alt="Iron Man"
@@ -62,6 +70,8 @@
       <span class="chip">⚖️ 12 g</span>
       
       <span class="chip"><span class="dot" style="background:var(--warn)"></span>EOL watch</span>
+      <a class="chip" href="https://www.bricklink.com/v2/catalog/catalogitem.page?S=242406-1" target="_blank" rel="noopener">BrickLink ↗</a>
+      <a class="chip" href="https://www.brickeconomy.com/set/242406-1" target="_blank" rel="noopener">BrickEconomy ↗</a>
     </div>
     
     <div class="phasebar" style="margin-top:16px">
@@ -117,12 +127,16 @@
     <span><span class="sw" style="background:var(--s2)"></span>BrickLink</span>
     <span><span class="sw" style="background:var(--s3)"></span>eBay</span>
     <span><span class="sw" style="background:var(--s4)"></span>BrickOwl</span>
-    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast ±20%</span>
+    <span><span class="sw" style="background:#b06fd4"></span>BrickEconomy (imported)</span>
+    <span><span class="sw" style="background:var(--s1);opacity:.35"></span>Forecast band</span>
   </div>
   <div class="chart-wrap"><canvas id="historyChart" data-item="242406"
        data-retired="2027"></canvas></div>
+  
   <div style="color:var(--muted);font-size:12px;margin-top:6px">
-    Points before today are scraped snapshots; the dashed line is a trend estimate from observed growth and retirement phase.
+    Points before today are scraped snapshots; the dashed line is a year-by-year trend estimate.
+    While a set is in stores its value tracks retail until the estimated retirement; appreciation starts after retirement
+    (theme-comparable growth, strongest in the first two retired years, then stabilizing), with a band that widens further out.
     The vertical marker is the estimated retirement (2027).
   </div>
 </div>
@@ -131,7 +145,8 @@
 
 
 
-<div class="two-col wide-left">
+
+<div>
   <div class="card">
     <h3>Sources — latest scan</h3>
     <div class="table-scroll">
@@ -186,33 +201,75 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3>Minifigure breakdown</h3>
+</div>
+
+<div class="card">
+  <h3>Minifigures <span class="soft">— 1 in this set, ₪22.01 together</span></h3>
+  
+  <div class="searchrow" style="margin-bottom:12px">
+    <label class="chip" style="gap:8px">Sort
+      <select id="figSort" class="inp" style="border:0;background:transparent;padding:0;min-width:0">
+        <option value="value-desc">Most valuable</option>
+        <option value="value-asc">Least valuable</option>
+        <option value="name-asc">Name</option>
+        <option value="qty-desc">Quantity</option>
+      </select>
+    </label>
+    <span class="spacer"></span>
+    <div class="toggle" id="figView">
+      <button type="button" class="chip on" data-view="grid">▦ Grid</button>
+      <button type="button" class="chip" data-view="table">☰ Table</button>
+    </div>
+  </div>
+
+  <div class="figgrid" id="figGrid">
     
-    <div class="table-scroll">
-    <table>
+    
+    <a class="figtile" href="../sets/sh0853.html" title="Iron Man - Mark 7 Armor, Large Helmet Visor"
+       data-value="22.01" data-name="iron man - mark 7 armor, large helmet visor" data-qty="1">
+      <div class="figtile-img">
+        <img src="https://img.bricklink.com/ItemImage/MN/0/sh0853.png" alt="Iron Man - Mark 7 Armor, Large Helmet Visor" loading="lazy"
+             onerror="this.style.visibility='hidden'">
+        
+      </div>
+      <div class="figtile-id">sh0853</div>
+      <div class="figtile-name">Iron Man - Mark 7 Armor, Large Helmet Visor</div>
+      <div class="figtile-value">₪22.01</div>
+      
+    </a>
+    
+  </div>
+
+  <div class="table-scroll" id="figTable" hidden>
+  <table data-sortable>
+    <thead>
       <tr><th>Minifig</th><th class="num">Qty</th><th class="num">Value</th><th class="num">% of set</th></tr>
+    </thead>
+    <tbody>
       
       <tr>
         <td><img class="thumb" src="https://img.bricklink.com/ItemImage/MN/0/sh0853.png" alt="" loading="lazy"
-       onerror="this.style.visibility='hidden'"><a href="../sets/sh0853.html"><b>sh0853</b> Iron Man - Mark 7 Armor, Large Helmet </a></td>
-        <td class="num">1</td>
-        <td class="num">₪22.02</td>
-        <td class="num">—</td>
+       onerror="this.style.visibility='hidden'"><a href="../sets/sh0853.html"><b>sh0853</b> Iron Man - Mark 7 Armor, Large Helmet Visor</a></td>
+        <td class="num" data-v="1">1</td>
+        <td class="num" data-v="22.01">₪22.01</td>
+        <td class="num" data-v="">—</td>
       </tr>
       
-      
-    </table>
-    </div>
+    </tbody>
     
-    
+  </table>
   </div>
+
+  
+  
 </div>
+
+
 
 <div class="card">
   <h3>Parts inventory <span class="soft">— exact list from the BrickLink set page</span></h3>
   
-  <div style="color:var(--muted)">Parts inventory not scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
+  <div style="color:var(--muted)">No part list scanned yet — it is fetched from BrickLink on the set's next refresh.</div>
   
 </div>
 
@@ -225,28 +282,28 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76290-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76290</b> The Avengers vs. The Leviathan</div>
       <div class="relmeta">2024 · ₪111
-        · <span class="delta down">▼ 14%</span></div>
+        · <span class="delta down">▼ 13%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76298.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76298-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76298</b> Iron Spider-Man Construction Figur</div>
       <div class="relmeta">2024 · ₪76.03
-        · <span class="delta down">▼ 15%</span></div>
+        · <span class="delta down">▼ 14%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76288.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76288-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76288</b> Iron Man &amp; Iron Legion vs. Hydra S</div>
       <div class="relmeta">2024 · ₪64.77
-        · <span class="delta down">▼ 1%</span></div>
+        · <span class="delta down">▼ 0%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76287.html">
       <img src="https://img.bricklink.com/ItemImage/SN/0/76287-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76287</b> Iron Man with Bike and The Hulk</div>
       <div class="relmeta">2024 · ₪31.33
-        · <span class="delta down">▼ 17%</span></div>
+        · <span class="delta down">▼ 16%</span></div>
     </a>
     
     <a class="relcard" href="../sets/76269.html">
@@ -260,7 +317,7 @@
       <img src="https://img.bricklink.com/ItemImage/SN/0/76255-1.png" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="relname"><b>76255</b> The New Guardians&#39; Ship</div>
       <div class="relmeta">2023 · ₪228
-        · <span class="delta down">▼ 9%</span></div>
+        · <span class="delta down">▼ 8%</span></div>
     </a>
     
   </div>
